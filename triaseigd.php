@@ -23,6 +23,9 @@
         th {
             background-color: #4CAF50;
             color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1; /* Menjaga posisi tetap di atas konten */
         }
     </style>
 </head>
