@@ -54,6 +54,7 @@
 data_triase_igd.no_rawat,
 pasien.no_rkm_medis,
 pasien.nm_pasien,
+reg_periksa.status_lanjut,
 master_triase_skala1.pengkajian_skala1,
 master_triase_skala2.pengkajian_skala2,
 master_triase_skala3.pengkajian_skala3,
@@ -101,6 +102,7 @@ data_triase_igd.tgl_kunjungan ASC";
                 <th>NOMOR RAWAT</th>               
                 <th>NOMOR RM</th>
                 <th>NAMA PASIEN</th>
+                <th>STATUS LANJUT</th>
                 <th>SKALA 1</th>
                 <th>SKALA 2</th>
                 <th>SKALA 3</th>
@@ -113,6 +115,7 @@ data_triase_igd.tgl_kunjungan ASC";
             echo "<td>" . $row['no_rawat'] . "</td>";
             echo "<td>" . $row['no_rkm_medis'] . "</td>";
             echo "<td>" . $row['nm_pasien'] . "</td>";
+            echo "<td>" . $row['status_lanjut'] . "</td>";
             echo "<td>" . $row['pengkajian_skala1'] . "</td>";
             echo "<td>" . $row['pengkajian_skala2'] . "</td>";
             echo "<td>" . $row['pengkajian_skala3'] . "</td>";
