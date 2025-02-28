@@ -94,7 +94,7 @@
                 <option value="laporanigd.php">Laporan IGD</option>                
                 <option value="diagnosaralan.php">Diagnosa Pasien Rawat Jalan</option>
                 <option value="triaseigd.php">Data Triase IGD</option>
-                <option value="menu2.php">Menu 2</option>
+                <option value="kontroltriaseigd.php">Kontrol Triase IGD</option>
             </select>
             <button type="submit">Pilih</button>
         </form>
