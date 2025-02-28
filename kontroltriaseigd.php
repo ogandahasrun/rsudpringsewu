@@ -62,6 +62,9 @@
                 MAX(reg_periksa.tgl_registrasi) AS tgl_registrasi,
                 MAX(pasien.no_rkm_medis) AS no_rkm_medis,
                 MAX(pasien.nm_pasien) AS nm_pasien,
+                MAX(reg_periksa.status_lanjut) AS status_lanjut,
+                MAX(penjab.png_jawab) AS cara_bayar, -- Ambil nama cara bayar dari tabel penjab
+                MAX(dokter.nm_dokter) AS nm_dokter, -- Ambil nama dokter dari tabel dokter
                 CASE
                     WHEN MAX(data_triase_igddetail_skala1.no_rawat) IS NOT NULL THEN 'SKALA 1'
                     WHEN MAX(data_triase_igddetail_skala2.no_rawat) IS NOT NULL THEN 'SKALA 2'
@@ -73,6 +76,8 @@
             FROM
                 reg_periksa
             INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+            INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj -- Join tabel penjab untuk cara bayar
+            INNER JOIN dokter ON reg_periksa.kd_dokter = dokter.kd_dokter -- Join tabel dokter untuk nama dokter
             LEFT JOIN data_triase_igddetail_skala1 ON data_triase_igddetail_skala1.no_rawat = reg_periksa.no_rawat
             LEFT JOIN data_triase_igddetail_skala2 ON data_triase_igddetail_skala2.no_rawat = reg_periksa.no_rawat
             LEFT JOIN data_triase_igddetail_skala3 ON data_triase_igddetail_skala3.no_rawat = reg_periksa.no_rawat
@@ -109,6 +114,9 @@
                 <th>NOMOR RAWAT</th>
                 <th>NOMOR RM</th>
                 <th>NAMA PASIEN</th>
+                <th>STATUS LANJUT</th>
+                <th>CARA BAYAR</th>
+                <th>DOKTER</th>
                 <th>SKALA TRIASE</th>
             </tr>";
         
@@ -141,6 +149,9 @@
             echo "<td>" . $row['no_rawat'] . "</td>";
             echo "<td>" . $row['no_rkm_medis'] . "</td>";
             echo "<td>" . $row['nm_pasien'] . "</td>";
+            echo "<td>" . $row['status_lanjut'] . "</td>";
+            echo "<td>" . $row['cara_bayar'] . "</td>";
+            echo "<td>" . $row['nm_dokter'] . "</td>";
             echo "<td style='$warna'>" . $row['skala_triase'] . "</td>";
             echo "</tr>";
         }
