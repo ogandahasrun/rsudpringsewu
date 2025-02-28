@@ -16,6 +16,10 @@
             padding: 8px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd; /* Menambahkan pembatas antar kolom */
+        }
+        th:last-child, td:last-child {
+            border-right: none; /* Menghilangkan pembatas di kolom terakhir */
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
