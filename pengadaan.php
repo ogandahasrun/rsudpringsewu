@@ -51,7 +51,7 @@
     <tr><td>Ditujukan kepada Yth</td><td>:</td><td><strong>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</strong></td></tr>
     <tr><td>Dari</td><td>:</td><td><strong>Pejabat Pelaksana Teknis Kegiatan</strong></td></tr>
     <tr><td>Tanggal</td><td>:</td><td>.........</td></tr>
-    <tr><td>Nomor</td><td>:</td><td><strong>445 / .01/ PPBJ / LL.04 / / 2024</strong></td></tr>
+    <tr><td>Nomor</td><td>:</td><td><strong>445 /     .01/ PPBJ / LL.04 / / 2025</strong></td></tr>
     <tr><td>Program</td><td>:</td><td><strong>Peningkatan Mutu Pelayanan Kesehatan RSUD</strong></td></tr>
     <tr><td>Kegiatan</td><td>:</td><td><strong>Belanja Operasional BLUD</strong></td></tr>
     <tr><td>Kode Rekening</td><td>:</td><td><strong>5.1.02.99.99.9999</strong></td></tr>
@@ -81,8 +81,7 @@
                                 pemesanan.tgl_faktur,
                                 pemesanan.total2,
                                 pemesanan.ppn,
-                                pemesanan.tagihan,
-                                pemesanan_terbilang.terbilang,
+                                pemesanan.tagihan,                                
                                 databarang.nama_brng AS nama_brng,
                                 detailpesan.jumlah AS jumlah,
                                 kodesatuan.satuan AS satuan,
@@ -99,8 +98,7 @@
                                 JOIN detailpesan ON ((detailpesan.no_faktur = pemesanan.no_faktur))
                                 JOIN databarang ON ((detailpesan.kode_brng = databarang.kode_brng))
                                 JOIN datasuplier ON ((pemesanan.kode_suplier = datasuplier.kode_suplier))
-                                JOIN kodesatuan ON (((detailpesan.kode_sat = kodesatuan.kode_sat) AND (databarang.kode_sat = kodesatuan.kode_sat)))
-                                INNER JOIN pemesanan_terbilang ON pemesanan_terbilang.no_faktur = pemesanan.no_faktur
+                                JOIN kodesatuan ON (((detailpesan.kode_sat = kodesatuan.kode_sat) AND (databarang.kode_sat = kodesatuan.kode_sat)))                                
                             WHERE
                                 pemesanan.no_faktur = ?";
                     
