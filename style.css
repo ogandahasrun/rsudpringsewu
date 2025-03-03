@@ -1,0 +1,167 @@
+/* Atur tampilan umum */
+body {
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 21cm; /* Sesuaikan dengan lebar kertas A4 */
+    margin: 0 auto;
+    padding: 1cm;
+}
+
+/* Flexbox untuk logo dan konten */
+.header-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 70px; /* Ukuran logo diperkecil */
+    height: auto; /* Biarkan tinggi menyesuaikan */
+    margin-right: 20px; /* Jarak antara logo dan konten */
+}
+
+.header-content {
+    line-height: 1.2; /* Mengatur jarak antar baris lebih rapat */
+    flex: 1; /* Konten mengambil sisa ruang */
+    text-align: center; /* Teks rata tengah */
+}
+
+.header-content h1 {
+    font-size: 14pt;
+    margin: 0;
+}
+
+.header-content p {
+    font-size: 12pt;
+    margin: 5px 0;
+}
+
+.garis-pembatas {
+    border: 0;
+    height: 2px;
+    background-color: black;
+    margin: 10px 0;
+}
+
+.content {
+    margin-top: 20px;
+}
+
+.content p {
+    margin: 2px 0; /* Margin diperkecil */
+    line-height: 1.2; /* Line height diperkecil */
+    text-align: justify;
+}
+
+.center-text {
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 4px; /* Padding diperkecil */
+    font-size: 10pt; /* Ukuran font diperkecil */
+    line-height: 1.2; /* Line height diperkecil */
+}
+
+th {
+    text-align: center; /* Judul kolom rata tengah */
+}
+
+td {
+    text-align: left; /* Default isi data rata kiri */
+}
+
+.text-right {
+    text-align: right; /* Isi data rata kanan */
+}
+.half-width-table {
+    width: 50%;
+    border-collapse: collapse;
+}
+.half-width-table th, .half-width-table td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+.signature-space {
+    width: 20%;
+}
+
+
+/* Tombol untuk preview cetak */
+.print-button {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.print-button button {
+    padding: 10px 20px;
+    font-size: 14pt;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.print-button button:hover {
+    background-color: #45a049;
+}
+
+/* Form pencarian */
+.search-form {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.signature {
+    margin-top: 40px;
+    margin-left: auto; /* Geser ke sisi kanan */
+    width: 50%; /* Atur lebar elemen */
+    text-align: center; /* Teks rata tengah */
+}
+
+/* Tampilan khusus untuk cetak */
+@media print {
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .header, .footer, table {
+        page-break-inside: avoid; /* Hindari pemotongan elemen saat mencetak */
+    }
+
+    .print-button, .search-form {
+        display: none; /* Sembunyikan tombol cetak dan form pencarian saat dicetak */
+    }
+
+    .garis-pembatas {
+        display: block; /* Pastikan elemen tidak disembunyikan */
+        border: 1px solid black; /* Garis muncul saat cetak */
+        background-color: black; /* Warna latar muncul saat cetak */
+    }
+}
