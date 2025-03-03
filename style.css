@@ -92,6 +92,7 @@ td {
 .text-right {
     text-align: right; /* Isi data rata kanan */
 }
+
 .half-width-table {
     width: 50%;
     border-collapse: collapse;
@@ -105,7 +106,21 @@ td {
     width: 20%;
 }
 
+.no-border-table {
+    border-collapse: collapse; /* Menggabungkan border sel yang berdekatan */
+    width: 100%; /* Lebar tabel */
+    padding: 4px; /* Padding diperkecil */
+}
 
+.no-border-table td, .no-border-table th {
+    border: none; /* Menghilangkan border pada sel dan header */
+    padding: 0px; /* Padding untuk sel */
+}
+
+.no-border-table tr {
+    border: none; /* Menghilangkan border pada baris */
+    padding: 0px; /* Padding untuk sel */
+}
 /* Tombol untuk preview cetak */
 .print-button {
     text-align: center;
@@ -132,10 +147,12 @@ td {
 }
 
 .signature {
-    margin-top: 40px;
+    margin-top: 20px;
     margin-left: auto; /* Geser ke sisi kanan */
     width: 50%; /* Atur lebar elemen */
     text-align: center; /* Teks rata tengah */
+    line-height: 1; /* Mengurangi jarak antar baris */
+    
 }
 
 /* Tampilan khusus untuk cetak */

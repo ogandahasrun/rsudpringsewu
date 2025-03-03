@@ -34,9 +34,6 @@
             </form>
         </div>
 
-        <!-- Konten Surat -->
-        <div class="content">
-            <h2 class="center-text">PERMOHONAN BELANJA BARANG/JASA (PPBJ)</h2>
             <style>
     .no-border-table {
         border-collapse: collapse;
@@ -48,13 +45,32 @@
 </style>
 
 <table class="no-border-table">
-    <tr><td>Ditujukan kepada Yth</td><td>:</td><td><strong>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</strong></td></tr>
-    <tr><td>Dari</td><td>:</td><td><strong>Pejabat Pelaksana Teknis Kegiatan</strong></td></tr>
+    <tr><td>Ditujukan kepada Yth</td><td>:</td><td><strong>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</strong></td></tr>
+    <tr><td>Dari</td><td>:</td><td><strong>Pejabat Pembuat Komitmen</strong></td></tr>
     <tr><td>Tanggal</td><td>:</td><td>.........</td></tr>
-    <tr><td>Nomor</td><td>:</td><td><strong>445 / .01/ PPBJ / LL.04 / / 2024</strong></td></tr>
-    <tr><td>Program</td><td>:</td><td><strong>Peningkatan Mutu Pelayanan Kesehatan RSUD</strong></td></tr>
-    <tr><td>Kegiatan</td><td>:</td><td><strong>Belanja Operasional BLUD</strong></td></tr>
-    <tr><td>Kode Rekening</td><td>:</td><td><strong>5.1.02.99.99.9999</strong></td></tr>
+    <tr><td>Nomor</td><td>:</td><td><strong>445 / ..........01/ PPBJ / LL.04 /...../ 2025</strong></td></tr>
+    <tr><td>Perihal</td><td>:</td><td><strong>Pengadaan e-Purchasing</strong></td></tr>    
+</table>
+
+<table class="no-border-table">
+    <tr><td>Dengan hormat,</td></tr>    
+</table>
+
+<table class="no-border-table">
+    <tr><td>A.</td><td>Dasar</td></tr>
+    <tr><td> </td><td>1. Peraturan Presiden Nomor 12 Tahun 2021 tentang Pengadaan Brang/Jasa Pemerintah</td></tr>
+    <tr><td> </td><td>2. Peraturan Bupati Nomor 17 Tahun 2018 tentang Jenjang Nilai Pengadaan Barang dan Jasa pada Unit
+    Pelayanan Umum Daerah Rumah Sakit Umum Daerah Pringsewu.</td></tr>
+    <tr><td> </td><td>3. Surat permintaan Pengadaan Barang/Jasa Nomor : 445/ .01/LL.04/2024 tanggal ... </td></tr>
+    <tr><td> </td></tr>
+    <tr><td>B.</td><td>Menugaskan</td></tr>
+    <tr><td> </td><td>Nama : Wisnetty, S.Si., Apt., M. Kes</td></tr>
+    <tr><td> </td><td>NIP : 19701020 200002 2002</td></tr>
+    <tr><td> </td><td>Jabatan : Pejabat Pengadaan Barang dan Jasa</td></tr>
+</table>
+
+<table class="no-border-table">
+    <tr><td>Untuk melaksanakan kegiatan berikut dengan metode Pengadaan e-Purchasing, Spesifikasi Teknis dan HPS sebagai berikut :</td></tr>    
 </table>
 
             <?php
@@ -81,8 +97,7 @@
                                 pemesanan.tgl_faktur,
                                 pemesanan.total2,
                                 pemesanan.ppn,
-                                pemesanan.tagihan,
-                                pemesanan_terbilang.terbilang,
+                                pemesanan.tagihan,                                
                                 databarang.nama_brng AS nama_brng,
                                 detailpesan.jumlah AS jumlah,
                                 kodesatuan.satuan AS satuan,
@@ -99,8 +114,7 @@
                                 JOIN detailpesan ON ((detailpesan.no_faktur = pemesanan.no_faktur))
                                 JOIN databarang ON ((detailpesan.kode_brng = databarang.kode_brng))
                                 JOIN datasuplier ON ((pemesanan.kode_suplier = datasuplier.kode_suplier))
-                                JOIN kodesatuan ON (((detailpesan.kode_sat = kodesatuan.kode_sat) AND (databarang.kode_sat = kodesatuan.kode_sat)))
-                                INNER JOIN pemesanan_terbilang ON pemesanan_terbilang.no_faktur = pemesanan.no_faktur
+                                JOIN kodesatuan ON (((detailpesan.kode_sat = kodesatuan.kode_sat) AND (databarang.kode_sat = kodesatuan.kode_sat)))                                
                             WHERE
                                 pemesanan.no_faktur = ?";
                     
@@ -120,7 +134,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Nomor</th>
+                        <th style="width: 50px; text-align: center;">Nomor</th>
                         <th>Nama Obat</th>
                         <th>Volume</th>
                         <th>Satuan</th>
@@ -140,7 +154,7 @@
                             $total_keseluruhan += $total; // Akumulasi total keseluruhan
 
                             echo "<tr>";
-                            echo "<td>" . $nomor_urut . "</td>"; // Nomor urut
+                            echo "<td class='text-right'>" . $nomor_urut . "</td>"; // Nomor urut
                             echo "<td>" . $row['nama_brng'] . "</td>";
                             echo "<td class='text-right'>" . number_format($row['jumlah'], 0, ',', '.') . "</td>"; // Volume rata kanan
                             echo "<td>" . $row['satuan'] . "</td>";
@@ -194,12 +208,11 @@
             ?>
             
             <div class="signature" style="text-align: center;">
-                <p>Pejabat Pelaksana Teknis Kegiatan</p>
-                <p>Belanja bahan Habis Pakai (BAHP) Rumah Sakit</p>
+                <p>Pejabat Pembuat Komitmen</p>                
                 <br>
                 <br>
-                <p><strong><u>dr. Triyani Rositasari</u></strong></p>
-                <p>NIP. 19830619 201101 2 005</p>
+                <p><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></p>
+                <p>NIP. 19780801 200501 1 009</p>
             </div>
         </div>
 
@@ -208,5 +221,6 @@
             <button onclick="window.print()">Preview Cetak</button>
         </div>
     </div>
+    
 </body>
 </html>
