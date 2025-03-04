@@ -64,6 +64,14 @@ body {
     text-align: center;
 }
 
+.center-nomorsurat {
+    text-align: center; /* Teks berada di tengah secara horizontal */
+    font-size: 12px; /* Ukuran huruf 12 */
+    font-weight: normal; /* Mengubah teks menjadi regular (tidak bold) */
+    margin: 0 auto; /* Memastikan elemen berada di tengah halaman */
+    width: 100%; /* Lebar penuh */
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -95,14 +103,17 @@ td {
 
 .half-width-table {
     width: 50%;
-    border-collapse: collapse;
+    margin-top: 20px;
+    border-collapse: collapse; /* Menggabungkan border sel */
 }
-.half-width-table th, .half-width-table td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: left;
+.half-width-table th,
+.half-width-table td {
+    padding: 4px; /* Mengurangi padding */
+    line-height: 1.2; /* Mengurangi jarak antar baris */
+    border: 1px solid #000; /* Menambahkan border untuk kejelasan */
 }
 .signature-space {
+    height: 30px; /* Mengurangi tinggi ruang tanda tangan */
     width: 20%;
 }
 
@@ -153,6 +164,11 @@ td {
     text-align: center; /* Teks rata tengah */
     line-height: 1; /* Mengurangi jarak antar baris */
     
+}
+
+.spacer {
+    display: inline-block;
+    width: 100px; /* Sesuaikan lebar spasi sesuai kebutuhan */
 }
 
 /* Tampilan khusus untuk cetak */
