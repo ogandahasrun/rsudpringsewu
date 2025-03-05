@@ -20,18 +20,14 @@
             </form>
         </div>
 
+        <!-- Tombol untuk preview cetak -->
+        <div class="print-button">
+            <button onclick="window.print()">Preview Cetak</button>
+        </div>
+
         <!-- Konten Surat -->
         <div class="content">
-            <h2 class="center-text">PERMOHONAN BELANJA BARANG/JASA (PPBJ)</h2>
-            <style>
-                .no-border-table {
-                    border-collapse: collapse;
-                    border: none;
-                }
-                .no-border-table td {
-                    border: none;
-                }
-            </style>
+            <h4 class="center-text">PERMOHONAN BELANJA BARANG/JASA (PPBJ)</h4>
 
             <table class="no-border-table">
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td><strong>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</strong></td></tr>
@@ -145,24 +141,19 @@
                 <p><strong><u>dr. Triyani Rositasari</u></strong></p>
                 <p>NIP. 19830619 201101 2 005</p>
             </div>
-        </div>
 
-        <!-- Tombol untuk preview cetak -->
-        <div class="print-button">
-            <button onclick="window.print()">Preview Cetak</button>
-        </div>
-    </div>
-
-    <table class="half-width-table">
-        <thead>
-            <tr><th colspan="2">Paraf Koordinasi</th></tr>
-        </thead>
-        <tbody>
-            <tr><td>Ka. Bid. Perencanaan & Keuangan</td><td class="signature-space"></td></tr>
-            <tr><td>Ka. Sie. Perencanaan & Pengembangan</td><td class="signature-space"></td></tr>
-            <tr><td>Ka. Sie. Keuangan</td><td class="signature-space"></td></tr>
-        </tbody>
-    </table>
+            <table class="half-width-table">
+                <thead>
+                <tr><th colspan="2">Paraf Koordinasi</th></tr>
+                </thead>
+                <tbody>
+                <tr><td>Ka. Bid. Perencanaan & Keuangan</td><td class="signature-space"></td></tr>
+                <tr><td>Ka. Sie. Perencanaan & Pengembangan</td><td class="signature-space"></td></tr>
+                <tr><td>Ka. Sie. Keuangan</td><td class="signature-space"></td></tr>
+                </tbody>
+            </table>
+        </div>       
+    </div>    
 </body>
 </html>
 
@@ -175,18 +166,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 2</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .page-break {
-            page-break-before: always;
-        }
-        .no-border-table {
-            border-collapse: collapse;
-            border: none;
-        }
-        .no-border-table td {
-            border: none;
-        }        
-    </style>
+    
 </head>
 <body>
     <div class="container">
@@ -194,16 +174,6 @@
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
-
-            <style>
-                .no-border-table {
-                    border-collapse: collapse;
-                    border: none;
-                }
-                .no-border-table td {
-                    border: none;
-                }
-            </style>
 
             <table class="no-border-table">
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td><strong>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</strong></td></tr>
@@ -281,18 +251,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .page-break {
-            page-break-before: always;
-        }
-        .no-border-table {
-            border-collapse: collapse;
-            border: none;
-        }
-        .no-border-table td {
-            border: none;
-        }        
-    </style>
+
 </head>
 <body>
     <div class="container">
@@ -300,17 +259,7 @@
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
-
-            <style>
-                .no-border-table {
-                    border-collapse: collapse;
-                    border: none;
-                }
-                .no-border-table td {
-                    border: none;
-                }
-            </style>
-
+            
             <table class="no-border-table">
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td><strong>Pejabat Pembuat Komitmen</strong></td></tr>
                 <tr><td>Dari</td><td>:</td><td><strong>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</strong></td></tr>
@@ -391,18 +340,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .page-break {
-            page-break-before: always;
-        }
-        .no-border-table {
-            border-collapse: collapse;
-            border: none;
-        }
-        .no-border-table td {
-            border: none;
-        }        
-    </style>
+
 </head>
 <body>
     <div class="container">
@@ -411,18 +349,8 @@
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
 
-            <h2 class="center-text">SURAT PESANAN</h2>
+            <h4 class="center-text">SURAT PESANAN</h4>
             <h4 class="center-nomorsurat">Nomor Surat : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SP/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
-
-            <style>
-                .no-border-table {
-                    border-collapse: collapse;
-                    border: none;
-                }
-                .no-border-table td {
-                    border: none;
-                }
-            </style>
 
             <table class="no-border-table">
                 <tr><td>yang bertanda tangan di bawah ini :</td></tr>
@@ -483,18 +411,389 @@
                 Barang/Jasa akan dikenakan Denda Keterlambatan sebesar 1/1000</td></tr>
             </table>
 
-            <!-- Tanda Tangan -->
-            <div class="signature" style="text-align: center;">
-                <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>                
-                <br>
-                <br>
-                <p><strong><u>Wisnetty, S.Si., Apt., M. Kes</u></strong></p>
-                <p>NIP. 19701020 200002 2002</p>
-            </div>   
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Untuk dan atas nama</td><td></td><td>Untuk dan atas nama</td></tr>
+                <tr><td></td><td>Pejabat Pembuat Komitmen</td><td></td><td>Penyedia barang</td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></td><td></td><td><strong><u><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></u></strong></td></tr>
+                <tr><td></td><td>NIP. 19780801 200501 1 009</td><td></td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td></tr>
+            </table>
         </div>
     </div>
 </body>
 </html>
 
 <!------------------------------ BATAS HALAMAN 4  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 3</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Kelima -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <h2 class="center-text">BERITA ACARA SERAH TERIMA PEKERJAAN</h2>
+            <h4 class="center-nomorsurat">Nomor Surat : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTP/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+
+            <table class="no-border-table">        
+                <tr><td></td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
+                <tr><td>1</td><td>Nama Penyedia </td><td>: <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
+                <tr><td></td><td>Alamat Penyedia </td><td>: <?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
+                <tr><td></td><td>yang diwakili oleh </td><td>: </td></tr>
+                <tr><td></td><td>Direktur </td><td>: <?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></td></tr>
+                <tr><td></td><td>Jabatan </td><td>: <?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td></tr>
+                <tr><td></td><td>Dalam hal ini bertindak untuk dan atas nama </td><td>: <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
+                <tr><td></td><td>Selanjutnya disebut sebagai Penyedia Barang/Jasa</td></tr>
+                <tr><td></td></tr>
+                <tr><td>1</td><td>Nama : dr. Andi Arman, Sp.PD</td><td>:</td></tr>
+                <tr><td></td><td>NIP : 19780801 200501 1 009</td><td>:</td></tr>
+                <tr><td></td><td>Jabatan : Pejabat Pembuat Komitmen BLUD Pringsewu</td><td>:</td></tr>
+                <tr><td></td><td>&nbsp;</td><td>:</td></tr>
+                <tr><td></td><td>Dalam hal ini bertindak untuk dan atas nama RSUD Pringsewu, yang Selanjutnya disebut sebagai Pejabat Pembuat Komitmen (PPK);</td><td>:</td></tr>                
+            </table>            
+
+            <?php echo "Berdasarkan Surat Pesanan Barang dan Jasa Nomor : .01/SP/ /LL.04/ /2024 untuk paket pekerjaan belanja Bahan Habis Pakai dengan ini menerangkan bahwa :"; ?>
+
+            <table class="no-border-table">        
+                <tr><td>1</td><td>Penyedia Barang/Jasa telah menyelesaikan dan telah menyerahkan hasil pekerjaan tersebut sesuai dengan ketentuan
+                Surat Pesanan (SP) kepada PPK</td></tr>
+                <tr><td>2</td><td>PPK telah menerima hasil pekerjaan tersebut dan menyatakan hasil pekerjaan tersebut telah sesuai dengan
+                ketentuan Surat Pesanan (SP) Barang dan Jasa, dengan rincian sebagai berikut :</td></tr>
+            </table>   
+
+            <!-- Tabel Detail Barang -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nomor</th>
+                        <th>Nama Barang</th>
+                        <th>Volume</th>
+                        <th>Satuan</th>
+                        <th>Harga Satuan</th>
+                        <th>Total Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php include 'table_body.php'; ?>
+                </tbody>
+            </table>
+
+            <?php
+            // Menampilkan terbilang dari total akhir
+            if (isset($total_akhir)) {
+                $terbilang_total = terbilang($total_akhir);
+                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+            }
+            ?>
+
+<?php echo "Demikian Berita Acara ini dibuat dalam rangkap 5 (lima) untuk dapat dipergunakan sebagaimana mestinya"; ?>
+
+
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Untuk dan atas nama</td><td></td><td>Untuk dan atas nama</td></tr>
+                <tr><td></td><td>Pejabat Pembuat Komitmen</td><td></td><td>Penyedia barang</td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></td><td></td><td><strong><u><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></u></strong></td></tr>
+                <tr><td></td><td>NIP. 19780801 200501 1 009</td><td></td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+<!------------------------------ BATAS HALAMAN 5  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 6</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Keenam -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
+            <h4 class="center-nomorsurat">Nomor Surat : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+
+            <?php echo "Pada hari ini                 tanggal bulan tahun Dua Ribu Dua Puluh Empat ( / /2025),"; ?>
+
+            <table class="no-border-table">        
+                <tr><td></td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
+                <tr><td>1</td><td>Nama</td><td>: dr. Andi Arman, Sp.PD</td></tr>
+                <tr><td></td><td>NIP</td><td>: 19780801 200501 1 009</td></tr>
+                <tr><td></td><td>Jabatan</td><td>: Pejabat Pembuat Komitmen BLUD Pringsewu</td></tr>
+                <tr><td></td><td>yang Selanjutnya disebut sebagai Pihak I;</td></tr>
+                <tr><td>2</td><td>Nama  </td><td>: dr. Triyani Rositasari</td></tr>
+                <tr><td></td><td>NIP </td><td>: 19830619 201101 2 005</td></tr>
+                <tr><td></td><td>Jabatan </td><td>: Pejabat Pelaksana Teknis Kegiatan (PPTK)</td></tr>
+                <tr><td></td><td>yang Selanjutnya disebut sebagai Pihak II;</td></tr>
+                <tr><td></td></tr>
+            </table>            
+
+            <?php echo "Dengan ini menerangkan bahwa :"; ?>
+
+            <table class="no-border-table">        
+                <tr><td>1</td><td>Pihak I telah menyerahkan barang dan jasa sesuai dengan Permohonan Pengadaan Barang dan Jasa (PPBJ) Nomor
+                : 445/ 2 0 6 0 .01/PPBJ/LL.04/ /2024 Tanggal , dengan rincian sebagai berikut :</td></tr>
+            </table>   
+
+            <!-- Tabel Detail Barang -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nomor</th>
+                        <th>Nama Barang</th>
+                        <th>Volume</th>
+                        <th>Satuan</th>
+                        <th>Harga Satuan</th>
+                        <th>Total Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php include 'table_body.php'; ?>
+                </tbody>
+            </table>
+
+            <?php
+            // Menampilkan terbilang dari total akhir
+            if (isset($total_akhir)) {
+                $terbilang_total = terbilang($total_akhir);
+                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+            }
+            ?>
+
+<table class="no-border-table">        
+                <tr><td>2</td><td>Untuk pendistribusian dan penggunaan barang dan jasa, Pihak II agar berkoordinasi dengan Pengurus Barang
+                pembantu.</td></tr>
+            </table>   
+
+
+<?php echo "Demikian Berita Serah Terima ini dibuat dengan sebenarnya dalam rangkap 5 (Lima) untuk dipergunakan sebagaimana mestinya."; ?>
+
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Pejabat Pelaksana Teknis Kegiatan</td><td></td><td>Pejabat Pembuat Komitmen</td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u>dr. Triyani Rositasari</u></strong></td><td></td><td><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></td></tr>
+                <tr><td></td><td>NIP. 19830619 201101 2 005</td><td></td><td>NIP. 19780801 200501 1 009</td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+<!------------------------------ BATAS HALAMAN 6  ------------------------------->
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 7</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Ketujuh -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
+            <h4 class="center-nomorsurat">Nomor Surat : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+
+            <?php echo "Pada hari ini                 tanggal bulan tahun Dua Ribu Dua Puluh Empat ( / /2025),"; ?>
+
+            <table class="no-border-table">        
+                <tr><td></td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
+                <tr><td>1</td><td>Nama</td><td>: dr. Andi Arman, Sp.PD</td></tr>
+                <tr><td></td><td>NIP</td><td>: 19780801 200501 1 009</td></tr>
+                <tr><td></td><td>Jabatan</td><td>: Pejabat Pembuat Komitmen BLUD Pringsewu</td></tr>
+                <tr><td></td><td>yang Selanjutnya disebut sebagai Pihak I;</td></tr>
+                <tr><td>2</td><td>Nama  </td><td>: dr. Triyani Rositasari</td></tr>
+                <tr><td></td><td>NIP </td><td>: 19830619 201101 2 005</td></tr>
+                <tr><td></td><td>Jabatan </td><td>: Pejabat Pelaksana Teknis Kegiatan (PPTK)</td></tr>
+                <tr><td></td><td>yang Selanjutnya disebut sebagai Pihak II;</td></tr>
+                <tr><td></td></tr>
+            </table>            
+
+            <?php echo "Dengan ini menerangkan bahwa :"; ?>
+
+            <table class="no-border-table">        
+                <tr><td>1</td><td>Pihak I telah menyerahkan barang dan jasa sesuai dengan Permohonan Pengadaan Barang dan Jasa (PPBJ) Nomor
+                : 445/ 2 0 6 0 .01/PPBJ/LL.04/ /2024 Tanggal , dengan rincian sebagai berikut :</td></tr>
+            </table>   
+
+            <!-- Tabel Detail Barang -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nomor</th>
+                        <th>Nama Barang</th>
+                        <th>Volume</th>
+                        <th>Satuan</th>
+                        <th>Harga Satuan</th>
+                        <th>Total Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php include 'table_body.php'; ?>
+                </tbody>
+            </table>
+
+            <?php
+            // Menampilkan terbilang dari total akhir
+            if (isset($total_akhir)) {
+                $terbilang_total = terbilang($total_akhir);
+                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+            }
+            ?>
+
+<table class="no-border-table">        
+                <tr><td>2</td><td>Untuk pendistribusian dan penggunaan barang dan jasa, Pihak II agar berkoordinasi dengan Pengurus Barang
+                pembantu.</td></tr>
+            </table>   
+
+
+<?php echo "Demikian Berita Serah Terima ini dibuat dengan sebenarnya dalam rangkap 5 (Lima) untuk dipergunakan sebagaimana mestinya."; ?>
+
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Pejabat Pelaksana Teknis Kegiatan</td><td></td><td>Pejabat Pembuat Komitmen</td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u>dr. Triyani Rositasari</u></strong></td><td></td><td><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></td></tr>
+                <tr><td></td><td>NIP. 19830619 201101 2 005</td><td></td><td>NIP. 19780801 200501 1 009</td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+<!------------------------------ BATAS HALAMAN 7  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 8</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Kedelapan -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <h2 class="center-text">SURAT PERMOHONAN PEMBAYARAN</h2>
+            <h4 class="center-nomorsurat">Nomor Surat : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SPP.1/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+
+            <table class="no-border-table">        
+                <tr><td>Kepada Yth :</td></tr>
+                <tr><td>Kuasa Pengguna Anggaran (KPA)</td></tr>
+                <tr><td>BLUD RSUD Pringsewu</td></tr>
+                <tr><td>di -</td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;Pringsewu</td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;</td><td></td></tr>
+                <tr><td>Dengan hormat,</td></tr>
+                <tr><td>Dengan ini kami mengajukan Permintaan Pembayaran untuk kegiatan :</td></tr>
+            </table>            
+
+            <table class="no-border-table">        
+                <tr><td>1.</td><td>Program</td><td>:</td><td>Operasional Pelayanan Rumah Sakit</td></tr>
+                <tr><td>2.</td><td>Kegiatan</td><td>:</td><td>Belanja Barang dan Jasa BLUD</td></tr>
+                <tr><td>3.</td><td>Pekerjaan</td><td>:</td><td>Belanja Bahan Habis Pakai</td></tr>
+                <tr><td>4.</td><td>Nomor PPBJ</td><td>:</td><td>445 / ....... / PPBJ.1 / / LL.04 / / 2025</td></tr>
+                <tr><td>.</td><td>Nilai</td><td>:</td><td><?php if (isset($total_akhir)) {echo "<p>Rp. <strong><em>" . number_format($total_akhir, 2, ',', '.') . " </em></strong></p>";}?></td></tr>
+                <tr><td>.</td><td></td><td>:</td><td><?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";}?></td></tr>
+                <tr><td>5.</td><td></td><td>1</td><td>1</td></tr>
+                <tr><td>6.</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>6.</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>6.</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>6.</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>6.</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>6.</td><td>1</td><td>1</td><td>1</td></tr>
+            </table>            
+
+
+            <!-- Tabel Detail Barang 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nomor</th>
+                        <th>Nama Barang</th>
+                        <th>Volume</th>
+                        <th>Satuan</th>
+                        <th>Harga Satuan</th>
+                        <th>Total Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php include 'table_body.php'; ?>
+                </tbody>
+            </table> -->
+
+            <?php
+            // Menampilkan terbilang dari total akhir
+            if (isset($total_akhir)) {
+                $terbilang_total = terbilang($total_akhir);
+                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+            }
+            ?>
+
+<table class="no-border-table">        
+                <tr><td>2</td><td>Untuk pendistribusian dan penggunaan barang dan jasa, Pihak II agar berkoordinasi dengan Pengurus Barang
+                pembantu.</td></tr>
+            </table>   
+
+
+<?php echo "Demikian Berita Serah Terima ini dibuat dengan sebenarnya dalam rangkap 5 (Lima) untuk dipergunakan sebagaimana mestinya."; ?>
+
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Pejabat Pelaksana Teknis Kegiatan</td><td></td><td>Pejabat Pembuat Komitmen</td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td>.</td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u>dr. Triyani Rositasari</u></strong></td><td></td><td><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></td></tr>
+                <tr><td></td><td>NIP. 19830619 201101 2 005</td><td></td><td>NIP. 19780801 200501 1 009</td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<!------------------------------ BATAS HALAMAN 8  ------------------------------->
+
+
+
+<!------------------------------ BATAS HALAMAN 9  ------------------------------->
+
+
+
+<!------------------------------ BATAS HALAMAN 10  ------------------------------->
+
+
+
 
