@@ -98,7 +98,7 @@
                 <tr><td>Status</td><td>:</td><td><?php echo $stts_nikah; ?></td></tr>
                 <tr><td>Alamat</td><td>:</td><td><?php echo $alamat; ?></td></tr>
                 <tr><td>Tempat Pemeriksaan</td><td>:</td><td>RSUD Pringsewu</td></tr>
-                <tr><td>Hasil Pemeriksaan</td><td>:</td><td>CKD Stage 2</td></tr>
+                <tr><td>Hasil Pemeriksaan</td><td>:</td><td>CKD Stage 5</td></tr>
                 <tr><td>Keterangan Lain</td><td>:</td><td>Hemodialisa 2 kali seminggu</td></tr>
             </table>
 
