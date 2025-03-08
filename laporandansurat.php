@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rsudpringsewu</title>
+    <title>Menu Laporan dan Surat</title>
     <style>
         a {
             display: block;
@@ -71,27 +71,21 @@
         position: fixed;
         bottom: 0;
         width: 100%;
-        }
-
+    }
+        
     </style>
 </head>
 <body>
-
 <a href="index.php">
     <img src="images/logo.png" alt="Logo" width="80" height="100">
 </a>
-
     <div class="container">
         <h1>RSUD PRINGSEWU</h1>
         <form method="get">
-            <label for="menu">Pilih Menu :</label>
+            <label for="menu">Pilih Menu Laporan dan Surat :</label>
             <select name="menu" id="menu">
                 <option value="">Pilih Menu</option>
-                <option value="farmasi.php">Farmasi</option>
-                <option value="keuangan.php">Keuangan</option>
-                <option value="surveilans.php">Surveilans</option>
-                <option value="casemix.php">Casemix</option>
-                <option value="laporandansurat.php">Laporan dan Surat</option>
+                <option value="suratketeranganhd.php">Surat Keterangan Pasien Hemodialisa</option>                
             </select>
             <button type="submit">Pilih</button>
         </form>
@@ -108,5 +102,6 @@
     ?>
 
     <footer>by IT rsudpringsewu</footer>
+
 </body>
 </html>
