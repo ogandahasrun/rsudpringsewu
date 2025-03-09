@@ -1,8 +1,7 @@
 <!-- File: header.php -->
 <div class="header-container">
     <!-- Logo dari URL eksternal -->
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Lambang_Kabupaten_Pringsewu.png/640px-Lambang_Kabupaten_Pringsewu.png" alt="Logo RSUD Pringsewu" class="logo">
-
+    <img src="images/logo.png" alt="Logo RSUD Pringsewu" class="logo">
     <!-- Konten -->
     <div class="header-content">
         <h1>PEMERINTAH KABUPATEN PRINGSEWU</h1>
