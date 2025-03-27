@@ -11,7 +11,8 @@ body {
 
 .container {
     width: 100%;
-    max-width: 21cm; /* Lebar kertas A4 */
+    max-width: 21cm; /* Lebar kertas F4 */
+    max-height: 33cm; /* tinggi kertas F4 */
     margin: 0 auto;
     padding: 1cm;
 }
@@ -85,6 +86,10 @@ h4 {
     text-align: center;
 }
 
+.currency {
+    text-align: right;
+}
+
 /* Nomor surat di tengah */
 .center-nomorsurat {
     text-align: center;
@@ -153,7 +158,6 @@ td {
     padding: 0px; /* Sesuaikan padding sesuai kebutuhan */
 } 
 
-
 /* ==================== */
 /* TANDA TANGAN & SPASI */
 /* ==================== */
@@ -208,6 +212,12 @@ td {
 /* TAMPILAN CETAK */
 /* ==================== */
 @media print {
+    /* Atur ukuran kertas */
+    @page {
+        size: 21.5cm 33cm; /* Lebar 21,5 cm dan tinggi 33 cm */
+        margin-bottom: 2cm; /* Sesuaikan margin bawah untuk memberi ruang bagi nomor halaman */
+    }
+
     body {
         width: 100%;
         height: 100%;
@@ -235,5 +245,14 @@ td {
         display: block;
         border: 1px solid black;
         background-color: black;
+    }
+
+    /* Menambahkan nomor halaman */
+    @page {
+        @bottom-center {
+            content: counter(page); /* Menampilkan nomor halaman */
+            font-size: 12px; /* Sesuaikan ukuran font */
+            font-family: Arial, sans-serif; /* Sesuaikan font */
+        }
     }
 }
