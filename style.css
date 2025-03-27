@@ -14,7 +14,7 @@ body {
     max-width: 21cm; /* Lebar kertas F4 */
     max-height: 33cm; /* tinggi kertas F4 */
     margin: 0 auto;
-    padding: 1cm;
+    padding: 0,5cm;
 }
 
 /* ==================== */
@@ -215,6 +215,7 @@ td {
     /* Atur ukuran kertas */
     @page {
         size: 21.5cm 33cm; /* Lebar 21,5 cm dan tinggi 33 cm */
+        margin: 1cm;
         margin-bottom: 2cm; /* Sesuaikan margin bawah untuk memberi ruang bagi nomor halaman */
     }
 
@@ -223,6 +224,11 @@ td {
         height: 100%;
         margin: 0;
         padding: 0;
+    }
+
+    table {
+        max-width: 100%;
+        overflow: hidden;
     }
 
     .container {
