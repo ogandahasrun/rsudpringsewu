@@ -72,6 +72,31 @@
             }
             $stmt->close();
 
+            // Ambil salah satu no_faktur dari hasil pencarian sebelumnya
+            $stmt_no_faktur = $koneksi->prepare("SELECT pemesanan.no_faktur 
+                FROM pemesananspjgabungan 
+                JOIN pemesanan ON pemesananspjgabungan.no_faktur = pemesanan.no_faktur 
+                WHERE pemesananspjgabungan.nopgdn = ? LIMIT 1");
+            $stmt_no_faktur->bind_param("s", $nopgdn);
+            $stmt_no_faktur->execute();
+            $result_no_faktur = $stmt_no_faktur->get_result();
+
+            if ($row_faktur = $result_no_faktur->fetch_assoc()) {
+                $no_faktur = $row_faktur['no_faktur'];
+
+                // Ambil data suplier berdasarkan no_faktur
+                $query_suplier = "SELECT * FROM datasuplier 
+                    WHERE kode_suplier = (SELECT kode_suplier FROM pemesanan WHERE no_faktur = ? LIMIT 1)";
+                $stmt_suplier = $koneksi->prepare($query_suplier);
+                $stmt_suplier->bind_param("s", $no_faktur);
+                $stmt_suplier->execute();
+                $result_suplier = $stmt_suplier->get_result();
+                $datasuplier = $result_suplier->fetch_assoc();
+
+                $stmt_suplier->close();
+            }
+            $stmt_no_faktur->close();
+
             $ppn = $total_summary * 0.11;
             $total_with_ppn = $total_summary + $ppn;
             $terbilang = terbilang($total_with_ppn);
@@ -210,3 +235,82 @@
 </html>
 
 <!------------------------------ BATAS HALAMAN 2  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 2a</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Kesepuluh -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <table class="no-border-table">
+                <tr><td>Nomor</td><td>:</td><td>445 /&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/PIBH/LL.04/...../2025</td></tr>
+                <tr><td>Lampiran</td><td>:</td><td>-</td></tr>
+                <tr><td>Perihal</td><td>:</td><td> Permohonan Informasi Barang dan Harga</td></tr>    
+            </table>
+
+            <table class="no-border-table">        
+                <tr><td>Kepada Yth</td></tr>
+                <tr><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?>
+                <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?>
+                </td></tr>
+            </table>
+
+
+
+            <table class="no-border-table">        
+                <tr><td> Dengan ini kami memohon informasi harga barang untuk paket pekerjaan sebagai berikut :</td></tr>
+            </table>
+            <table class="no-border-table">        
+                <tr><td>1.</td><td>Paket Pekerjaan</td><td>: Belanja Bahan Alat Habis Pakai (BAHP) Rumah Sakit</td></tr>
+                <tr><td></td><td>Nama Paket Pekerjaan</td><td>: Belanja Bahan Alat Habis Pakai (BAHP) Rumah Sakit</td></tr>
+                <tr><td></td><td>Sumber Pendanaan</td><td>: DPA-BLUD Tahun Anggaran 2025</td></tr>
+                <tr><td>2.</td><td>Rincian Barang</td><td>: </td></tr>
+            </table>            
+
+            <!-- Tabel Detail Barang -->
+            <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Nomor</th>
+                    <th>Nama Barang</th>
+                    <th>Jumlah</th>
+                    <th>Satuan</th>
+                    <th class="currency" style="text-align: center;">Harga</th>
+                    <th class="currency" style="text-align: center;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php include 'table_body_gabungan.php'; ?>
+            </tbody>
+        </table>
+
+        <table class="no-border-table">
+                <tr><td>Demikian atas perhatian dan kerjasamanya diucapkan terima kasih</td></tr>    
+            </table>
+
+            <!-- Tanda Tangan -->
+            <div class="signature" style="text-align: center;">
+                <p><?php echo isset($datasuplier['kota']) ? $datasuplier['kota'] : ''; ?>, ....................................... 2025</p>
+                <p><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></p>
+                <br>
+                <br>
+                <br>
+                <p><strong><u><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></u></strong></p>
+                <p><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></p>
+            </div>   
+        </div>
+    </div>
+</body>
+</html>
+
+<!------------------------------ BATAS HALAMAN 3  ------------------------------->
