@@ -360,20 +360,20 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 2a  ------------------------------->
+<!------------------------------ BATAS HALAMAN 3  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
+    <title>SPJ Halaman 4</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Ketiga -->
+        <!-- Halaman Ke4 -->
         <div class="page-break">
             
             <table class="no-border-table">
@@ -451,20 +451,20 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 2b  ------------------------------->
+<!------------------------------ BATAS HALAMAN 4  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
+    <title>SPJ Halaman 5</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Ketiga -->
+        <!-- Halaman Ke5 -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -546,20 +546,20 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 3  ------------------------------->
+<!------------------------------ BATAS HALAMAN 5  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
+    <title>SPJ Halaman 6</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Ketiga -->
+        <!-- Halaman Ke6 -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -653,7 +653,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 4  ------------------------------->
+<!------------------------------ BATAS HALAMAN 6  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -754,7 +754,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 5  ------------------------------->
+<!------------------------------ BATAS HALAMAN 7  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -849,7 +849,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 6  ------------------------------->
+<!------------------------------ BATAS HALAMAN 8  ------------------------------->
 
 
 <!DOCTYPE html>
@@ -953,7 +953,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 7  ------------------------------->
+<!------------------------------ BATAS HALAMAN 9  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -1051,7 +1051,7 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 8  ------------------------------->
+<!------------------------------ BATAS HALAMAN 10  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -1163,7 +1163,7 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 9  ------------------------------->
+<!------------------------------ BATAS HALAMAN 11  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -1248,4 +1248,4 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 10  ------------------------------->
+<!------------------------------ BATAS HALAMAN 12  ------------------------------->
