@@ -996,7 +996,7 @@
                     <td>1</td>
                     <td>.</td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td>
-                    <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($pemesanan['tgl_faktur']) . "</p>"; ?> </div></td>
+                    <td></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($no_faktur) . "</p>"; ?> </div></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($datasuplier['nama_suplier']) . "</p>"; ?> </div></td>
                     </tr>
