@@ -1,112 +1,113 @@
+<?php
+session_start();
+include 'koneksi.php';
+
+// Cek session username, bukan nik
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit();
+}
+
+// Pindahkan logika redirect sebelum keluar HTML
+if (isset($_GET['menu'])) {
+    $menu = $_GET['menu'];
+    $allowed_menus = ['farmasi.php', 'keuangan.php', 'surveilans.php', 'casemix.php', 'laporandansurat.php'];
+    
+    if (in_array($menu, $allowed_menus)) {
+        header("Location: $menu");
+        exit();
+    } else {
+        // Kalau menu tidak dikenal, kembalikan ke index
+        header("Location: index.php");
+        exit();
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rsudpringsewu</title>
+    <title>RSUD PRINGSEWU</title>
     <style>
-        a {
-            display: block;
-            text-align: center;
-            }
-        img {
-            margin: 20px auto 0; /* Mengatur margin atas dan bawah ke 0 dan margin samping secara otomatis */
-            }
+        /* Styling keren */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
         }
         .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 20px;
         }
         form {
+            margin-top: 20px;
             text-align: center;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
-        }
-        select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            margin-bottom: 20px;
+        select, button {
             width: 100%;
-            box-sizing: border-box;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
         }
         button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
+            background: #007bff;
+            color: white;
             border: none;
-            border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
         }
         button:hover {
-            background-color: #0056b3;
+            background: #0056b3;
         }
-
+        .logout {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: red;
+            text-decoration: none;
+        }
         footer {
-        text-align: center;
-        padding: 20px 0;
-        background-color: #333;
-        color: #fff;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
+            margin-top: 40px;
+            text-align: center;
+            color: #777;
         }
-
     </style>
 </head>
 <body>
 
-<a href="index.php">
+<a href="index.php" style="display: block; text-align: center; margin-top: 30px;">
     <img src="images/logo.png" alt="Logo" width="80" height="100">
 </a>
 
-    <div class="container">
-        <h1>RSUD PRINGSEWU</h1>
-        <form method="get">
-            <label for="menu">Pilih Menu :</label>
-            <select name="menu" id="menu">
-                <option value="">Pilih Menu</option>
-                <option value="farmasi.php">Farmasi</option>
-                <option value="keuangan.php">Keuangan</option>
-                <option value="surveilans.php">Surveilans</option>
-                <option value="casemix.php">Casemix</option>
-                <option value="laporandansurat.php">Laporan dan Surat</option>
-            </select>
-            <button type="submit">Pilih</button>
-        </form>
-    </div>
+<div class="container">
+    <h1>RSUD PRINGSEWU</h1>
+    <form method="get">
+        <select name="menu" required>
+            <option value="">Pilih Menu</option>
+            <option value="farmasi.php">Farmasi</option>
+            <option value="keuangan.php">Keuangan</option>
+            <option value="surveilans.php">Surveilans</option>
+            <option value="casemix.php">Casemix</option>
+            <option value="laporandansurat.php">Laporan dan Surat</option>
+        </select>
+        <button type="submit">Pilih Menu</button>
+    </form>
+    <a href="logout.php" class="logout">Logout</a>
+</div>
 
-    <?php
-    if(isset($_GET['menu'])) {
-        $menu = $_GET['menu'];
-        if(!empty($menu)) {
-            header("Location: $menu");
-            exit();
-        }
-    }
-    ?>
+<footer>by IT RSUD Pringsewu</footer>
 
-    <footer>by IT rsudpringsewu</footer>
 </body>
 </html>
