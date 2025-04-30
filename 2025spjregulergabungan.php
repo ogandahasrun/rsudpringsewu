@@ -46,6 +46,7 @@
         <?php
         include 'koneksi.php';
         include 'functions.php';
+        include 'auth.php';
 
         $nopgdn = isset($_GET['nopgdn']) ? $_GET['nopgdn'] : '';
         $data = [];
@@ -294,13 +295,12 @@
 
             <!-- Tanda Tangan -->
             <div class="signature" style="text-align: center;">
-                <p><?php echo isset($datasuplier['kota']) ? $datasuplier['kota'] : ''; ?>, ....................................... 2025</p>
-                <p><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></p>
+                <p>Pringsewu, ............................. 2025</p>
+                <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>
                 <br>
                 <br>
-                <br>
-                <p><strong><u><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></u></strong></p>
-                <p><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></p>
+                <p><strong><u>Wisnetty, S.Si., Apt., M. Kes</u></strong></p>
+                <p>NIP. 19701020 200002 2002</p>
             </div>   
         </div>
     </div>
@@ -981,29 +981,7 @@
             <table class="no-border-table">        
                 <tr><td>3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Dengan ini Pengurus Barang I telah menyerahkan barang kepada Kepala Instalasi Farmasi sebagaimana di bawah ini</td></tr>
             </table>   
-
-            <table>
-                <tr>
-                <th>Nomor</th>
-                <th>Tanggal Pesan</th>
-                <th>Nomor Pesan</th>
-                <th>Tanggal Faktur</th>
-                <th>Nomor Faktur</th>
-                <th>PBF/PAK</th>
-                </tr>
-
-                    <tr>
-                    <td>1</td>
-                    <td>.</td>
-                    <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td>
-                    <td></td>
-                    <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($no_faktur) . "</p>"; ?> </div></td>
-                    <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($datasuplier['nama_suplier']) . "</p>"; ?> </div></td>
-                    </tr>
-            </table>
-                
-            </table>
-
+               
             <!-- Tabel Detail Barang -->
             <table border="1" cellpadding="5" cellspacing="0">
             <thead>

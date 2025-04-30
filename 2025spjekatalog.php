@@ -39,9 +39,16 @@
                 <tr><td>Kode Rekening</td><td>:</td><td>5.1.02.99.99.9999</td></tr>
             </table>
 
+            <table class="no-border-table">
+                <tr><td> Dengan hormat,</td></tr>
+                <tr><td>Berikut kami sampaikan permintaan pengadaan Belanja Bahan Habis Pakai dari Pengguna atau user untuk Operasional
+                Pelayanan Rumah Sakit</td></tr>    
+            </table>
+
             <?php
             include 'koneksi.php';
             include 'functions.php';
+            include 'auth.php';
 
             // Inisialisasi variabel nomor faktur
             $no_faktur = "";
@@ -266,11 +273,16 @@
             <?php include 'header.php'; ?>
             
             <table class="no-border-table">
-                <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Pejabat Pembuat Komitmen</td></tr>
-                <tr><td>Dari</td><td>:</td><td>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>.........</td></tr>
                 <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /...../ 2025</td></tr>
+                <tr><td>Lampiran</td><td>:</td><td>-</td></tr>    
                 <tr><td>Perihal</td><td>:</td><td>Penyampaian Hasil Pengadaan e-Purchasing</td></tr>    
+            </table>
+
+            <table class="no-border-table">
+                <tr><td>Kepada Yth,</td></tr>
+                <tr><td>Pejabat Pembuat Komitmen</td></tr>
+                <tr><td>di - </td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RSUD Pringsewu</td></tr>
             </table>
 
             <table class="no-border-table">
@@ -283,12 +295,12 @@
                 <tr><td> </td><td>1. Peraturan Presiden Nomor 12 Tahun 2021 tentang Pengadaan Barang/Jasa Pemerintah</td></tr>
                 <tr><td> </td><td>2. Peraturan Bupati Nomor 17 Tahun 2018 tentang Jenjang Nilai Pengadaan Barang dan Jasa pada Unit
                 Pelayanan Umum Daerah Rumah Sakit Umum Daerah Pringsewu.</td></tr>
-                <tr><td> </td><td>3. Surat permintaan Pengadaan Barang/Jasa Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/2025 tanggal ... </td></tr>
+                <tr><td> </td><td>3. Surat permintaan e-purchasing Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/2025 tanggal ... </td></tr>
                 <tr><td> </td></tr>
                 <tr><td>B.</td><td>Penyedia</td></tr>
                 <tr><td> </td><td>1. Nama Paket Pekerjaan : Belanja bahan habis Pakai (BAHP) RSUD</td></tr>
-                <tr><td> </td><td>2. Nama Penyedia : <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
-                <tr><td> </td><td>3. Direktur : <?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></td></tr>
+                <tr><td> </td><td>2. HPS : <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
+                <tr><td> </td><td>3. Nama Penyedia : <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td> </td><td>4. Alamat Penyedia : <?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
                 <tr><td> </td><td>5. NPWP : <?php echo isset($datasuplier['NPWP']) ? $datasuplier['NPWP'] : ''; ?></td></tr>
                 <tr><td>C.</td><td>Rincian sebagai berikut :</td></tr>
@@ -325,7 +337,8 @@
 
             <!-- Tanda Tangan -->
             <div class="signature" style="text-align: center;">
-                <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>                
+                <p>Pringsewu, ............................. 2025</p>
+                <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>
                 <br>
                 <br>
                 <p><strong><u>Wisnetty, S.Si., Apt., M. Kes</u></strong></p>
@@ -355,7 +368,8 @@
             <?php include 'header.php'; ?>
 
             <h4 class="center-text">SURAT PESANAN</h4>
-            <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/LL.04/
+            <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/
+                <?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">
@@ -377,7 +391,8 @@
                 <tr><td>Penyedia</td></tr>
                 <tr><td>Nama Paket Pekerjaan</td><td>:</td><td>Belanja bahan habis Pakai (BAHP) RSUD</td></tr>
                 <tr><td>Nama Penyedia</td><td>:</td><td><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
-                <tr><td>Direktur</td><td>:</td><td><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></td></tr>
+                <tr><td>Yang diwakili oleh</td><td>:</td><td><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></td></tr>
+                <tr><td>Jabatan</td><td>:</td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td></tr>
                 <tr><td>Alamat Penyedia</td><td>:</td><td><?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
                 <tr><td>NPWP</td><td>:</td><td><?php echo isset($datasuplier['NPWP']) ? $datasuplier['NPWP'] : ''; ?></td></tr>
                 <tr><td>Nomor e Purchasing</td><td>:</td><td></td></tr>
@@ -453,36 +468,43 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA PEKERJAAN</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTP/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/BASTP/LL.04/
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+
+                <table class="no-border-table">        
+                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+            </table>            
 
             <table class="no-border-table">        
                 <tr><td></td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
-                <tr><td>1</td><td>Nama Penyedia </td><td>: <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
+                <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nama Penyedia </td><td>: <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td></td><td>Alamat Penyedia </td><td>: <?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
                 <tr><td></td><td>yang diwakili oleh </td><td>: </td></tr>
-                <tr><td></td><td>Direktur </td><td>: <?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></td></tr>
+                <tr><td></td><td>Nama </td><td>: <?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></td></tr>
                 <tr><td></td><td>Jabatan </td><td>: <?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td></tr>
                 <tr><td></td><td>Dalam hal ini bertindak untuk dan atas nama </td><td>: <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td></td><td>Selanjutnya disebut sebagai Penyedia Barang/Jasa<td>:</td></td></tr>
                 <tr><td></td></tr>
-                <tr><td>1</td><td>Nama</td><td>: dr. Andi Arman, Sp.PD</td></tr>
+                <tr><td>2</td><td>Nama</td><td>: dr. Andi Arman, Sp.PD</td></tr>
                 <tr><td></td><td>NIP</td><td>: 19780801 200501 1 009</td></tr>
-                <tr><td></td><td>Jabatan</td><td>: Pejabat Pembuat Komitmen BLUD Pringsewu</td></tr>
-                <tr><td></td><td>Dalam hal ini bertindak untuk dan atas nama RSUD Pringsewu, </td></tr>
-                <tr><td></td><td>yang Selanjutnya disebut sebagai Pejabat Pembuat Komitmen (PPK);</td></tr>
+                <tr><td></td><td>Jabatan</td><td>: Kuasa Pengguna Anggaran</td></tr>
+                <tr><td></td><td>Dalam hal ini bertindak untuk dan atas nama RSUD Pringsewu, </td><td></td></tr>
+                <tr><td></td><td>yang Selanjutnya disebut sebagai Pejabat Pembuat Komitmen (PPK);</td><td></td></tr>
             </table>            
 
             <?php echo ""; ?>
 
             <table class="no-border-table">        
-                <tr><td>Berdasarkan Surat Pesanan Barang dan Jasa Nomor : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SP/ /LL.04/ /2024 untuk paket pekerjaan 
+                <tr><td>Berdasarkan Surat Pesanan Barang dan Jasa Nomor : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SP/ /LL.04/ /2025 untuk paket pekerjaan 
                         belanja Bahan Habis Pakai dengan ini menerangkan bahwa :</td></tr>
             </table>   
 
 
             <table class="no-border-table">        
-                <tr><td>1</td><td>Penyedia Barang/Jasa telah menyelesaikan dan telah menyerahkan hasil pekerjaan tersebut sesuai dengan ketentuan
+                <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Penyedia Barang/Jasa telah menyelesaikan dan telah menyerahkan hasil pekerjaan tersebut sesuai dengan ketentuan
                 Surat Pesanan (SP) kepada PPK</td></tr>
                 <tr><td>2</td><td>PPK telah menerima hasil pekerjaan tersebut dan menyatakan hasil pekerjaan tersebut telah sesuai dengan
                 ketentuan Surat Pesanan (SP) Barang dan Jasa, dengan rincian sebagai berikut :</td></tr>
@@ -517,7 +539,6 @@
 
 
             <table class="no-border-table" style="text-align: center;">
-                <tr><td></td><td>Untuk dan atas nama</td><td></td><td>Untuk dan atas nama</td></tr>
                 <tr><td></td><td>Pejabat Pembuat Komitmen</td><td></td><td>Penyedia barang</td></tr>
                 <tr><td>.</td><td></td><td></td><td></td></tr>
                 <tr><td>.</td><td></td><td></td><td></td></tr>
@@ -548,7 +569,7 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB/LL.04/
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
@@ -560,9 +581,9 @@
 
             <table class="no-border-table">        
                 <tr><td></td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
-                <tr><td>1</td><td>Nama</td><td>: dr. Andi Arman, Sp.PD</td></tr>
+                <tr><td>1&nbsp;&nbsp;&nbsp;</td><td>Nama</td><td>: dr. Andi Arman, Sp.PD</td></tr>
                 <tr><td></td><td>NIP</td><td>: 19780801 200501 1 009</td></tr>
-                <tr><td></td><td>Jabatan</td><td>: Pejabat Pembuat Komitmen BLUD Pringsewu</td></tr>
+                <tr><td></td><td>Jabatan</td><td>: Pejabat Pembuat Komitmen (PPK)</td></tr>
                 <tr><td></td><td>yang Selanjutnya disebut sebagai Pihak I;</td></tr>
                 <tr><td>2</td><td>Nama  </td><td>: dr. Triyani Rositasari</td></tr>
                 <tr><td></td><td>NIP </td><td>: 19830619 201101 2 005</td></tr>
@@ -575,8 +596,8 @@
             </table>   
 
             <table class="no-border-table">        
-                <tr><td>1</td><td>Pihak I telah menyerahkan barang dan jasa sesuai dengan Permohonan Pengadaan Barang dan Jasa (PPBJ) Nomor
-                : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ/LL.04/ /2025 Tanggal , dengan rincian sebagai berikut :</td></tr>
+                <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Pihak I telah menyerahkan barang dan jasa sesuai dengan Permohonan Pengadaan Barang dan Jasa (PPBJ) </td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ/LL.04/ /2025 Tanggal , dengan rincian sebagai berikut :</td></tr>
             </table>   
 
             <!-- Tabel Detail Barang -->
@@ -605,7 +626,7 @@
             ?>
 
 <table class="no-border-table">        
-                <tr><td>2</td><td>Untuk pendistribusian dan penggunaan barang dan jasa, Pihak II agar berkoordinasi dengan Pengurus Barang
+                <tr><td>2&nbsp;&nbsp;&nbsp;</td><td>Untuk pendistribusian dan penggunaan barang dan jasa, Pihak II agar berkoordinasi dengan Pengurus Barang
                 pembantu.</td></tr>
             </table>   
 
@@ -644,7 +665,7 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">SURAT PERINTAH PENCATATAN ASET</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SPPA.1/LL.04/2025</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SPPA.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -747,7 +768,7 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">SURAT PERMOHONAN PEMBAYARAN</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SPP.1/LL.04/2025</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SPP.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
                 <tr><td>Kepada Yth :</td></tr>
@@ -767,14 +788,14 @@
                 <tr><td>1</td><td>Program</td><td>: Operasional Pelayanan Rumah Sakit</td></tr>
                 <tr><td>2</td><td>Kegiatan</td><td>: Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>3</td><td>Pekerjaan</td><td>: Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ.1 / / LL.04 / / 2025</td></tr>
-                <tr><td></td><td>Nilai</td><td><?php if (isset($total_akhir)) {echo "<p>Rp. <strong><em>" . number_format($total_akhir, 2, ',', '.') . " </em></strong></p>";} ?></td></tr>
-                <tr><td></td><td></td><td><?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
-                echo "<p><strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";}?> </td></tr>
-                <tr><td>5</td><td>Nomor Surat Pesanan</td><td></td></tr>
-                <tr><td></td><td>Nilai</td><td><?php if (isset($total_akhir)) {echo "<p>Rp. <strong><em>" . number_format($total_akhir, 2, ',', '.') . " </em></strong></p>";} ?></td></tr>
-                <tr><td></td><td></td><td><?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
-                echo "<p><strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";}?> </td></tr>
+                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td></tr>
+                <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
+                <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
+                echo "" . ucfirst($terbilang_total) . " rupiah";}?> </td></tr>
+                <tr><td>5</td><td>Nomor Surat Pesanan</td><td>: <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td></tr>
+                <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
+                <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
+                echo "" . ucfirst($terbilang_total) . " rupiah";}?></td></tr>
                 <tr><td>6</td><td>Pelaksana Pekerjaan</td><td></td></tr>
                 <tr><td></td><td>Nama</td><td>: <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td></td><td>Alamat</td><td>: <?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
@@ -845,8 +866,7 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB.IF/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
                 <table class="no-border-table">        
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -856,8 +876,8 @@
             </table>            
 
             <table class="no-border-table">        
-                <tr><td></td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
-                <tr><td>1</td><td>Nama</td><td>: dr. Aris Mulato, SKM</td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
+                <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nama</td><td>: dr. Aris Mulato, SKM</td></tr>
                 <tr><td></td><td>NIP</td><td>: 197603082014071003</td></tr>
                 <tr><td></td><td>Jabatan</td><td>: Pengurus Barang Pembantu</td></tr>
                 <tr><td></td><td></td><td>&nbsp;&nbsp;yang Selanjutnya disebut sebagai Pengurus Barang I ;</td></tr>
@@ -868,7 +888,7 @@
             </table>            
 
             <table class="no-border-table">        
-                <tr><td>3&nbsp;</td><td>Dengan ini Pengurus Barang I telah menyerahkan barang kepada Kepala Instalasi Farmasi sebagaimana di bawah ini</td></tr>
+                <tr><td>3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Dengan ini Pengurus Barang I telah menyerahkan barang kepada Kepala Instalasi Farmasi sebagaimana di bawah ini</td></tr>
             </table>   
 
             <table>
@@ -884,8 +904,7 @@
                     <tr>
                     <td>1</td>
                     <td>.</td>
-                    <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/LL.04/
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</div></td>
+                    <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($pemesanan['tgl_faktur']) . "</p>"; ?> </div></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($no_faktur) . "</p>"; ?> </div></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($datasuplier['nama_suplier']) . "</p>"; ?> </div></td>
@@ -965,12 +984,13 @@
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
                     bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),
+                    telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
                 <tr><td>Kegiatan</td><td>:</td><td>Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>Pekerjaan</td><td>:</td><td>Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>No. Surat Pesanan</td><td>:</td><td>............/ SP / ...  / LL.04 / 2025</td></tr>
+                <tr><td>No. Surat Pesanan</td><td>:</td><td><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td></tr>
                 <tr><td>Pelaksana Pekerjaan</td><td>:</td><td></td></tr>
                 <tr><td>Nama Perusahaan</td><td>:</td><td><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td>Alamat Perusahaan</td><td>:</td><td><?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
@@ -1025,7 +1045,3 @@
 </html>
 
 <!------------------------------ BATAS HALAMAN 10  ------------------------------->
-
-<table class="no-border-table" style="text-align: center;">
-                <tr><td>1</td><td><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?></td>
-</table>

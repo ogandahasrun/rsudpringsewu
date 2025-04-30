@@ -48,6 +48,7 @@
             <?php
             include 'koneksi.php';
             include 'functions.php';
+            include 'auth.php';
 
             // Inisialisasi variabel nomor faktur
             $no_faktur = "";
@@ -360,20 +361,20 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 3  ------------------------------->
+<!------------------------------ BATAS HALAMAN 2a  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 4</title>
+    <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Ke4 -->
+        <!-- Halaman Ketiga -->
         <div class="page-break">
             
             <table class="no-border-table">
@@ -451,20 +452,20 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 4  ------------------------------->
+<!------------------------------ BATAS HALAMAN 2b  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 5</title>
+    <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Ke5 -->
+        <!-- Halaman Ketiga -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -546,20 +547,20 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 5  ------------------------------->
+<!------------------------------ BATAS HALAMAN 3  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 6</title>
+    <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Ke6 -->
+        <!-- Halaman Ketiga -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -653,7 +654,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 6  ------------------------------->
+<!------------------------------ BATAS HALAMAN 4  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -754,7 +755,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 7  ------------------------------->
+<!------------------------------ BATAS HALAMAN 5  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -849,7 +850,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 8  ------------------------------->
+<!------------------------------ BATAS HALAMAN 6  ------------------------------->
 
 
 <!DOCTYPE html>
@@ -953,7 +954,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 9  ------------------------------->
+<!------------------------------ BATAS HALAMAN 7  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -1051,7 +1052,7 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 10  ------------------------------->
+<!------------------------------ BATAS HALAMAN 8  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -1163,7 +1164,7 @@
 </html>
 
 
-<!------------------------------ BATAS HALAMAN 11  ------------------------------->
+<!------------------------------ BATAS HALAMAN 9  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -1248,4 +1249,4 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 12  ------------------------------->
+<!------------------------------ BATAS HALAMAN 10  ------------------------------->

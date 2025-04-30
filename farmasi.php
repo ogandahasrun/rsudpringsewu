@@ -97,9 +97,9 @@
                 <option value="stok_minimal_depo_rawat_inap.php">Stok Minimal Depo Rawat Inap</option>
                 <option value="laporannarkotik.php">Menu Pembuatan Laporan Narkotik</option>
                 <option value="laporanformularium.php">Laporan Formularium</option>
-                <option value="menu2.php">Menu 2</option>
-                <option value="menu2.php">Menu 2</option>
-                <option value="menu2.php">Menu 2</option>
+                <option value="2025spjekatalog.php">SPJ E-Katalog 2025</option>
+                <option value="2025spjreguler.php">SPJ Reguler 2025</option>
+                <option value="2025spjregulergabungan.php">SPJ Reguler Gabungan 2025</option>
             </select>
             <button type="submit">Pilih</button>
         </form>
