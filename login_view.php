@@ -64,7 +64,7 @@
 </a>
 
 <div class="login-container">
-    <h2>Login</h2>
+    <h2>Silahkan Masukkan User dan Password Aplikasi Simkes Khanza Anda</h2>
     <?php if (!empty($error)): ?>
         <div class="error"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
