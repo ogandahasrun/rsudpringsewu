@@ -58,6 +58,11 @@
 </head>
 <body>
 
+<a href="index.php" style="display: block; text-align: center; margin-top: 30px;">
+    <img src="images/logo.png" alt="Logo" width="80" height="100">
+    <h1>RSUD PRINGSEWU</h1>
+</a>
+
 <div class="login-container">
     <h2>Login</h2>
     <?php if (!empty($error)): ?>
