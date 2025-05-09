@@ -1106,3 +1106,52 @@
 </html>
 
 <!------------------------------ BATAS HALAMAN 12  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 13</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Kesepuluh -->
+        <div class="page-break">
+            <?php
+                // Pastikan $nopgdn sudah ada sebelumnya dari form GET
+                if (!empty($nopgdn)) {
+                    $stmt_faktur_list = $koneksi->prepare("SELECT DISTINCT no_faktur 
+                        FROM pemesananspjgabungan 
+                        WHERE nopgdn = ?");
+                    $stmt_faktur_list->bind_param("s", $nopgdn);
+                    $stmt_faktur_list->execute();
+                    $result_faktur_list = $stmt_faktur_list->get_result();
+
+                    echo '<h3>Daftar Nomor Faktur Terkait</h3>';
+                    echo '<table border="1" cellpadding="5" cellspacing="0">';
+                    echo '<thead><tr><th>No</th><th>Nomor Faktur</th></tr></thead>';
+                    echo '<tbody>';
+                    $no = 1;
+                    while ($row_faktur = $result_faktur_list->fetch_assoc()) {
+                        echo '<tr>';
+                        echo '<td>' . $no++ . '</td>';
+                        echo '<td>' . htmlspecialchars($row_faktur['no_faktur']) . '</td>';
+                        echo '</tr>';
+                    }
+                    echo '</tbody></table>';
+
+                    $stmt_faktur_list->close();
+                }
+            ?>
+        </div>
+    </div>
+</body>
+</html>
+
+<!------------------------------ BATAS HALAMAN 13  ------------------------------->
+
+
+
