@@ -53,7 +53,7 @@
 </head>
 <body>
     <header>
-        <h1>Kelengkapan Berkas Rawat Inap</h1>
+        <h1>KUNJUNGAN PASIEN</h1>
     </header>
 
     <div class="back-button">
@@ -108,6 +108,7 @@
             echo "<table>
                     <tr>
                         <th>NOMOR URUT</th>
+                        <th>TANGGAL REGISTRASI</th>
                         <th>NOMOR RAWAT</th>
                         <th>NOMOR REKAM MEDIK</th>
                         <th>NAMA PASIEN</th>
@@ -121,6 +122,7 @@
             while ($row = mysqli_fetch_assoc($result)) {
                 echo "<tr>
                         <td>$no</td>
+                        <td>{$row['tgl_registrasi']}</td>
                         <td>{$row['no_rawat']}</td>
                         <td>{$row['no_rkm_medis']}</td>
                         <td>{$row['nm_pasien']}</td>
