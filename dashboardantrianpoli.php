@@ -1,5 +1,7 @@
 <?php
 include 'koneksi.php';
+
+date_default_timezone_set('Asia/Jakarta');
 function tanggal_indo($tanggal) {
     $bulan = [
         1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -58,7 +60,7 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Antrian Poli</title>
-    <meta http-equiv="refresh" content="5">
+    <meta http-equiv="refresh" content="10">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
