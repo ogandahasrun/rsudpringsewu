@@ -11,11 +11,10 @@ function tanggal_indo($tanggal) {
     return "$tgl $bln $thn";
 }
 
-
 $today = date('Y-m-d');
 $nm_dokter = isset($_GET['nm_dokter']) ? $_GET['nm_dokter'] : '';
 
-// Ambil daftar semua dokter untuk isi dropdown
+// Ambil daftar dokter untuk dropdown
 $dokterList = [];
 $dokterQuery = "SELECT DISTINCT nm_dokter FROM dokter ORDER BY nm_dokter ASC";
 $dokterResult = $koneksi->query($dokterQuery);
@@ -23,7 +22,7 @@ while ($row = $dokterResult->fetch_assoc()) {
     $dokterList[] = $row['nm_dokter'];
 }
 
-// Siapkan query data pasien
+// Query pasien belum dilayani
 $sql = "SELECT
             reg_periksa.no_reg,
             reg_periksa.no_rawat,
@@ -61,61 +60,126 @@ $result = $stmt->get_result();
     <title>Dashboard Antrian Poli</title>
     <meta http-equiv="refresh" content="5">
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        select, input[type="submit"] { padding: 5px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo {
+            text-align: center;
+        }
+        .logo img {
+            width: 60px;
+            height: auto;
+        }
+        .title {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .date {
+            text-align: center;
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        select, input[type="submit"] {
+            padding: 8px 12px;
+            font-size: 14px;
+            margin: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
 
-<div style="text-align: center;">
-    <a href="index.php">
-        <img src="images/logo.png" alt="Logo" width="40" height="50">
-    </a>
-</div>
+<div class="container">
+    <div class="logo">
+        <a href="index.php">
+            <img src="images/logo.png" alt="Logo">
+        </a>
+    </div>
+    <div class="title">DASHBOARD ANTRIAN POLI</div>
+    <div class="date"><?= tanggal_indo(date('Y-m-d')) ?></div>
 
-<h3 style="text-align: center;">DASHBOARD ANTRIAN POLI</h3>
-<h4 style="text-align: center;"><?= tanggal_indo(date('Y-m-d')) ?></h4>
+    <form method="get">
+        <label for="nm_dokter">Pilih Dokter:</label>
+        <select name="nm_dokter" id="nm_dokter">
+            <option value="">-- Semua Dokter --</option>
+            <?php foreach ($dokterList as $dokter): ?>
+                <option value="<?= htmlspecialchars($dokter) ?>" <?= ($dokter == $nm_dokter) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($dokter) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <input type="submit" value="Tampilkan">
+    </form>
 
-<form method="get">
-    <label for="nm_dokter">Pilih Dokter:</label>
-    <select name="nm_dokter" id="nm_dokter">
-        <option value="">-- Semua Dokter --</option>
-        <?php foreach ($dokterList as $dokter): ?>
-            <option value="<?= htmlspecialchars($dokter) ?>" <?= ($dokter == $nm_dokter) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($dokter) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-    <input type="submit" value="Tampilkan">
-</form>
-
-<table>
-    <thead>
-        <tr>
-            <th>No. Reg</th>
-            <th>No. Rawat</th>
-            <th>No. RM</th>
-            <th>Nama Pasien</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if ($result->num_rows > 0): ?>
-            <?php while ($row = $result->fetch_assoc()): ?>
+    <table>
+        <thead>
+            <tr>
+                <th>Nomor Registrasi</th>
+                <th>Nomor Rawat</th>
+                <th>Nomor Rekam Medik</th>
+                <th>Nama Pasien</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if ($result->num_rows > 0): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($row['no_reg']) ?></td>
+                        <td><?= htmlspecialchars($row['no_rawat']) ?></td>
+                        <td><?= htmlspecialchars($row['no_rkm_medis']) ?></td>
+                        <td><?= htmlspecialchars($row['nm_pasien']) ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
                 <tr>
-                    <td><?= htmlspecialchars($row['no_reg']) ?></td>
-                    <td><?= htmlspecialchars($row['no_rawat']) ?></td>
-                    <td><?= htmlspecialchars($row['no_rkm_medis']) ?></td>
-                    <td><?= htmlspecialchars($row['nm_pasien']) ?></td>
+                    <td colspan="4" class="no-data">Tidak ada data pasien untuk hari ini.</td>
                 </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr><td colspan="4">Tidak ada data pasien untuk hari ini.</td></tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
 
 </body>
 </html>
