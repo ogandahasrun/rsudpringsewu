@@ -86,7 +86,7 @@
             <select name="menu" id="menu">
                 <option value="">Pilih Menu</option>
                 <option value="data_barang.php">Data Barang</option>
-                <option value="stok_barang.php">Stok Barang</option>
+                <option value="stokfarmasi.php">Stok Barang Farmasi</option>
                 <option value="riwayatdri.php">Riwayat Barang Depo Rawat Inap</option>
                 <option value="riwayatgo.php">Riwayat Barang Gudang</option>
                 <option value="stok_gudang.php">Stok Lokasi Gudang Barang</option>

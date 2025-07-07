@@ -85,8 +85,7 @@
             <label for="menu">Pilih Menu Surveilans:</label>
             <select name="menu" id="menu">
                 <option value="">Pilih Menu</option>
-                <option value="diare.php">Laporan Diare</option>
-                <option value="malaria.php">Laporan Malaria</option>
+                <option value="borperkamar.php">BOR per Kamar</option>
                 <option value="penyakit.php">Laporan Penyakit</option>
                 <option value="datapasienranap.php">Data Pasien Ranap non IGD dan Ponek</option>
                 <option value="hasillab.php">Hasil Lab</option>

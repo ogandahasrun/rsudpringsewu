@@ -113,6 +113,25 @@
             mysqli_stmt_execute($stmt_suplier);
             $result_suplier = mysqli_stmt_get_result($stmt_suplier);
             $datasuplier = mysqli_fetch_assoc($result_suplier);
+
+            $faktur_list = [];
+            if (!empty($nopgdn)) {
+                $stmt_faktur = $koneksi->prepare("SELECT pemesanan.no_faktur, SUM(detailpesan.subtotal) AS tagihan
+                    FROM pemesananspjgabungan
+                    JOIN pemesanan ON pemesananspjgabungan.no_faktur = pemesanan.no_faktur
+                    JOIN detailpesan ON pemesanan.no_faktur = detailpesan.no_faktur
+                    WHERE pemesananspjgabungan.nopgdn = ?
+                    GROUP BY pemesanan.no_faktur
+                    ORDER BY pemesanan.no_faktur");
+                $stmt_faktur->bind_param("s", $nopgdn);
+                $stmt_faktur->execute();
+                $result_faktur = $stmt_faktur->get_result();
+                while ($row = $result_faktur->fetch_assoc()) {
+                    $faktur_list[] = $row;
+                }
+                $stmt_faktur->close();
+            }
+
         ?>
 
         <table border="1" cellpadding="5" cellspacing="0">
@@ -1033,7 +1052,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Kesepuluh -->
+        <!-- Halaman Keduabelas -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -1089,8 +1108,8 @@
                 <tr><td></td><td>Penyedia Barang/Jasa</td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td><td></td></tr>
                 <tr><td>2</td><td>Pejabat Pelaksana Teknis Kegiatan (PPTK)</td><td>dr. Triyani Rositasari</td><td>..................</td></tr>
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19830619 201101 2 005 </td><td></td></tr>
-                <tr><td>3</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Nur Syamsudin, S.Kep</td><td>..................</td></tr>
-                <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19800112 200604 1 013</td><td></td></tr>
+                <tr><td>3</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Sulaksono, SKM., M.Kes</td><td>..................</td></tr>
+                <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19750523 199703 1 004</td><td></td></tr>
                 <tr><td>4</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Edi Irawan, Am.TE</td><td>..................</td></tr>
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19850806 201101 1 006</td><td></td></tr>
                 <tr><td>5</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Emmy Saragih, Amd.Gz</td><td>..................</td></tr>
@@ -1106,3 +1125,46 @@
 </html>
 
 <!------------------------------ BATAS HALAMAN 12  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 10</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Keduabelas -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+
+
+<?php if (!empty($faktur_list)) { ?>
+    <h4>Daftar Faktur</h4>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nomor Faktur</th>
+                <th>Tagihan (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $no = 1;
+            foreach ($faktur_list as $faktur) {
+                echo "<tr>";
+                echo "<td>" . $no++ . "</td>";
+                echo "<td>" . htmlspecialchars($faktur['no_faktur']) . "</td>";
+                echo "<td style='text-align:right;'>" . number_format($faktur['tagihan'], 0, ',', '.') . "</td>";
+                echo "</tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+<?php } ?>

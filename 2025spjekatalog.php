@@ -1028,8 +1028,8 @@
                 <tr><td></td><td>Penyedia Barang/Jasa</td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td><td></td></tr>
                 <tr><td>2</td><td>Pejabat Pelaksana Teknis Kegiatan (PPTK)</td><td>dr. Triyani Rositasari</td><td>..................</td></tr>
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19830619 201101 2 005 </td><td></td></tr>
-                <tr><td>3</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Nur Syamsudin, S.Kep</td><td>..................</td></tr>
-                <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19800112 200604 1 013</td><td></td></tr>
+                <tr><td>3</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Sulaksono, SKM., M.Kes</td><td>..................</td></tr>
+                <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19750523 199703 1 004</td><td></td></tr>
                 <tr><td>4</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Edi Irawan, Am.TE</td><td>..................</td></tr>
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19850806 201101 1 006</td><td></td></tr>
                 <tr><td>5</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Emmy Saragih, Amd.Gz</td><td>..................</td></tr>

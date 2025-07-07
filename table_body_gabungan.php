@@ -21,7 +21,7 @@
         <td class="currency" style="text-align:right;"><strong>Rp <?php echo number_format(ceil($total_with_ppn)); ?></strong></td>
     </tr>
     <tr>
-        <td colspan="6" class="currency"><strong>Terbilang : </strong> <?php echo $terbilang; ?></td>
+        <td colspan="6" class="currency"><strong>Terbilang : </strong> <?php echo $terbilang; ?> rupiah </td>
     </tr>
     <?php } else { ?>
     <tr>
