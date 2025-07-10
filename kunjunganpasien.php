@@ -90,7 +90,13 @@
                     poliklinik.nm_poli,
                     dokter.nm_dokter,
                     pasien.no_tlp,
-                    penjab.png_jawab
+                    penjab.png_jawab,
+                    pasien.no_ktp,
+                    pasien.jk,
+                    pasien.tmp_lahir,
+                    pasien.tgl_lahir,
+                    pasien.alamat,
+                    pasien.agama
                   FROM
                     reg_periksa
                   INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
@@ -112,6 +118,12 @@
                         <th>NOMOR RAWAT</th>
                         <th>NOMOR REKAM MEDIK</th>
                         <th>NAMA PASIEN</th>
+                        <th>NOMOR KTP</th>
+                        <th>JENIS KELAMIN</th>
+                        <th>TEMPAT LAHIR</th>
+                        <th>TANGGAL LAHIR</th>
+                        <th>ALAMAT</th>
+                        <th>AGAMA</th>
                         <th>NAMA POLI</th>
                         <th>NAMA DOKTER</th>
                         <th>NOMOR TELP</th>
@@ -126,6 +138,12 @@
                         <td>{$row['no_rawat']}</td>
                         <td>{$row['no_rkm_medis']}</td>
                         <td>{$row['nm_pasien']}</td>
+                        <td>{$row['no_ktp']}</td>
+                        <td>{$row['jk']}</td>
+                        <td>{$row['tmp_lahir']}</td>
+                        <td>{$row['tgl_lahir']}</td>
+                        <td>{$row['alamat']}</td>
+                        <td>{$row['agama']}</td>
                         <td>{$row['nm_poli']}</td>
                         <td>{$row['nm_dokter']}</td>
                         <td>{$row['no_tlp']}</td>
