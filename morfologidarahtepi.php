@@ -99,20 +99,41 @@
         }
     </style>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.input-hasil').forEach(input => {
-            input.addEventListener('input', function () {
-                let value = this.value.toLowerCase();
-                this.value = value.charAt(0).toUpperCase() + value.slice(1);
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.input-hasil').forEach(input => {
+        // Format nilai yang sudah ada saat halaman dimuat
+        if (input.value) {
+            input.value = formatText(input.value);
+        }
 
-            // Format nilai yang sudah terisi saat halaman dimuat
-            let value = input.value.toLowerCase();
-            input.value = value.charAt(0).toUpperCase() + value.slice(1);
+        input.addEventListener('input', function (e) {
+            // Simpan posisi kursor dan nilai sebelum perubahan
+            const cursorPos = this.selectionStart;
+            const originalValue = this.value;
+            
+            // Format teks
+            this.value = formatText(originalValue);
+            
+            // Kembalikan posisi kursor
+            if (cursorPos === 1 && originalValue.length === 0) {
+                this.setSelectionRange(2, 2); // Penanganan khusus untuk karakter pertama
+            } else {
+                this.setSelectionRange(cursorPos, cursorPos);
+            }
         });
+
+        // Fungsi untuk memformat teks
+        function formatText(text) {
+            if (text.length === 0) return text;
+            
+            // Ambil karakter pertama (kapital) dan sisanya (biarkan asli)
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
     });
-    </script>
+});
+</script>
+
 </head>
 <body>
     <header>
