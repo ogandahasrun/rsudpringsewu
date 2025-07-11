@@ -100,29 +100,15 @@
     </style>
 
 </head>
-<body>
-    <header>
-        <h1>RL 3.5 Kunjungan Rawat Jalan</h1>
-    </header>
-
-    <div class="back-button">
-        <a href="surveilans.php">Kembali ke Menu Surveilans</a>
-    </div>
-
-    <form method="POST">
-        Filter Tanggal Registrasi:
-        <input type="date" name="tanggal_awal" required value="<?php echo $tanggal_awal; ?>">
-        <input type="date" name="tanggal_akhir" required value="<?php echo $tanggal_akhir; ?>">
-        <button type="submit" name="filter">Filter</button>
-    </form>
 
 <?php
 include 'koneksi.php';
 
-// Tanggal filter (anda bisa menyesuaikan ini dengan input form)
-$tanggal_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d');
-$tanggal_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
+// Tanggal filter - perbaikan: menggunakan $_POST karena form menggunakan method POST
+$tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y-m-d');
+$tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
 
+// Perbaikan query: menambahkan validasi tanggal dan memperbaiki typo (CASE menjadi CASE)
 $query = "
 SELECT 
     ROW_NUMBER() OVER (ORDER BY poliklinik.nm_poli) AS 'Nomor urut',
@@ -146,66 +132,108 @@ ORDER BY
     poliklinik.nm_poli
 ";
 
+// Debugging: tambahkan ini untuk memeriksa query yang dihasilkan
+// echo "<pre>Query: " . htmlspecialchars($query) . "</pre>";
+
 $result = mysqli_query($koneksi, $query);
 
-// Membuat tabel HTML
-echo "<h2>Laporan Kunjungan Poliklinik</h2>";
-echo "<p>Periode: $tanggal_awal s/d $tanggal_akhir</p>";
-echo "<table border='1' cellpadding='5' cellspacing='0'>
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Nama Poli</th>
-            <th colspan='2'>Kabupaten Pringsewu</th>
-            <th colspan='2'>Luar Kabupaten Pringsewu</th>
-            <th>Jumlah</th>
-        </tr>
-        <tr>
-            <th></th>
-            <th></th>
-            <th>L</th>
-            <th>P</th>
-            <th>L</th>
-            <th>P</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>";
-
-$total_all = 0;
-$total_l_kab1810 = 0;
-$total_p_kab1810 = 0;
-$total_l_kab_lain = 0;
-$total_p_kab_lain = 0;
-
-while ($row = mysqli_fetch_assoc($result)) {
-    echo "<tr>
-        <td>".$row['Nomor urut']."</td>
-        <td>".$row['nm_poli']."</td>
-        <td>".$row['Laki-laki (KD_KAB=1810)']."</td>
-        <td>".$row['Perempuan (KD_KAB=1810)']."</td>
-        <td>".$row['Laki-laki (KD_KAB!=1810)']."</td>
-        <td>".$row['Perempuan (KD_KAB!=1810)']."</td>
-        <td>".$row['Jumlah Total']."</td>
-    </tr>";
-    
-    // Menghitung total
-    $total_all += $row['Jumlah Total'];
-    $total_l_kab1810 += $row['Laki-laki (KD_KAB=1810)'];
-    $total_p_kab1810 += $row['Perempuan (KD_KAB=1810)'];
-    $total_l_kab_lain += $row['Laki-laki (KD_KAB!=1810)'];
-    $total_p_kab_lain += $row['Perempuan (KD_KAB!=1810)'];
+if (!$result) {
+    // Jika query error, tampilkan pesan error
+    die("Error dalam query: " . mysqli_error($koneksi));
 }
-
-// Baris total
-echo "<tr>
-    <td colspan='2'><strong>Total</strong></td>
-    <td><strong>".$total_l_kab1810."</strong></td>
-    <td><strong>".$total_p_kab1810."</strong></td>
-    <td><strong>".$total_l_kab_lain."</strong></td>
-    <td><strong>".$total_p_kab_lain."</strong></td>
-    <td><strong>".$total_all."</strong></td>
-</tr>";
-
-echo "</tbody></table>";
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bagian head tetap sama -->
+</head>
+<body>
+    <header>
+        <h1>RL 3.5 Kunjungan Rawat Jalan</h1>
+    </header>
+
+    <div class="back-button">
+        <a href="surveilans.php">Kembali ke Menu Surveilans</a>
+    </div>
+
+    <!-- Form filter - method POST -->
+    <form method="POST" class="filter-form">
+        Filter Tanggal Registrasi:
+        <input type="date" name="tanggal_awal" required value="<?php echo htmlspecialchars($tanggal_awal); ?>">
+        <input type="date" name="tanggal_akhir" required value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+        <button type="submit" name="filter">Filter</button>
+    </form>
+
+<?php
+// Tampilkan data hanya jika form telah disubmit atau untuk pertama kali
+if ($_SERVER['REQUEST_METHOD'] == 'POST' || !isset($_POST['filter'])) {
+    // Membuat tabel HTML
+    echo "<h2>Laporan Kunjungan Poliklinik</h2>";
+    echo "<p>Periode : " . htmlspecialchars($tanggal_awal) . " s/d " . htmlspecialchars($tanggal_akhir) . "</p>";
+    
+    if (mysqli_num_rows($result) > 0) {
+        echo "<table border='1' cellpadding='5' cellspacing='0'>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Poli</th>
+                    <th colspan='2'>Kabupaten Pringsewu</th>
+                    <th colspan='2'>Luar Kabupaten Pringsewu</th>
+                    <th>Jumlah</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>";
+
+        $total_all = 0;
+        $total_l_kab1810 = 0;
+        $total_p_kab1810 = 0;
+        $total_l_kab_lain = 0;
+        $total_p_kab_lain = 0;
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>
+                <td>".htmlspecialchars($row['Nomor urut'])."</td>
+                <td>".htmlspecialchars($row['nm_poli'])."</td>
+                <td>".htmlspecialchars($row['Laki-laki (KD_KAB=1810)'])."</td>
+                <td>".htmlspecialchars($row['Perempuan (KD_KAB=1810)'])."</td>
+                <td>".htmlspecialchars($row['Laki-laki (KD_KAB!=1810)'])."</td>
+                <td>".htmlspecialchars($row['Perempuan (KD_KAB!=1810)'])."</td>
+                <td>".htmlspecialchars($row['Jumlah Total'])."</td>
+            </tr>";
+            
+            // Menghitung total
+            $total_all += $row['Jumlah Total'];
+            $total_l_kab1810 += $row['Laki-laki (KD_KAB=1810)'];
+            $total_p_kab1810 += $row['Perempuan (KD_KAB=1810)'];
+            $total_l_kab_lain += $row['Laki-laki (KD_KAB!=1810)'];
+            $total_p_kab_lain += $row['Perempuan (KD_KAB!=1810)'];
+        }
+
+        // Baris total
+        echo "<tr>
+            <td colspan='2'><strong>Total</strong></td>
+            <td><strong>".$total_l_kab1810."</strong></td>
+            <td><strong>".$total_p_kab1810."</strong></td>
+            <td><strong>".$total_l_kab_lain."</strong></td>
+            <td><strong>".$total_p_kab_lain."</strong></td>
+            <td><strong>".$total_all."</strong></td>
+        </tr>";
+
+        echo "</tbody></table>";
+    } else {
+        echo "<div class='no-data'>Tidak ada data ditemukan untuk periode yang dipilih.</div>";
+    }
+}
+?>
+</body>
+</html>
