@@ -95,6 +95,7 @@
                 <option value="triaseigd.php">Data Triase IGD</option>
                 <option value="kontroltriaseigd.php">Kontrol Triase IGD</option>
                 <option value="kunjunganpasien.php">Kunjungan Pasien</option>
+                <option value="rl35kunjunganralan.php">RL 3.5 Kunjungan Rawat Jalan</option>
             </select>
             <button type="submit">Pilih</button>
         </form>
