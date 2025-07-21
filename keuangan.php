@@ -86,7 +86,7 @@
             <select name="menu" id="menu">
                 <option value="">Pilih Menu</option>
                 <option value="detailtindakan.php">Detail Tindakan Pasien</option>                
-                <option value="menu1.php">Menu 1</option>
+                <option value="penagihanfaktur.php">Penagihan Faktur Barang Medis</option>
                 <option value="menu2.php">Menu 2</option>
                 <option value="menu3.php">Menu 3</option>
             </select>
