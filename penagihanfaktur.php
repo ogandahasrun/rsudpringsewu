@@ -33,6 +33,34 @@
             cursor: pointer;
             font-size: 16px;
         }
+
+        /* STATUS color shadows */
+        .status-belumdibayar {
+            box-shadow: inset 0 0 10px red;
+            background-color: #ffe5e5;
+            font-weight: bold;
+        }
+        .status-titipfaktur {
+            box-shadow: inset 0 0 10px orange;
+            background-color: #fff3e0;
+            font-weight: bold;
+        }
+        .status-belumlunas {
+            box-shadow: inset 0 0 10px gold;
+            background-color: #fffde7;
+            font-weight: bold;
+        }
+        .status-sudahdibayar {
+            box-shadow: inset 0 0 10px green;
+            background-color: #e8f5e9;
+            font-weight: bold;
+        }
+
+        /* Tanggal Penagihan kosong */
+        .penagihan-kosong {
+            box-shadow: inset 0 0 10px red;
+            background-color: #ffecec;
+        }
     </style>
     <script>
         function copyTableData() {
@@ -58,7 +86,6 @@
     <?php
     include 'koneksi.php';
 
-    // Simpan tanggal penagihan
     if (isset($_POST['simpan_tanggal'])) {
         $no_faktur = $_POST['no_faktur'];
         $tanggal_penagihan = $_POST['tanggal_penagihan'];
@@ -70,12 +97,10 @@
         }
     }
 
-    // Default value tanggal filter
     $tanggal_awal = $_POST['tanggal_awal'] ?? '';
     $tanggal_akhir = $_POST['tanggal_akhir'] ?? '';
     $tgl_pesan = $_POST['tgl_pesan'] ?? '';
     $perusahaan = $_POST['perusahaan'] ?? '';
-
     ?>
 
     <!-- Filter Form -->
@@ -108,7 +133,8 @@
                     pemesanan_tanggal_penagihan.tanggal_penagihan,
                     pemesanan.total2,
                     pemesanan.ppn,
-                    pemesanan.tagihan
+                    pemesanan.tagihan,
+                    pemesanan.status
                 FROM
                     pemesanan
                 INNER JOIN datasuplier ON pemesanan.kode_suplier = datasuplier.kode_suplier
@@ -142,9 +168,30 @@
                     <th>TOTAL</th>
                     <th>PPN</th>
                     <th>TOTAL TAGIHAN</th>
+                    <th>STATUS BAYAR</th>
                 </tr>";
 
             while ($row = mysqli_fetch_assoc($result)) {
+                // Tentukan class status
+                $status_class = '';
+                switch (strtolower(trim($row['status']))) {
+                    case 'belum dibayar':
+                        $status_class = 'status-belumdibayar';
+                        break;
+                    case 'titip faktur':
+                        $status_class = 'status-titipfaktur';
+                        break;
+                    case 'belum lunas':
+                        $status_class = 'status-belumlunas';
+                        break;
+                    case 'sudah dibayar':
+                        $status_class = 'status-sudahdibayar';
+                        break;
+                }
+
+                // Cek apakah tanggal penagihan kosong
+                $penagihan_class = empty($row['tanggal_penagihan']) ? 'penagihan-kosong' : '';
+
                 echo "<tr>
                     <td>{$row['no_faktur']}</td>
                     <td>{$row['nama_suplier']}</td>
@@ -154,9 +201,7 @@
                     <td>
                         <form method='POST' style='margin:0; display:inline-block;'>
                             <input type='hidden' name='no_faktur' value='{$row['no_faktur']}'>
-                            <input type='date' name='tanggal_penagihan' value='{$row['tanggal_penagihan']}'>
-                            
-                            <!-- Tambahkan filter ke dalam hidden input -->
+                            <input type='date' name='tanggal_penagihan' class='$penagihan_class' value='{$row['tanggal_penagihan']}'>
                             <input type='hidden' name='tanggal_awal' value='{$tanggal_awal}'>
                             <input type='hidden' name='tanggal_akhir' value='{$tanggal_akhir}'>
                             <input type='hidden' name='tgl_pesan' value='{$tgl_pesan}'>
@@ -165,9 +210,10 @@
                             <input type='hidden' name='filter' value='1'>
                         </form>
                     </td>
-                        <td style='text-align: right;'>" . format_rupiah($row['total2']) . "</td>
-                        <td style='text-align: right;'>" . format_rupiah($row['ppn']) . "</td>
-                        <td style='text-align: right;'>" . format_rupiah($row['tagihan']) . "</td>
+                    <td style='text-align: right;'>" . format_rupiah($row['total2']) . "</td>
+                    <td style='text-align: right;'>" . format_rupiah($row['ppn']) . "</td>
+                    <td style='text-align: right;'>" . format_rupiah($row['tagihan']) . "</td>
+                    <td class='$status_class'>{$row['status']}</td>
                 </tr>";
             }
 
