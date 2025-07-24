@@ -73,6 +73,7 @@
                     pasien.nm_pasien, 
                     reg_periksa.kd_poli, 
                     bridging_sep.no_sep,
+                    bridging_sep.nmdpdjp, 
                     MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
                     rspsw_umbal.diajukan,
                     rspsw_umbal.disetujui
@@ -102,6 +103,7 @@
                     <th>DIAGNOSA</th>
                     <th>POLIKLINIK</th>
                     <th>NOMOR SEP</th>
+                    <th>NAMA DPJP</th>
                     <th>DIAJUKAN</th>
                     <th>DISETUJUI</th>
                 </tr>";
@@ -113,6 +115,7 @@
                         <td>{$row['kd_penyakit']}</td>
                         <td>{$row['kd_poli']}</td>
                         <td>{$row['no_sep']}</td>
+                        <td>{$row['nmdpdjp']}</td>
                         <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
                     </tr>";
