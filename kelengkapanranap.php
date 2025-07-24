@@ -74,6 +74,7 @@
                     reg_periksa.kd_poli, 
                     bridging_sep.no_sep,
                     MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
+                    rspsw_umbal.diajukan,
                     rspsw_umbal.disetujui
                 FROM 
                     reg_periksa 
@@ -101,6 +102,7 @@
                     <th>DIAGNOSA</th>
                     <th>POLIKLINIK</th>
                     <th>NOMOR SEP</th>
+                    <th>DIAJUKAN</th>
                     <th>DISETUJUI</th>
                 </tr>";
             while ($row = mysqli_fetch_assoc($result)) {
@@ -111,6 +113,7 @@
                         <td>{$row['kd_penyakit']}</td>
                         <td>{$row['kd_poli']}</td>
                         <td>{$row['no_sep']}</td>
+                        <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
                     </tr>";
             }
