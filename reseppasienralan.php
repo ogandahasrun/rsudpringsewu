@@ -91,7 +91,8 @@ $query = "SELECT
             resep_dokter.jml,
             databarang.kode_sat,
             resep_dokter.aturan_pakai,
-            dokter.nm_dokter
+            dokter.nm_dokter,
+            bridging_sep.no_sep
         FROM
             resep_obat
             INNER JOIN resep_dokter ON resep_dokter.no_resep = resep_obat.no_resep
@@ -99,6 +100,7 @@ $query = "SELECT
             INNER JOIN reg_periksa ON resep_obat.no_rawat = reg_periksa.no_rawat
             INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
             INNER JOIN dokter ON resep_obat.kd_dokter = dokter.kd_dokter
+            LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat
         WHERE
             resep_obat.`status` = 'ralan' AND
             resep_obat.tgl_perawatan BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
@@ -117,6 +119,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             'no_rkm_medis'  => $row['no_rkm_medis'],
             'nm_pasien'     => $row['nm_pasien'],
             'nm_dokter'     => $row['nm_dokter'],
+            'no_sep'        => $row['no_sep'],
             'obat'          => []
         ];
     }
@@ -140,6 +143,7 @@ if (count($data_grouped) > 0) {
                 <th>NO RM</th>
                 <th>NAMA PASIEN</th>
                 <th>DOKTER</th>
+                <th>NO SEP</th>
                 <th>KODE BARANG</th>
                 <th>NAMA BARANG</th>
                 <th>JUMLAH</th>
@@ -160,7 +164,8 @@ if (count($data_grouped) > 0) {
                     <td rowspan='$rowspan' style='vertical-align: top;'>{$data['no_rawat']}</td>
                     <td rowspan='$rowspan' style='vertical-align: top;'>{$data['no_rkm_medis']}</td>
                     <td rowspan='$rowspan' style='vertical-align: top;'>{$data['nm_pasien']}</td>
-                    <td rowspan='$rowspan' style='vertical-align: top;'>{$data['nm_dokter']}</td>";
+                    <td rowspan='$rowspan' style='vertical-align: top;'>{$data['nm_dokter']}</td>
+                    <td rowspan='$rowspan' style='vertical-align: top;'>{$data['no_sep']}</td>";
                 $first_row = false;
                 $no++;
             }
