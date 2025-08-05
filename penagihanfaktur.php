@@ -34,7 +34,6 @@
             font-size: 16px;
         }
 
-        /* STATUS color shadows */
         .status-belumdibayar {
             box-shadow: inset 0 0 10px red;
             background-color: #ffe5e5;
@@ -56,7 +55,6 @@
             font-weight: bold;
         }
 
-        /* Tanggal Penagihan kosong */
         .penagihan-kosong {
             box-shadow: inset 0 0 10px red;
             background-color: #ffecec;
@@ -88,12 +86,28 @@
 
     if (isset($_POST['simpan_tanggal'])) {
         $no_faktur = $_POST['no_faktur'];
-        $tanggal_penagihan = $_POST['tanggal_penagihan'];
+
+        // Cek dan ubah input tanggal jika kosong
+        $tanggal_penyerahan = !empty($_POST['tanggal_penyerahan']) ? "'".$_POST['tanggal_penyerahan']."'" : "NULL";
+        $tanggal_penagihan = !empty($_POST['tanggal_penagihan']) ? "'".$_POST['tanggal_penagihan']."'" : "NULL";
+
         $cek = mysqli_query($koneksi, "SELECT * FROM pemesanan_tanggal_penagihan WHERE no_faktur='$no_faktur'");
+
         if (mysqli_num_rows($cek) > 0) {
-            mysqli_query($koneksi, "UPDATE pemesanan_tanggal_penagihan SET tanggal_penagihan='$tanggal_penagihan' WHERE no_faktur='$no_faktur'");
+            mysqli_query($koneksi, "
+                UPDATE pemesanan_tanggal_penagihan 
+                SET 
+                    tanggal_penyerahan = $tanggal_penyerahan,
+                    tanggal_penagihan = $tanggal_penagihan
+                WHERE no_faktur = '$no_faktur'
+            ") or die("Update error: " . mysqli_error($koneksi));
         } else {
-            mysqli_query($koneksi, "INSERT INTO pemesanan_tanggal_penagihan (no_faktur, tanggal_penagihan) VALUES ('$no_faktur', '$tanggal_penagihan')");
+            mysqli_query($koneksi, "
+                INSERT INTO pemesanan_tanggal_penagihan 
+                    (no_faktur, tanggal_penyerahan, tanggal_penagihan) 
+                VALUES 
+                    ('$no_faktur', $tanggal_penyerahan, $tanggal_penagihan)
+            ") or die("Insert error: " . mysqli_error($koneksi));
         }
     }
 
@@ -103,7 +117,6 @@
     $perusahaan = $_POST['perusahaan'] ?? '';
     ?>
 
-    <!-- Filter Form -->
     <form method="POST">
         <label>Filter Tanggal Faktur:</label>
         <input type="date" name="tanggal_awal" value="<?= $tanggal_awal ?>">
@@ -123,13 +136,14 @@
         return 'Rp ' . number_format($angka, 0, ',', '.');
     }
 
-    if (isset($_POST['filter'])) {
+    if (isset($_POST['filter']) || isset($_POST['simpan_tanggal'])) {
         $query = "SELECT
                     pemesanan.no_faktur,
                     datasuplier.nama_suplier,
                     pemesanan.tgl_pesan,
                     pemesanan.tgl_faktur,
                     pemesanan.tgl_tempo,
+                    pemesanan_tanggal_penagihan.tanggal_penyerahan,
                     pemesanan_tanggal_penagihan.tanggal_penagihan,
                     pemesanan.total2,
                     pemesanan.ppn,
@@ -164,6 +178,7 @@
                     <th>TGL PESAN</th>
                     <th>TGL FAKTUR</th>
                     <th>TGL TEMPO</th>
+                    <th>TGL PENYERAHAN</th>
                     <th>TGL PENAGIHAN</th>
                     <th>TOTAL</th>
                     <th>PPN</th>
@@ -172,7 +187,6 @@
                 </tr>";
 
             while ($row = mysqli_fetch_assoc($result)) {
-                // Tentukan class status
                 $status_class = '';
                 switch (strtolower(trim($row['status']))) {
                     case 'belum dibayar':
@@ -189,8 +203,8 @@
                         break;
                 }
 
-                // Cek apakah tanggal penagihan kosong
                 $penagihan_class = empty($row['tanggal_penagihan']) ? 'penagihan-kosong' : '';
+                $penyerahan_class = empty($row['tanggal_penyerahan']) ? 'penagihan-kosong' : '';
 
                 echo "<tr>
                     <td>{$row['no_faktur']}</td>
@@ -201,6 +215,20 @@
                     <td>
                         <form method='POST' style='margin:0; display:inline-block;'>
                             <input type='hidden' name='no_faktur' value='{$row['no_faktur']}'>
+                            <input type='date' name='tanggal_penyerahan' class='$penyerahan_class' value='{$row['tanggal_penyerahan']}'>
+                            <input type='hidden' name='tanggal_penagihan' value='{$row['tanggal_penagihan']}'>
+                            <input type='hidden' name='tanggal_awal' value='{$tanggal_awal}'>
+                            <input type='hidden' name='tanggal_akhir' value='{$tanggal_akhir}'>
+                            <input type='hidden' name='tgl_pesan' value='{$tgl_pesan}'>
+                            <input type='hidden' name='perusahaan' value='{$perusahaan}'>
+                            <button type='submit' name='simpan_tanggal'>Simpan</button>
+                            <input type='hidden' name='filter' value='1'>
+                        </form>
+                    </td>
+                    <td>
+                        <form method='POST' style='margin:0; display:inline-block;'>
+                            <input type='hidden' name='no_faktur' value='{$row['no_faktur']}'>
+                            <input type='hidden' name='tanggal_penyerahan' value='{$row['tanggal_penyerahan']}'>
                             <input type='date' name='tanggal_penagihan' class='$penagihan_class' value='{$row['tanggal_penagihan']}'>
                             <input type='hidden' name='tanggal_awal' value='{$tanggal_awal}'>
                             <input type='hidden' name='tanggal_akhir' value='{$tanggal_akhir}'>
