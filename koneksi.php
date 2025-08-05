@@ -1,5 +1,5 @@
 <?php 
-$koneksi = mysqli_connect("192.168.1.88","backup","backup","sik");
+$koneksi = mysqli_connect("192.168.1.88","bpjsfktl","bpjsfktl","sik");
  
 // Check connection
 if (mysqli_connect_errno()){
