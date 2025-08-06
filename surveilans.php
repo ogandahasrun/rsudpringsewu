@@ -96,6 +96,7 @@
                 <option value="kontroltriaseigd.php">Kontrol Triase IGD</option>
                 <option value="kunjunganpasien.php">Kunjungan Pasien</option>
                 <option value="rl35kunjunganralan.php">RL 3.5 Kunjungan Rawat Jalan</option>
+                <option value="rl39radiologi.php">RL 3.9 Kegiatan Radiologi</option>
             </select>
             <button type="submit">Pilih</button>
         </form>

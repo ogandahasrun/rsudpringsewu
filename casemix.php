@@ -87,8 +87,7 @@
                 <option value="">Pilih Menu</option>
                 <option value="kelengkapanranap.php">Kelengkapan Berkas Rawat Inap</option>                
                 <option value="kelengkapanralan.php">Kelengkapan Berkas Rawat Jalan</option>
-                <option value="menu2.php">Menu 2</option>
-                <option value="menu2.php">Menu 2</option>
+                <option value="hapusgabungberkas.php">Hapus Gabung Berkas Klaim</option>
             </select>
             <button type="submit">Pilih</button>
         </form>
