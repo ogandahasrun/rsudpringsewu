@@ -102,7 +102,7 @@ include 'koneksi.php';
                     lec_umbal.nm_pasien,
                     lec_umbal.nm_dokter,
                     lec_umbal.diagnosa,
-                    lec_umbal.prosedur,
+                    lec_kelompok_prosedur.prosedur,
                     rspsw_umbal.diajukan,
                     rspsw_umbal.disetujui,
                     lec_umbal.status,
@@ -112,6 +112,7 @@ include 'koneksi.php';
                     LEFT JOIN rspsw_umbal ON lec_umbal.no_sep = rspsw_umbal.no_sep
                     INNER JOIN reg_periksa ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+                    LEFT JOIN lec_kelompok_prosedur ON lec_umbal.kd_prosedur = lec_kelompok_prosedur.kd_prosedur
                 WHERE
                     rspsw_umbal.bulanklaim = '$bulanklaim'";
 
