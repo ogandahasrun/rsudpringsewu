@@ -2,88 +2,77 @@
 session_start();
 include 'koneksi.php';
 
-// Cek session username, bukan nik
 if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit();
-}
-
-// Pindahkan logika redirect sebelum keluar HTML
-if (isset($_GET['menu'])) {
-    $menu = $_GET['menu'];
-    $allowed_menus = ['farmasi.php', 'keuangan.php', 'surveilans.php', 'casemix.php', 'laporandansurat.php'];
-    
-    if (in_array($menu, $allowed_menus)) {
-        header("Location: $menu");
-        exit();
-    } else {
-        // Kalau menu tidak dikenal, kembalikan ke index
-        header("Location: index.php");
-        exit();
-    }
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSUD PRINGSEWU</title>
-    <style>
-        /* Styling keren */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 500px;
-            margin: 80px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            margin-top: 20px;
-            text-align: center;
-        }
-        select, button {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        .logout {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: red;
-            text-decoration: none;
-        }
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            color: #777;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSUD PRINGSEWU</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 700px;
+        margin: 80px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    h1 {
+        color: #333;
+    }
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+    .menu-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #f9f9f9;
+        border-radius: 10px;
+        padding: 15px;
+        text-decoration: none;
+        color: #333;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .menu-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .menu-item img {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+    }
+    .logout {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: red;
+        text-decoration: none;
+    }
+    footer {
+        margin-top: 40px;
+        text-align: center;
+        color: #777;
+    }
+</style>
 </head>
 <body>
 
@@ -93,17 +82,30 @@ if (isset($_GET['menu'])) {
 
 <div class="container">
     <h1>RSUD PRINGSEWU</h1>
-    <form method="get">
-        <select name="menu" required>
-            <option value="">Pilih Menu</option>
-            <option value="farmasi.php">Farmasi</option>
-            <option value="keuangan.php">Keuangan</option>
-            <option value="surveilans.php">Surveilans</option>
-            <option value="casemix.php">Casemix</option>
-            <option value="laporandansurat.php">Laporan dan Surat</option>
-        </select>
-        <button type="submit">Pilih Menu</button>
-    </form>
+
+    <div class="menu-grid">
+        <a href="farmasi.php" class="menu-item">
+            <img src="images/farmasi.png" alt="Farmasi">
+            <span>Farmasi</span>
+        </a>
+        <a href="keuangan.php" class="menu-item">
+            <img src="images/keuangan.png" alt="Keuangan">
+            <span>Keuangan</span>
+        </a>
+        <a href="surveilans.php" class="menu-item">
+            <img src="images/surveilans.png" alt="Surveilans">
+            <span>Surveilans</span>
+        </a>
+        <a href="casemix.php" class="menu-item">
+            <img src="images/casemix.png" alt="Casemix">
+            <span>Casemix</span>
+        </a>
+        <a href="laporandansurat.php" class="menu-item">
+            <img src="images/laporan.png" alt="Laporan dan Surat">
+            <span>Laporan & Surat</span>
+        </a>
+    </div>
+
     <a href="logout.php" class="logout">Logout</a>
 </div>
 
