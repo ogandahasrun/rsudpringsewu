@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="container">
+        <div class="page-break">
         <?php include 'header.php'; ?>
 
         <div class="search-form">
@@ -407,6 +408,73 @@
 </html>
 
 <!------------------------------ BATAS HALAMAN 4  ------------------------------->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 4a</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Ke6 -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <h4 class="center-text">BERITA ACAHAR KESEPAKATAN HARGA</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BAKH/
+                <?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+
+            <table class="no-border-table">        
+                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+            </table>            
+
+            <table class="no-border-table">
+                <tr><td>Pejabat Pengadaan Rumah Sakit Umum (RSUD) Pringsewu telah melaksanakan kesepakatan dengan 
+                    <?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?> 
+                    untuk paket pekerjaan Belanja Bahan Alat Habis Pakai (BAHP) Rumah Sakit Dengan hasil sebagai berikut :</td></tr>
+            </table>
+
+            <!-- Tabel Detail Barang -->
+            <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Nomor</th>
+                    <th>Nama Barang</th>
+                    <th>Jumlah</th>
+                    <th>Satuan</th>
+                    <th class="currency" style="text-align: center;">Harga</th>
+                    <th class="currency" style="text-align: center;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php include 'table_body_gabungan.php'; ?>
+            </tbody>
+            </table>
+
+
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Menerima dan menyetujui</td><td></td><td></td></tr>
+                <tr><td></td><td>Penyedia barang</td><td></td><td>Pejabat Pengadaan Barang dan Jasa</td></tr>
+                <tr><td><br></td><td></td><td></td><td></td></tr>
+                <tr><td><br></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u><?php echo isset($datasuplier['direktur']) ? $datasuplier['direktur'] : ''; ?></u></strong></td><td></td><td><strong><u>WISNETTY, S.Si., Apt., M. Kes</u></strong></td></tr>
+                <tr><td></td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td><td></td><td>NIP. 19701020 200002 2002</td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+<!------------------------------ BATAS HALAMAN 4a  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">

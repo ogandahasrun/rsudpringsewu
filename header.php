@@ -5,7 +5,7 @@
     <!-- Konten -->
     <div class="header-content">
         <h1>PEMERINTAH KABUPATEN PRINGSEWU</h1>
-        <h1><strong>RSUD PRINGSEWU</strong></h1>
+        <h1><strong>RUMAH SAKIT UMUM DAERAH PRINGSEWU</strong></h1>
         <p>Jl. Lintas Barat Pekon Fajar Agung Barat, Kec. Pringsewu, Kode Pos 35373</p>
         <p>Phone: (0729) 23582 | Email: rsud@pringsewukab.go.id | Website: rsud.pringsewukab.go.id</p>
     </div>
