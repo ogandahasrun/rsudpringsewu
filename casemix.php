@@ -1,109 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Casemix</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        a {
-            display: block;
-            text-align: center;
-            }
-        img {
-            margin: 20px auto 0; /* Mengatur margin atas dan bawah ke 0 dan margin samping secara otomatis */
-            }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
         }
+        a {
+            text-decoration: none;
+        }
+        .logo-link {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
         .container {
             max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
+            margin: 40px auto 60px auto;
+            padding: 22px;
             background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
         }
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 28px;
+            letter-spacing: 1px;
         }
-        form {
+        .icon-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 24px;
+            margin-top: 10px;
+        }
+        .icon-menu a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 22px 8px 16px 8px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+            font-size: 15px;
+            min-height: 120px;
+        }
+        .icon-menu a:hover {
+            background: #e3f2fd;
+            box-shadow: 0 4px 16px rgba(0,123,255,0.08);
+            color: #0056b3;
+        }
+        .icon-menu i {
+            font-size: 2.2em;
+            margin-bottom: 12px;
+            color: #007bff;
+            transition: color 0.2s;
+        }
+        .icon-menu a:hover i {
+            color: #0056b3;
+        }
+        .icon-menu span {
+            margin-top: 2px;
+            font-size: 1em;
+            color: #333;
             text-align: center;
+            word-break: break-word;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
-        }
-        select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-
         footer {
-        text-align: center;
-        padding: 20px 0;
-        background-color: #333;
-        color: #fff;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-    }
-        
+            text-align: center;
+            padding: 18px 0;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .icon-menu {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .icon-menu a {
+                padding: 14px 4px 10px 4px;
+                min-height: 90px;
+            }
+        }
     </style>
 </head>
 <body>
-<a href="index.php">
-    <img src="images/logo.png" alt="Logo" width="80" height="100">
-</a>
+    <a href="index.php" class="logo-link">
+        <img src="images/logo.png" alt="Logo" width="80" height="100">
+    </a>
     <div class="container">
         <h1>RSUD PRINGSEWU</h1>
-        <form method="get">
-            <label for="menu">Pilih Menu Casemix :</label>
-            <select name="menu" id="menu">
-                <option value="">Pilih Menu</option>
-                <option value="kelengkapanranap.php">Kelengkapan Berkas Rawat Inap</option>                
-                <option value="kelengkapanralan.php">Kelengkapan Berkas Rawat Jalan</option>
-                <option value="hapusgabungberkas.php">Hapus Gabung Berkas Klaim</option>
-            </select>
-            <button type="submit">Pilih</button>
-        </form>
+        <div class="icon-menu">
+            <a href="kelengkapanranap.php" title="Kelengkapan Berkas Rawat Inap">
+                <i class="fas fa-bed"></i>
+                <span>Kelengkapan Berkas Rawat Inap</span>
+            </a>
+            <a href="kelengkapanralan.php" title="Kelengkapan Berkas Rawat Jalan">
+                <i class="fas fa-user-check"></i>
+                <span>Kelengkapan Berkas Rawat Jalan</span>
+            </a>
+            <a href="hapusgabungberkas.php" title="Hapus Gabung Berkas Klaim">
+                <i class="fas fa-file-excel"></i>
+                <span>Hapus Gabung Berkas Klaim</span>
+            </a>
+        </div>
     </div>
-
-    <?php
-    if(isset($_GET['menu'])) {
-        $menu = $_GET['menu'];
-        if(!empty($menu)) {
-            header("Location: $menu");
-            exit();
-        }
-    }
-    ?>
-
     <footer>by IT rsudpringsewu</footer>
-
 </body>
 </html>

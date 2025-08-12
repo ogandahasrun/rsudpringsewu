@@ -1,118 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Surveilans</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        a {
-            display: block;
-            text-align: center;
-            }
-        img {
-            margin: 20px auto 0; /* Mengatur margin atas dan bawah ke 0 dan margin samping secara otomatis */
-            }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
         }
+        a {
+            text-decoration: none;
+        }
+        .logo-link {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
         .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
+            max-width: 700px;
+            margin: 40px auto 60px auto;
+            padding: 22px;
             background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
         }
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 28px;
+            letter-spacing: 1px;
         }
-        form {
+        .icon-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 22px;
+            margin-top: 10px;
+        }
+        .icon-menu a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 22px 8px 16px 8px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+            font-size: 15px;
+            min-height: 120px;
+        }
+        .icon-menu a:hover {
+            background: #e3f2fd;
+            box-shadow: 0 4px 16px rgba(0,123,255,0.08);
+            color: #0056b3;
+        }
+        .icon-menu i {
+            font-size: 2.2em;
+            margin-bottom: 12px;
+            color: #007bff;
+            transition: color 0.2s;
+        }
+        .icon-menu a:hover i {
+            color: #0056b3;
+        }
+        .icon-menu span {
+            margin-top: 2px;
+            font-size: 1em;
+            color: #333;
             text-align: center;
+            word-break: break-word;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
-        }
-        select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-
         footer {
-        text-align: center;
-        padding: 20px 0;
-        background-color: #333;
-        color: #fff;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-    }
-        
+            text-align: center;
+            padding: 18px 0;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .icon-menu {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .icon-menu a {
+                padding: 14px 4px 10px 4px;
+                min-height: 90px;
+            }
+        }
     </style>
 </head>
 <body>
-<a href="index.php">
-    <img src="images/logo.png" alt="Logo" width="80" height="100">
-</a>
+    <a href="index.php" class="logo-link">
+        <img src="images/logo.png" alt="Logo" width="80" height="100">
+    </a>
     <div class="container">
         <h1>RSUD PRINGSEWU</h1>
-        <form method="get">
-            <label for="menu">Pilih Menu Surveilans:</label>
-            <select name="menu" id="menu">
-                <option value="">Pilih Menu</option>
-                <option value="borperkamar.php">BOR per Kamar</option>
-                <option value="penyakit.php">Laporan Penyakit</option>
-                <option value="datapasienranap.php">Data Pasien Ranap non IGD dan Ponek</option>
-                <option value="hasillab.php">Hasil Lab</option>
-                <option value="penyakitkematian.php">Diagnosa Penyebab Kematian</option>
-                <option value="laporanigd.php">Laporan IGD</option>                
-                <option value="diagnosaralan.php">Diagnosa Pasien Rawat Jalan</option>
-                <option value="triaseigd.php">Data Triase IGD</option>
-                <option value="kontroltriaseigd.php">Kontrol Triase IGD</option>
-                <option value="kunjunganpasien.php">Kunjungan Pasien</option>
-                <option value="rl35kunjunganralan.php">RL 3.5 Kunjungan Rawat Jalan</option>
-                <option value="rl39radiologi.php">RL 3.9 Kegiatan Radiologi</option>
-            </select>
-            <button type="submit">Pilih</button>
-        </form>
+        <div class="icon-menu">
+            <a href="borperkamar.php" title="BOR per Kamar">
+                <i class="fas fa-bed"></i>
+                <span>BOR per Kamar</span>
+            </a>
+            <a href="penyakit.php" title="Laporan Penyakit">
+                <i class="fas fa-virus"></i>
+                <span>Laporan Penyakit</span>
+            </a>
+            <a href="datapasienranap.php" title="Data Pasien Ranap non IGD dan Ponek">
+                <i class="fas fa-users"></i>
+                <span>Data Pasien Ranap</span>
+            </a>
+            <a href="hasillab.php" title="Hasil Lab">
+                <i class="fas fa-vial"></i>
+                <span>Hasil Lab</span>
+            </a>
+            <a href="penyakitkematian.php" title="Diagnosa Penyebab Kematian">
+                <i class="fas fa-heart-broken"></i>
+                <span>Diagnosa Kematian</span>
+            </a>
+            <a href="laporanigd.php" title="Laporan IGD">
+                <i class="fas fa-ambulance"></i>
+                <span>Laporan IGD</span>
+            </a>
+            <a href="diagnosaralan.php" title="Diagnosa Pasien Rawat Jalan">
+                <i class="fas fa-user-md"></i>
+                <span>Diagnosa Ralan</span>
+            </a>
+            <a href="triaseigd.php" title="Data Triase IGD">
+                <i class="fas fa-notes-medical"></i>
+                <span>Data Triase IGD</span>
+            </a>
+            <a href="kontroltriaseigd.php" title="Kontrol Triase IGD">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Kontrol Triase IGD</span>
+            </a>
+            <a href="kunjunganpasien.php" title="Kunjungan Pasien">
+                <i class="fas fa-user-friends"></i>
+                <span>Kunjungan Pasien</span>
+            </a>
+            <a href="rl35kunjunganralan.php" title="RL 3.5 Kunjungan Rawat Jalan">
+                <i class="fas fa-chart-bar"></i>
+                <span>RL 3.5 Kunjungan Ralan</span>
+            </a>
+            <a href="rl39radiologi.php" title="RL 3.9 Kegiatan Radiologi">
+                <i class="fas fa-x-ray"></i>
+                <span>RL 3.9 Radiologi</span>
+            </a>
+        </div>
     </div>
-
-    <?php
-    if(isset($_GET['menu'])) {
-        $menu = $_GET['menu'];
-        if(!empty($menu)) {
-            header("Location: $menu");
-            exit();
-        }
-    }
-    ?>
-
     <footer>by IT rsudpringsewu</footer>
-
 </body>
 </html>
