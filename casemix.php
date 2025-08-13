@@ -117,6 +117,12 @@
                 <i class="fas fa-user-check"></i>
                 <span>Kelengkapan Berkas Rawat Jalan</span>
             </a>
+
+            <a href="kontrolsepganda.php" title="Kontrol SEP Ganda">
+                <i class="fas fa-clone"></i>
+                <span>Kontrol SEP Ganda</span>
+            </a>
+
             <a href="hapusgabungberkas.php" title="Hapus Gabung Berkas Klaim">
                 <i class="fas fa-file-excel"></i>
                 <span>Hapus Gabung Berkas Klaim</span>
