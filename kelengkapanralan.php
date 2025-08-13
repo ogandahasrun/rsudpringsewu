@@ -71,6 +71,7 @@
                     reg_periksa.no_rawat, 
                     pasien.no_rkm_medis, 
                     pasien.nm_pasien, 
+                    pasien.no_peserta,
                     bridging_sep.no_sep, 
                     bridging_sep.nmdpdjp, 
                     MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
@@ -99,8 +100,9 @@
                     <th>NOMOR RAWAT</th>
                     <th>NOMOR REKAM MEDIS</th>
                     <th>NAMA PASIEN</th>
-                    <th>DIAGNOSA</th>
+                    <th>NOMOR PESERTA</th>
                     <th>NOMOR SEP</th>
+                    <th>DIAGNOSA</th>                    
                     <th>NAMA DPJP</th>
                     <th>DIAJUKAN</th>
                     <th>DISETUJUI</th>
@@ -110,8 +112,9 @@
                         <td>{$row['no_rawat']}</td>
                         <td>{$row['no_rkm_medis']}</td>
                         <td>{$row['nm_pasien']}</td>
-                        <td>{$row['kd_penyakit']}</td>
+                        <td>{$row['no_peserta']}</td>
                         <td>{$row['no_sep']}</td>
+                        <td>{$row['kd_penyakit']}</td>                        
                         <td>{$row['nmdpdjp']}</td>
                         <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
