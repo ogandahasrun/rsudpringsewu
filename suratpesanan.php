@@ -13,7 +13,7 @@
             <img src="images/logo.png" alt="Logo RSUD Pringsewu" class="logo">
             <!-- Konten -->
             <div class="header-content">
-                <h1><strong>RUMAH SAKIT UMUM DAERAH PRINGSEWU</strong></h1>
+                <h1><strong>RUMAH SAKIT AZIZAH</strong></h1>
                 <p>Jl. Hanafiah No.64, Imopuro, Kec. Metro Pusat, Kota Metro, Lampung Kode pos 34111</p>
                 <p>Phone: (0725) 7852222 | Email: rumahsakitazizah@gmail.com | Website: www.rsazizahmetro.com</p>
             </div>
