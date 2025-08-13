@@ -153,6 +153,10 @@
                 <i class="fas fa-chart-bar"></i>
                 <span>RL 3.5 Kunjungan Ralan</span>
             </a>
+            <a href="rl38laboratorium.php" title="RL 3.8 Kegiatan Laboratorium">
+                <i class="fas fa-microscope"></i>
+                <span>RL 3.8 Kegiatan Laboratorium</span>
+            </a>
             <a href="rl39radiologi.php" title="RL 3.9 Kegiatan Radiologi">
                 <i class="fas fa-x-ray"></i>
                 <span>RL 3.9 Radiologi</span>
