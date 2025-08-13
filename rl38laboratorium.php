@@ -24,6 +24,23 @@ $query = "
 ";
 
 $result = mysqli_query($koneksi, $query);
+
+$query_pa = "
+    SELECT 
+        jns_perawatan_lab.nm_perawatan,
+        SUM(CASE WHEN pasien.jk = 'L' THEN 1 ELSE 0 END) AS L,
+        SUM(CASE WHEN pasien.jk = 'P' THEN 1 ELSE 0 END) AS P,
+        COUNT(*) AS Jumlah
+    FROM detail_periksa_labpa
+    INNER JOIN reg_periksa ON detail_periksa_labpa.no_rawat = reg_periksa.no_rawat
+    INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+    INNER JOIN jns_perawatan_lab ON detail_periksa_labpa.kd_jenis_prw = jns_perawatan_lab.kd_jenis_prw
+    WHERE detail_periksa_labpa.tgl_periksa BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+    GROUP BY jns_perawatan_lab.nm_perawatan
+    ORDER BY jns_perawatan_lab.nm_perawatan
+";
+$result_pa = mysqli_query($koneksi, $query_pa);
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -56,6 +73,8 @@ $result = mysqli_query($koneksi, $query);
     <input type="date" name="tanggal_akhir" value="<?php echo htmlspecialchars($tanggal_akhir); ?>" required>
     <button type="submit" name="filter">Filter</button>
 </form>
+
+<h2 style="color:#4CAF50;text-align:center;">Rekapitulasi Patologi Klinik</h2>
 
 <?php
 if ($result && mysqli_num_rows($result) > 0) {
@@ -108,6 +127,59 @@ if ($result && mysqli_num_rows($result) > 0) {
     echo "</table>";
 } else {
     echo "<div class='no-data'>Tidak ada data untuk periode ini.</div>";
+}
+?>
+
+<br><br>
+<h2 style="color:#4CAF50;text-align:center;">Rekapitulasi Patologi Anatomi</h2>
+<?php
+if ($result_pa && mysqli_num_rows($result_pa) > 0) {
+    // Variabel total keseluruhan PA
+    $total_L_pa = 0;
+    $total_P_pa = 0;
+    $total_jumlah_pa = 0;
+
+    echo "<table>";
+    echo "<thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Pemeriksaan</th>
+                <th>L</th>
+                <th>P</th>
+                <th>Jumlah</th>
+            </tr>
+          </thead>
+          <tbody>";
+
+    $no_pa = 1;
+    while ($row_pa = mysqli_fetch_assoc($result_pa)) {
+        echo "<tr>
+                <td>{$no_pa}</td>
+                <td>" . htmlspecialchars($row_pa['nm_perawatan']) . "</td>
+                <td>{$row_pa['L']}</td>
+                <td>{$row_pa['P']}</td>
+                <td>{$row_pa['Jumlah']}</td>
+            </tr>";
+
+        $total_L_pa += $row_pa['L'];
+        $total_P_pa += $row_pa['P'];
+        $total_jumlah_pa += $row_pa['Jumlah'];
+
+        $no_pa++;
+    }
+
+    echo "</tbody>";
+    echo "<tfoot>
+            <tr>
+                <td colspan='2'>TOTAL</td>
+                <td>{$total_L_pa}</td>
+                <td>{$total_P_pa}</td>
+                <td>{$total_jumlah_pa}</td>
+            </tr>
+          </tfoot>";
+    echo "</table>";
+} else {
+    echo "<div class='no-data'>Tidak ada data Patologi Anatomi untuk periode ini.</div>";
 }
 ?>
 
