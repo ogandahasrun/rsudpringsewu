@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ e-katalog</title>
+    <title>Surat Pesanan</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -75,14 +75,15 @@
 
                     echo "<table border='1' cellpadding='6' cellspacing='0' style='width:100%;margin-top:12px;'>";
                     echo "<tr>
-                            <th>Kode Barang</th>
+                            <th>No</th>
                             <th>Nama Barang</th>
                             <th>Jumlah</th>
                             <th>Satuan</th>
                         </tr>";
+                    $no = 1;
                     while ($row = mysqli_fetch_assoc($result)) {
                         echo "<tr>
-                                <td>" . htmlspecialchars($row['kode_brng']) . "</td>
+                                <td>" . $no++ . "</td>
                                 <td>" . htmlspecialchars($row['nama_brng']) . "</td>
                                 <td>" . htmlspecialchars($row['jumlah']) . "</td>
                                 <td>" . htmlspecialchars($row['kode_sat']) . "</td>
@@ -95,7 +96,7 @@
             }
             ?>
 
-            <div class="signature" style="text-align: center; margin-top:40px;">
+            <div class="signature">
                 <p>Metro, ...........................</p>
                 <p>Hormat kami,</p>
                 <br>
