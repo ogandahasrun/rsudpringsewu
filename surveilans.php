@@ -161,6 +161,10 @@
                 <i class="fas fa-x-ray"></i>
                 <span>RL 3.9 Radiologi</span>
             </a>
+            <a href="rl318farmasiresep.php" title="RL 3.18 Resep Farmasi">
+                <i class="fas fa-pills"></i>
+                <span>RL 3.18 Resep Farmasi</span>
+            </a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
