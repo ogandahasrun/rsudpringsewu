@@ -121,6 +121,10 @@
                 <i class="fas fa-users"></i>
                 <span>Data Pasien Ranap</span>
             </a>
+            <a href="kontroldpjp.php" title="Kontrol DPJP Pasien Ranap">
+                <i class="fas fa-users"></i>
+                <span>Kontrol DPJP Pasien Ranap</span>
+            </a>
             <a href="hasillab.php" title="Hasil Lab">
                 <i class="fas fa-vial"></i>
                 <span>Hasil Lab</span>
