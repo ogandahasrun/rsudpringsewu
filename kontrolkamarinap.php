@@ -97,37 +97,46 @@
             }
 
             echo '<button class="copy-button" onclick="copyTableData()">Copy Tabel</button>';
-            echo "<table>
-                <tr>
-                    <th>NOMOR RAWAT</th>
-                    <th>NOMOR REKAM MEDIS</th>
-                    <th>NAMA PASIEN</th>
-                    <th>TANGGAL MASUK</th>
-                    <th>JAM MASUK</th>
-                    <th>NAMA BANGSAL</th>
-                    <th>KAMAR / BED</th>
-                    <th>STATUS</th>
-                </tr>";
+echo "<table>
+    <tr>
+        <th>No</th>
+        <th>NOMOR RAWAT</th>
+        <th>NOMOR REKAM MEDIS</th>
+        <th>NAMA PASIEN</th>
+        <th>TANGGAL MASUK</th>
+        <th>JAM MASUK</th>
+        <th>NAMA BANGSAL</th>
+        <th>KAMAR / BED</th>
+        <th>STATUS</th>
+    </tr>";
 
-            foreach ($data as $row) {
-                // Cek kondisi warning
-                $class = "";
-                if ($kamar_count[$row['kd_kamar']] > 1 || strtoupper($row['status']) == "KOSONG") {
-                    $class = "warning";
-                }
+$no = 1;
+foreach ($data as $row) {
+    // Cek kondisi warning
+    $class = "";
+    if ($kamar_count[$row['kd_kamar']] > 1 || strtoupper($row['status']) == "KOSONG") {
+        $class = "warning";
+    }
 
-                echo "<tr class='{$class}'>
-                        <td>{$row['no_rawat']}</td>
-                        <td>{$row['no_rkm_medis']}</td>
-                        <td>{$row['nm_pasien']}</td>
-                        <td>{$row['tgl_masuk']}</td>
-                        <td>{$row['jam_masuk']}</td>
-                        <td>{$row['nm_bangsal']}</td>
-                        <td>{$row['kd_kamar']}</td>
-                        <td>{$row['status']}</td>
-                    </tr>";
-            }
-            echo "</table>";
+    echo "<tr class='{$class}'>
+            <td>{$no}</td>
+            <td>{$row['no_rawat']}</td>
+            <td>{$row['no_rkm_medis']}</td>
+            <td>{$row['nm_pasien']}</td>
+            <td>{$row['tgl_masuk']}</td>
+            <td>{$row['jam_masuk']}</td>
+            <td>{$row['nm_bangsal']}</td>
+            <td>{$row['kd_kamar']}</td>
+            <td>{$row['status']}</td>
+        </tr>";
+    $no++;
+}
+// Baris jumlah data
+$total_data = count($data);
+echo "<tr>
+        <td colspan='9' style='text-align:right;font-weight:bold;'>Jumlah Data: {$total_data}</td>
+      </tr>";
+echo "</table>";
         }
         mysqli_close($koneksi);
     ?>

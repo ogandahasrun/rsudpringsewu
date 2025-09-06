@@ -117,9 +117,9 @@
                 <i class="fas fa-virus"></i>
                 <span>Laporan Penyakit</span>
             </a>
-            <a href="datapasienranap.php" title="Data Pasien Ranap non IGD dan Ponek">
+            <a href="kontrolkamarinap.php" title="Kontrol Kamar Inap">
                 <i class="fas fa-users"></i>
-                <span>Data Pasien Ranap</span>
+                <span>Kontrol Kamar Inap</span>
             </a>
             <a href="kontroldpjp.php" title="Kontrol DPJP Pasien Ranap">
                 <i class="fas fa-users"></i>
