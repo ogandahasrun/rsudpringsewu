@@ -246,7 +246,7 @@ td {
         background-color: black;
     }
 
-    /* ===== Nomor Halaman Otomatis ===== */
+    /* ===== Nomor Halaman Otomatis ===== 
     body {
         counter-reset: page;
     }
@@ -258,5 +258,5 @@ td {
         bottom: 20px;
         font-size: 12px;
         color: #333;
-    }
+    } */
 }

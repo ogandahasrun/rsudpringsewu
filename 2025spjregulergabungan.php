@@ -425,7 +425,7 @@
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
 
-            <h4 class="center-text">BERITA ACAHAR KESEPAKATAN HARGA</h4>
+            <h4 class="center-text">BERITA ACARA KESEPAKATAN HARGA</h4>
             <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BAKH/
                 <?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
@@ -1055,7 +1055,7 @@
 
             <table class="no-border-table">        
                 <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Yang bertanda tangan di bawah ini </td><td>:</td></tr>
-                <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nama</td><td>: dr. Aris Mulato, SKM</td></tr>
+                <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nama</td><td>: Aris Mulato, SKM</td></tr>
                 <tr><td></td><td>NIP</td><td>: 197603082014071003</td></tr>
                 <tr><td></td><td>Jabatan</td><td>: Pengurus Barang Pembantu</td></tr>
                 <tr><td></td><td></td><td>&nbsp;&nbsp;yang Selanjutnya disebut sebagai Pengurus Barang I ;</td></tr>
@@ -1095,11 +1095,11 @@
 <?php echo "Demikian Berita Serah Terima ini dibuat dengan sebenarnya dalam rangkap 5 (Lima) untuk dipergunakan sebagaimana mestinya."; ?>
 
             <table class="no-border-table" style="text-align: center;">
-                <tr><td></td><td style="text-align: center;">Pejabat Pelaksana Teknis Kegiatan</td><td></td><td style="text-align: center;">Pejabat Pembuat Komitmen</td></tr>
+                <tr><td></td><td style="text-align: center;">Kepala Instalasi Farmasi</td><td></td><td style="text-align: center;">Pengurus Barang Pembantu</td></tr>
                 <tr><td><br></td><td></td><td></td><td></td></tr>
                 <tr><td><br></td><td></td><td></td><td></td></tr>
-                <tr><td></td><td style="text-align: center;"><strong><u>dr. Triyani Rositasari</u></strong></td><td></td><td style="text-align: center;"><strong><u>dr. ANDI ARMAN, Sp.PD</u></strong></td></tr>
-                <tr><td></td><td style="text-align: center;">NIP. 19830619 201101 2 005</td><td></td><td style="text-align: center;">NIP. 19780801 200501 1 009</td></tr>
+                <tr><td></td><td style="text-align: center;"><strong><u>Wisnetty, S.Si., Apt., M. Kes</u></strong></td><td></td><td style="text-align: center;"><strong><u>Aris Mulato, SKM</u></strong></td></tr>
+                <tr><td></td><td style="text-align: center;">NIP. 19701020 200003 2 002</td><td></td><td style="text-align: center;">NIP. 19760308 201407 1 003</td></tr>
             </table>
         </div>
     </div>

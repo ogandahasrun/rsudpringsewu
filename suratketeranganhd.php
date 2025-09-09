@@ -103,7 +103,7 @@
             </table>
 
             <table class="no-border-table">
-                <tr><td>Demikian Surat Keterangan ini dibuar dengan sebenarnya, agar dapat dipergunakan sebagaimana mestinya</td></tr>
+                <tr><td>Demikian Surat Keterangan ini dibuat dengan sebenarnya, agar dapat dipergunakan sebagaimana mestinya</td></tr>
             </table>
 
             <div class="signature">
