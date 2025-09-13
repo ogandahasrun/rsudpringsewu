@@ -97,6 +97,7 @@
             echo '<button class="copy-button" onclick="copyTableData()">Copy Tabel</button>';
             echo "<table>
                 <tr>
+                    <th>No</th>
                     <th>NOMOR RAWAT</th>
                     <th>NOMOR REKAM MEDIS</th>
                     <th>NAMA PASIEN</th>
@@ -107,8 +108,14 @@
                     <th>DIAJUKAN</th>
                     <th>DISETUJUI</th>
                 </tr>";
+            $no = 1;
+            $total_diajukan = 0;
+            $total_disetujui = 0;
             while ($row = mysqli_fetch_assoc($result)) {
+                $total_diajukan += intval($row['diajukan']);
+                $total_disetujui += intval($row['disetujui']);
                 echo "<tr>
+                        <td>{$no}</td>
                         <td>{$row['no_rawat']}</td>
                         <td>{$row['no_rkm_medis']}</td>
                         <td>{$row['nm_pasien']}</td>
@@ -119,7 +126,14 @@
                         <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
                     </tr>";
+                $no++;    
             }
+            echo "<tr>
+                    <td colspan='8' style='text-align:right;font-weight:bold;'>Jumlah</td>
+                    <td style='font-weight:bold;'>{$total_diajukan}</td>
+                    <td style='font-weight:bold;'>{$total_disetujui}</td>
+                </tr>";
+
             echo "</table>";
         }
         mysqli_close($koneksi);
