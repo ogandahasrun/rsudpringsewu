@@ -57,7 +57,7 @@
         <h1>Laporan Kunjungan Pasien</h1>
     </header>
     <div class="back-button">
-        <a href="laporandansurat.php">Kembali ke Menu Laporan</a>
+        <a href="surveilans.php">Kembali ke Menu Surveilans</a>
     </div>
 
     <?php

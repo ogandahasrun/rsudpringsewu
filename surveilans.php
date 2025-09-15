@@ -129,6 +129,10 @@
                 <i class="fas fa-vial"></i>
                 <span>Hasil Lab</span>
             </a>
+            <a href="laporankunjunganpasien.php" title="Laporan Kunjungan Pasien">
+                <i class="fas fa-user-friends"></i>
+                <span>Laporan Kunjungan Pasien</span>
+            </a>
             <a href="penyakitkematian.php" title="Diagnosa Penyebab Kematian">
                 <i class="fas fa-heart-broken"></i>
                 <span>Diagnosa Kematian</span>
