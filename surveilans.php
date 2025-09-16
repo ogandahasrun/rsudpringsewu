@@ -1,3 +1,21 @@
+<?php
+include 'koneksi.php';
+$query_instansi = "SELECT nama_instansi, logo FROM setting LIMIT 1";
+$result_instansi = mysqli_query($koneksi, $query_instansi);
+$nama_instansi = "RSUD PRINGSEWU";
+$logo_src = "images/logo.png"; // default jika tidak ada di database
+
+if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
+    $nama_instansi = $row_instansi['nama_instansi'];
+    if (!empty($row_instansi['logo'])) {
+        // Konversi BLOB ke base64
+        $logo_blob = $row_instansi['logo'];
+        $logo_base64 = base64_encode($logo_blob);
+        $logo_src = "data:image/png;base64," . $logo_base64;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -104,10 +122,10 @@
 </head>
 <body>
     <a href="index.php" class="logo-link">
-        <img src="images/logo.png" alt="Logo" width="80" height="100">
+        <img src="<?php echo $logo_src; ?>" alt="Logo" width="80" height="100">
     </a>
     <div class="container">
-        <h1>RSUD PRINGSEWU</h1>
+        <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
         <div class="icon-menu">
             <a href="borperkamar.php" title="BOR per Kamar">
                 <i class="fas fa-bed"></i>
