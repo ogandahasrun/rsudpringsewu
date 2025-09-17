@@ -133,6 +133,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="riwayatdri.php" title="Riwayat Barang Depo Rawat Inap"><i class="fas fa-procedures"></i><span>Riwayat Depo Inap</span></a>
             <a href="riwayatgo.php" title="Riwayat Barang Gudang"><i class="fas fa-warehouse"></i><span>Riwayat Gudang</span></a>
             <a href="mutasibarangmedis.php" title="Mutasi Barang Medis"><i class="fas fa-exchange-alt"></i><span>Mutasi Medis</span></a>
+            <a href="suratpesanan.php" title="Surat Pesanan Barang Medis"><i class="fas fa-box-open"></i><span>Surat Pesanan Barang Medis</span></a>
             <a href="stok_gudang.php" title="Stok Lokasi Gudang Barang"><i class="fas fa-boxes"></i><span>Stok Gudang</span></a>
             <a href="stokpertanggal.php" title="Stok per Tanggal"><i class="fas fa-clinic-medical"></i><span>Stok per Tanggal</span></a>
             <a href="stok_depo_rawat_inap.php" title="Stok Lokasi Depo Rawat Inap"><i class="fas fa-hospital-user"></i><span>Stok Depo RI</span></a>
