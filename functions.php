@@ -1,6 +1,6 @@
 <?php
 function terbilang($angka) {
-    $angka = ceil(abs($angka)); // pembulatan ke atas
+    $angka = round(abs($angka)); // pembulatan ke atas
     $bilangan = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
     $terbilang = "";
 
