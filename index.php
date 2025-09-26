@@ -100,6 +100,10 @@ if (!isset($_SESSION['username'])) {
             <img src="images/casemix.png" alt="Casemix">
             <span>Casemix</span>
         </a>
+        <a href="dashboard.php" class="menu-item">
+            <img src="images/dashboard.png" alt="Dashboard">
+            <span>Dashboard</span>
+        </a>
         <a href="laporandansurat.php" class="menu-item">
             <img src="images/laporan.png" alt="Laporan dan Surat">
             <span>Laporan & Surat</span>
