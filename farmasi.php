@@ -141,9 +141,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="stok_minimal_depo_rawat_inap.php" title="Stok Minimal Depo Rawat Inap"><i class="fas fa-sort-amount-down-alt"></i><span>Stok Min Depo RI</span></a>
             <a href="laporannarkotik.php" title="Menu Pembuatan Laporan Narkotik"><i class="fas fa-capsules"></i><span>Laporan Narkotik</span></a>
             <a href="laporanformularium.php" title="Laporan Formularium"><i class="fas fa-notes-medical"></i><span>Formularium</span></a>
-            <a href="2025spjekatalog.php" title="SPJ E-Katalog 2025"><i class="fas fa-file-invoice"></i><span>SPJ E-Katalog</span></a>
-            <a href="2025spjreguler.php" title="SPJ Reguler 2025"><i class="fas fa-file-invoice-dollar"></i><span>SPJ Reguler</span></a>
-            <a href="2025spjregulergabungan.php" title="SPJ Reguler Gabungan 2025"><i class="fas fa-file-contract"></i><span>SPJ Gabungan</span></a>
+            <a href="pemesanandokumentasi.php" title="Dokumentasi Faktur"><i class="fas fa-file-invoice-dollar"></i><span>Dokumentasi Faktur</span></a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
