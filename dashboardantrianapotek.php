@@ -222,5 +222,11 @@ if ($stmt) {
     </table>
 </div>
 
+<div style="position:fixed;left:0;right:0;bottom:0;background:#007bff;color:#fff;padding:8px 0;z-index:99;">
+    <marquee behavior="scroll" direction="left" scrollamount="8" style="font-size:16px;font-family:Tahoma, Geneva, Verdana, sans-serif;">
+        Mohon bersabar, kami dahulukan pasien DARURAT dan OPERASI
+    </marquee>
+</div>
+
 </body>
 </html>
