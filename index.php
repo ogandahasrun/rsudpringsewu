@@ -108,6 +108,10 @@ if (!isset($_SESSION['username'])) {
             <img src="images/laporan.png" alt="Laporan dan Surat">
             <span>Laporan & Surat</span>
         </a>
+        <a href="pengadaan.php" class="menu-item">
+            <img src="images/pengadaan.png" alt="Pengadaan">
+            <span>Pengadaan</span>
+        </a>
     </div>
 
     <a href="logout.php" class="logout">Logout</a>
