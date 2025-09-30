@@ -56,6 +56,7 @@ if (!empty($keyword) || !empty($kd_bangsal) || isset($_GET['tanggal_awal']) || i
                 riwayat_barang_medis.posisi,
                 riwayat_barang_medis.tanggal,
                 riwayat_barang_medis.jam,
+                riwayat_barang_medis.keterangan,
                 bangsal.nm_bangsal
             FROM
                 riwayat_barang_medis
@@ -117,6 +118,7 @@ if (isset($result) && $result->num_rows > 0) {
                 <th>Tanggal</th>
                 <th>Jam</th>
                 <th>Nama Bangsal</th>
+                <th>Keterangan</th>
             </tr>";
 
     while ($row = $result->fetch_assoc()) {
@@ -132,6 +134,7 @@ if (isset($result) && $result->num_rows > 0) {
                 <td>{$row['tanggal']}</td>
                 <td>{$row['jam']}</td>
                 <td>{$row['nm_bangsal']}</td>
+                <td>{$row['keterangan']}</td>
               </tr>";
     }
 
