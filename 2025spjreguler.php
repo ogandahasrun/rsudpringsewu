@@ -1250,3 +1250,35 @@
 </html>
 
 <!------------------------------ BATAS HALAMAN 10  ------------------------------->
+
+</head>
+<body>
+    <div class="container">
+        <!-- Halaman Kedua -->
+        <div class="page-break">
+            <!-- Panggil file header.php -->
+            <?php include 'header.php'; ?>
+
+            <table class="no-border-table">
+                <tr><td>Dokumentasi Faktur</td></tr>
+                <?php
+                if (!empty($no_faktur)) {
+                    $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='" . mysqli_real_escape_string($koneksi, $no_faktur) . "' LIMIT 1");
+                    if ($row = mysqli_fetch_assoc($q)) {
+                        for ($i = 1; $i <= 3; $i++) {
+                            $foto = $row['foto' . $i];
+                            if (!empty($foto)) {
+                                echo '<tr><td><img src="uploads/faktur/' . htmlspecialchars($foto) . '" alt="Foto Faktur ' . $i . '" style="max-width:350px;max-height:350px;margin:10px 0;"></td></tr>';
+                            }
+                        }
+                    } else {
+                        echo '<tr><td><em>Tidak ada dokumentasi faktur.</em></td></tr>';
+                    }
+                } else {
+                    echo '<tr><td><em>Nomor faktur tidak ditemukan.</em></td></tr>';
+                }
+                ?>
+            </table>
+</body>
+
+<!------------------------------ BATAS HALAMAN terakhir  ------------------------------->
