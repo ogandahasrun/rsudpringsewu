@@ -5,6 +5,15 @@ $no_faktur = isset($_GET['no_faktur']) ? $_GET['no_faktur'] : '';
 $pesan = '';
 $foto_paths = ['','',''];
 
+// Ambil parameter filter dari GET untuk tombol kembali
+$filter_params = '';
+$filter_keys = ['tgl_pesan_awal','tgl_pesan_akhir','tgl_faktur_awal','tgl_faktur_akhir','nama_suplier'];
+foreach ($filter_keys as $key) {
+    if (isset($_GET[$key])) {
+        $filter_params .= '&' . $key . '=' . urlencode($_GET[$key]);
+    }
+}
+
 // Ambil data dokumentasi jika sudah ada
 $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='$no_faktur' LIMIT 1");
 if ($row = mysqli_fetch_assoc($q)) {
@@ -165,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             <?php endif; ?>
         </form>
         <br>
-        <a href="pemesanandokumentasi.php">← Kembali ke Daftar Faktur</a>
+        <a href="pemesanandokumentasi.php?<?php echo ltrim($filter_params, '&'); ?>">← Kembali ke Daftar Faktur</a>
     </div>
 </body>
 </html>

@@ -138,7 +138,7 @@ if ($result && mysqli_num_rows($result) > 0) {
                     <td><?php echo htmlspecialchars($row['kode_sat']); ?></td>
                     <?php if ($first): ?>
                         <td rowspan="<?= $rowspan ?>">
-                            <a href="dokumentasifaktur.php?no_faktur=<?php echo urlencode($row['no_faktur']); ?>" style="padding:4px 10px; background:#007bff; color:#fff; border-radius:4px; text-decoration:none;">Upload Foto</a>
+                            <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>">Upload Foto</a>
                         </td>
                     <?php endif; ?>
                 </tr>
