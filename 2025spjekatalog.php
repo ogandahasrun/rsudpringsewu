@@ -48,7 +48,6 @@
             <?php
             include 'koneksi.php';
             include 'functions.php';
-            include 'auth.php';
 
             // Inisialisasi variabel nomor faktur
             $no_faktur = "";
