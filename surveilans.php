@@ -191,6 +191,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-pills"></i>
                 <span>RL 3.18 Resep Farmasi</span>
             </a>
+            <a href="rl41morbiditasranap.php" title="RL 4.1 Morbiditas Pasien Rawat Inap">
+                <i class="fas fa-procedures"></i>
+                <span>RL 4.1 Morbiditas Pasien Rawat Inap</span>
+            </a>
+            <a href="rl51morbiditasralan.php" title="RL 5.1 Morbiditas Pasien Rawat Jalan">
+                <i class="fas fa-user-injured"></i>
+                <span>RL 5.1 Morbiditas Pasien Rawat Jalan</span>
+            </a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
