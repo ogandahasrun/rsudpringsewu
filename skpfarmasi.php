@@ -118,6 +118,48 @@ while ($row = mysqli_fetch_assoc($r10)) {
     $data10[$row['tgl']] = $row['jumlah'];
 }
 
+// 11. Penerimaan Barang ke Gudang Farmasi
+$data11 = array_fill_keys($periode, 0);
+$q11 = "SELECT pemesanan.tgl_pesan, COUNT(detailpesan.kode_brng) as jumlah
+FROM pemesanan
+INNER JOIN detailpesan ON detailpesan.no_faktur = pemesanan.no_faktur
+WHERE pemesanan.tgl_pesan BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+GROUP BY pemesanan.tgl_pesan
+ORDER BY pemesanan.tgl_pesan ASC";
+$r11 = mysqli_query($koneksi, $q11);
+if (!$r11) die("Query error 11: " . mysqli_error($koneksi));
+while ($row = mysqli_fetch_assoc($r11)) {
+    $data11[$row['tgl_pesan']] = $row['jumlah'];
+}
+
+// 12. Stok Keluar Gudang Farmasi
+$data12 = array_fill_keys($periode, 0);
+$q12 = "SELECT pengeluaran_obat_bhp.tanggal, COUNT(detail_pengeluaran_obat_bhp.kode_brng) as jumlah
+FROM pengeluaran_obat_bhp
+INNER JOIN detail_pengeluaran_obat_bhp ON detail_pengeluaran_obat_bhp.no_keluar = pengeluaran_obat_bhp.no_keluar
+WHERE pengeluaran_obat_bhp.tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+GROUP BY pengeluaran_obat_bhp.tanggal
+ORDER BY pengeluaran_obat_bhp.tanggal ASC";
+$r12 = mysqli_query($koneksi, $q12);
+if (!$r12) die("Query error 12: " . mysqli_error($koneksi));
+while ($row = mysqli_fetch_assoc($r12)) {
+    $data12[$row['tanggal']] = $row['jumlah'];
+}
+
+// 13. Mutasi dari Gudang Farmasi (format tanggal+jam, tampilkan tanggal dan jumlah)
+$data13 = array_fill_keys($periode, 0);
+$q13 = "SELECT DATE(mutasibarang.tanggal) AS tgl, COUNT(mutasibarang.kode_brng) as jumlah
+FROM mutasibarang
+WHERE mutasibarang.kd_bangsaldari = 'go' 
+  AND mutasibarang.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
+GROUP BY tgl
+ORDER BY tgl ASC";
+$r13 = mysqli_query($koneksi, $q13);
+if (!$r13) die("Query error 13: " . mysqli_error($koneksi));
+while ($row = mysqli_fetch_assoc($r13)) {
+    $data13[$row['tgl']] = $row['jumlah'];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -303,6 +345,60 @@ while ($row = mysqli_fetch_assoc($r10)) {
                     <td><?php echo $tgl; ?></td>
                     <td><?php echo $data10[$tgl]; ?></td>
                 </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <h2>11. Penerimaan Barang ke Gudang Farmasi</h2>
+    <table class="skp-table">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Jumlah Penerimaan</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($periode as $tgl): ?>
+            <tr>
+                <td><?php echo $tgl; ?></td>
+                <td><?php echo $data11[$tgl]; ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <h2>12. Stok Keluar Gudang Farmasi</h2>
+    <table class="skp-table">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Jumlah Keluar</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($periode as $tgl): ?>
+            <tr>
+                <td><?php echo $tgl; ?></td>
+                <td><?php echo $data12[$tgl]; ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <h2>13. Mutasi dari Gudang Farmasi</h2>
+    <table class="skp-table">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Jumlah Mutasi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($periode as $tgl): ?>
+            <tr>
+                <td><?php echo $tgl; ?></td>
+                <td><?php echo $data13[$tgl]; ?></td>
+            </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
