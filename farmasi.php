@@ -128,6 +128,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
         <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
         <div class="icon-menu">
             <a href="data_barang.php" title="Data Barang"><i class="fas fa-box"></i><span>Data Barang</span></a>
+            <a href="skpfarmasi.php" title="SKP Farmasi"><i class="fas fa-clipboard-list"></i><span>SKP Farmasi</span></a>
             <a href="stokfarmasi.php" title="Stok Barang Farmasi"><i class="fas fa-pills"></i><span>Stok Farmasi</span></a>
             <a href="reseppasienralan.php" title="Resep Pasien Ralan"><i class="fas fa-file-prescription"></i><span>Resep Ralan</span></a>
             <a href="riwayatbarangfarmasi.php" title="Riwayat Barang Farmasi"><i class="fas fa-procedures"></i><span>Riwayat Barang Farmasi</span></a>
