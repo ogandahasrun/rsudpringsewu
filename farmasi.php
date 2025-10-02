@@ -130,6 +130,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="data_barang.php" title="Data Barang"><i class="fas fa-box"></i><span>Data Barang</span></a>
             <a href="skpfarmasi.php" title="SKP Farmasi"><i class="fas fa-clipboard-list"></i><span>SKP Farmasi</span></a>
             <a href="stokfarmasi.php" title="Stok Barang Farmasi"><i class="fas fa-pills"></i><span>Stok Farmasi</span></a>
+            <a href="hutangmedis.php" title="Hutang Barang Medis"><i class="fas fa-file-invoice-dollar"></i><span>Hutang Barang Medis</span></a>
             <a href="reseppasienralan.php" title="Resep Pasien Ralan"><i class="fas fa-file-prescription"></i><span>Resep Ralan</span></a>
             <a href="riwayatbarangfarmasi.php" title="Riwayat Barang Farmasi"><i class="fas fa-procedures"></i><span>Riwayat Barang Farmasi</span></a>
             <a href="mutasibarangmedis.php" title="Mutasi Barang Medis"><i class="fas fa-exchange-alt"></i><span>Mutasi Medis</span></a>
