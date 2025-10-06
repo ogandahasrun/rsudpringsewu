@@ -49,7 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     if ($slot === -1) {
         $pesan = "Sudah ada 3 foto untuk faktur ini!";
     } else {
-        $file_name = $no_faktur . '_' . ($slot+1) . '.jpg';
+        $safe_no_faktur = preg_replace('/[^A-Za-z0-9]/', '', $no_faktur);
+        $file_name = $safe_no_faktur . '_' . ($slot+1) . '.jpg';
         $target_file = $upload_dir . $file_name;
         $tmp_file = $_FILES['foto']['tmp_name'];
         $max_size = 200 * 1024; // 200 KB
