@@ -145,6 +145,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="kontrolpermintaanmutasi.php" title="Kontrol Permintaan dan Mutasi"><i class="fas fa-capsules"></i><span>Kontrol Permintaan dan Mutasi</span></a>
             <a href="laporanformularium.php" title="Laporan Formularium"><i class="fas fa-notes-medical"></i><span>Formularium</span></a>
             <a href="pemesanandokumentasi.php" title="Dokumentasi Faktur"><i class="fas fa-file-invoice-dollar"></i><span>Dokumentasi Faktur</span></a>
+            <a href="rencanabelanjafarmasi.php" title="Rencana Belanja Farmasi"><i class="fas fa-file-invoice-dollar"></i><span>Rencana Belanja Farmasi</span></a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
