@@ -20,11 +20,11 @@ while ($row = mysqli_fetch_assoc($result_barang)) {
 
 // 2. Stok awal per bangsal (ambil stok pada tanggal dan jam paling awal di periode untuk setiap barang)
 $stok_awal = [];
-$bangsals = ['GO','DRI','AP','DI','DO','DE'];
+$bangsals = ['GO','DRI','AP','DI','DO','DPED'];
 foreach ($bangsals as $bangsal) {
     $stok_awal[$bangsal] = [];
     foreach ($barang_list as $kode_brng => $barang) {
-        // Ambil tanggal dan jam paling awal untuk barang dan bangsal ini
+        // Ambil tanggal dan jam paling awal untuk barang dan bangsal ini dalam periode
         $q_min = "SELECT tanggal FROM riwayat_barang_medis 
                   WHERE kd_bangsal = '$bangsal' 
                     AND kode_brng = '$kode_brng'
@@ -32,9 +32,10 @@ foreach ($bangsals as $bangsal) {
                   ORDER BY tanggal ASC LIMIT 1";
         $r_min = mysqli_query($koneksi, $q_min);
         $min_row = mysqli_fetch_assoc($r_min);
+        
         if ($min_row) {
             $min_tanggal = $min_row['tanggal'];
-            // Ambil stok_awal pada tanggal dan jam paling awal
+            // Ambil stok_awal pada tanggal dan jam paling awal dalam periode
             $q_stok = "SELECT stok_awal FROM riwayat_barang_medis 
                        WHERE kd_bangsal = '$bangsal' 
                          AND kode_brng = '$kode_brng'
@@ -44,7 +45,15 @@ foreach ($bangsals as $bangsal) {
             $stok_row = mysqli_fetch_assoc($r_stok);
             $stok_awal[$bangsal][$kode_brng] = $stok_row ? $stok_row['stok_awal'] : 0;
         } else {
-            $stok_awal[$bangsal][$kode_brng] = 0;
+            // Jika tidak ada data dalam periode, ambil stok_akhir dari transaksi terakhir sebelum periode
+            $q_prev = "SELECT stok_akhir FROM riwayat_barang_medis 
+                       WHERE kd_bangsal = '$bangsal' 
+                         AND kode_brng = '$kode_brng'
+                         AND tanggal < '$tanggal_awal'
+                       ORDER BY tanggal DESC LIMIT 1";
+            $r_prev = mysqli_query($koneksi, $q_prev);
+            $prev_row = mysqli_fetch_assoc($r_prev);
+            $stok_awal[$bangsal][$kode_brng] = $prev_row ? $prev_row['stok_akhir'] : 0;
         }
     }
 }
@@ -158,7 +167,7 @@ while ($row = mysqli_fetch_assoc($r)) {
                 <th>Stok Awal AP</th>
                 <th>Stok Awal DI</th>
                 <th>Stok Awal DO</th>
-                <th>Stok Awal DE</th>
+                <th>Stok Awal DPED</th>
                 <th>Total Stok Awal</th>
                 <th>Penerimaan</th>
                 <th>Hibah</th>
@@ -180,7 +189,7 @@ foreach ($barang_list as $kode_brng => $barang) {
     $ap = isset($stok_awal['AP'][$kode_brng]) ? $stok_awal['AP'][$kode_brng] : 0;
     $di = isset($stok_awal['DI'][$kode_brng]) ? $stok_awal['DI'][$kode_brng] : 0;
     $do = isset($stok_awal['DO'][$kode_brng]) ? $stok_awal['DO'][$kode_brng] : 0;
-    $de = isset($stok_awal['DE'][$kode_brng]) ? $stok_awal['DE'][$kode_brng] : 0;
+    $de = isset($stok_awal['DPED'][$kode_brng]) ? $stok_awal['DPED'][$kode_brng] : 0;
     $total_stok_awal = $go + $dri + $ap + $di + $do + $de;
 
     // Barang masuk
