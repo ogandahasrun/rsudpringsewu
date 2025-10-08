@@ -2,27 +2,64 @@
 
 include 'koneksi.php';
 
+// Timezone (optional, ensures consistent "today")
+if (function_exists('date_default_timezone_set')) {
+    date_default_timezone_set('Asia/Jakarta');
+}
+
+// Helper: validate Y-m-d date
+function valid_tanggal($v) {
+    $dt = DateTime::createFromFormat('Y-m-d', (string)$v);
+    return $dt && $dt->format('Y-m-d') === $v;
+}
+
 // Ambil filter tanggal dari form, default hari ini
 $tanggal_awal  = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y-m-d');
 $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
 
-// Query sesuai permintaan (hanya pasien L)
-$query = "
+// Sanitasi dasar: fallback ke hari ini jika format tidak valid
+if (!valid_tanggal($tanggal_awal))  { $tanggal_awal  = date('Y-m-d'); }
+if (!valid_tanggal($tanggal_akhir)) { $tanggal_akhir = date('Y-m-d'); }
+
+// Jika rentang terbalik, tukar
+if ($tanggal_awal > $tanggal_akhir) {
+    [$tanggal_awal, $tanggal_akhir] = [$tanggal_akhir, $tanggal_awal];
+}
+
+// Query sesuai permintaan (hanya pasien L), pakai prepared statement
+// Catatan: gunakan filter inclusive-exclusive agar aman untuk kolom DATE maupun DATETIME
+//   d.tgl_periksa >= ? AND d.tgl_periksa < DATE_ADD(?, INTERVAL 1 DAY)
+$sql = "
     SELECT
-        jns_perawatan_lab.nm_perawatan,
-        template_laboratorium.Pemeriksaan,
-        COUNT(pasien.jk) AS Jumlah_L
-    FROM detail_periksa_lab
-    INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat
-    INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
-    INNER JOIN template_laboratorium ON detail_periksa_lab.id_template = template_laboratorium.id_template
-    INNER JOIN jns_perawatan_lab ON detail_periksa_lab.kd_jenis_prw = jns_perawatan_lab.kd_jenis_prw
-    WHERE detail_periksa_lab.tgl_periksa BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
-      AND pasien.jk = 'L'
-    GROUP BY template_laboratorium.Pemeriksaan, jns_perawatan_lab.nm_perawatan
-    ORDER BY jns_perawatan_lab.nm_perawatan ASC, template_laboratorium.urut ASC
+        j.nm_perawatan,
+        t.Pemeriksaan,
+        COUNT(p.jk) AS Jumlah_L
+    FROM detail_periksa_lab d
+    INNER JOIN reg_periksa r ON d.no_rawat = r.no_rawat
+    INNER JOIN pasien p ON r.no_rkm_medis = p.no_rkm_medis
+    INNER JOIN template_laboratorium t ON d.id_template = t.id_template
+    INNER JOIN jns_perawatan_lab j ON d.kd_jenis_prw = j.kd_jenis_prw
+    WHERE d.tgl_periksa >= ?
+      AND d.tgl_periksa < DATE_ADD(?, INTERVAL 1 DAY)
+      AND p.jk = 'L'
+    GROUP BY t.Pemeriksaan, j.nm_perawatan
+    ORDER BY j.nm_perawatan ASC, t.urut ASC
 ";
-$result = mysqli_query($koneksi, $query);
+
+$result = false;
+if ($stmt = mysqli_prepare($koneksi, $sql)) {
+    mysqli_stmt_bind_param($stmt, 'ss', $tanggal_awal, $tanggal_akhir);
+    if (mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+    } else {
+        // Opsional: tampilkan error eksekusi saat debug
+        // echo 'Query execute error: ' . htmlspecialchars(mysqli_error($koneksi));
+    }
+    mysqli_stmt_close($stmt);
+} else {
+    // Opsional: tampilkan error prepare saat debug
+    // echo 'Query prepare error: ' . htmlspecialchars(mysqli_error($koneksi));
+}
 ?>
 
 <!DOCTYPE html>

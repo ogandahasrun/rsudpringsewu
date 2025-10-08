@@ -30,9 +30,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+            /* ruang ekstra untuk menghindari footer fixed menimpa konten */
+            padding-bottom: 72px;
         }
         a {
             text-decoration: none;
+            /* percepat tap di mobile */
+            touch-action: manipulation;
         }
         .logo-link {
             display: flex;
@@ -104,20 +108,27 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             width: 100%;
             font-size: 15px;
             letter-spacing: 1px;
+            /* dukung safe-area (iPhone notch) */
+            padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
         }
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
             }
             .icon-menu {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 12px;
             }
             .icon-menu a {
                 padding: 14px 4px 10px 4px;
                 min-height: 90px;
             }
+            /* Di layar kecil, biarkan footer mengikuti dokumen agar tidak menutupi konten */
+            footer { position: static; }
+            body { padding-bottom: 0; }
         }
+        /* Logo lebih fleksibel agar pas di berbagai lebar layar */
+        .logo-link img { height: auto; max-width: 25vw; min-width: 72px; width: 80px; }
     </style>
 </head>
 <body>
