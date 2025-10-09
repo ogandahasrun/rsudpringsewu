@@ -151,6 +151,11 @@ while ($row = mysqli_fetch_assoc($r)) {
         <input type="date" name="tanggal_akhir" required value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
         <button type="submit" name="filter">Tampilkan</button>
     </form>
+
+        <div class="back-button">
+            <a href="farmasi.php">← Kembali ke Menu Farmasi</a>
+        </div>
+
     <button id="copyTableBtn">Copy Tabel ke Clipboard</button>
 
     <div id="sipnapTable">
