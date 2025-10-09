@@ -39,11 +39,27 @@
             border: none;
             cursor: pointer;
         }
+        .copy-btn {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #1976D2;
+        }
     </style>
 </head>
 <body>
 
 <h2>Data Stok Barang Farmasi</h2>
+
+        <div class="back-button">
+            <a href="farmasi.php">← Kembali ke Menu Farmasi</a>
+        </div>
 
 <form method="GET" class="filter-form">
     <label>Cari Barang (Kode atau Nama): </label>
@@ -51,14 +67,18 @@
     <input type="submit" value="Filter">
 </form>
 
-<table>
+        <div class="export-button">
+            <button class="copy-btn" onclick="copyTableToClipboard('dataTable')">Copy ke Clipboard</button>
+        </div>
+
+<table id="dataTable">
     <thead>
         <tr>
             <th>No</th>
             <th>Kode Barang</th>
             <th>Nama Barang</th>
-            <th>Satuan</th>
             <th>Harga</th>
+            <th>Satuan</th>
             <th>Stok GO</th>
             <th>Stok DRI</th>
             <th>Stok AP</th>
@@ -119,6 +139,29 @@
         ?>
     </tbody>
 </table>
+
+    <script>
+    function copyTableToClipboard(tableID) {
+        const table = document.getElementById(tableID);
+        const textarea = document.createElement("textarea");
+        let text = "";
+
+        for (let row of table.rows) {
+            let rowData = [];
+            for (let cell of row.cells) {
+                rowData.push(cell.innerText);
+            }
+            text += rowData.join("\t") + "\n";
+        }
+
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Data tabel telah disalin ke clipboard!");
+    }
+    </script>
 
 </body>
 </html>
