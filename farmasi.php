@@ -152,7 +152,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="stok_minimal_gudang.php" title="Stok Minimal Gudang Barang"><i class="fas fa-sort-amount-down"></i><span>Stok Min Gudang</span></a>
             <a href="stok_minimal_depo_rawat_jalan.php" title="Stok Minimal Depo Rawat Jalan"><i class="fas fa-sort-amount-down-alt"></i><span>Stok Min Depo RJ</span></a>
             <a href="stok_minimal_depo_rawat_inap.php" title="Stok Minimal Depo Rawat Inap"><i class="fas fa-sort-amount-down-alt"></i><span>Stok Min Depo RI</span></a>
-            <a href="laporannarkotik.php" title="Menu Pembuatan Laporan Narkotik"><i class="fas fa-capsules"></i><span>Laporan Narkotik</span></a>
+            <a href="sipnap.php" title="Menu Pembuatan Laporan Sipnap"><i class="fas fa-capsules"></i><span>Laporan Sipnap</span></a>
             <a href="kontrolpermintaanmutasi.php" title="Kontrol Permintaan dan Mutasi"><i class="fas fa-capsules"></i><span>Kontrol Permintaan dan Mutasi</span></a>
             <a href="laporanformularium.php" title="Laporan Formularium"><i class="fas fa-notes-medical"></i><span>Formularium</span></a>
             <a href="pemesanandokumentasi.php" title="Dokumentasi Faktur"><i class="fas fa-file-invoice-dollar"></i><span>Dokumentasi Faktur</span></a>
