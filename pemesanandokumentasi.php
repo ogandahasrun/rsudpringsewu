@@ -54,6 +54,21 @@ ORDER BY pemesanan.tgl_pesan DESC, pemesanan.no_faktur DESC";
 
 $result = mysqli_query($koneksi, $sql);
 
+// Query untuk mengecek status foto
+$foto_query = "SELECT no_faktur, foto1, foto2, foto3 FROM pemesanan_dokumentasi";
+$foto_result = mysqli_query($koneksi, $foto_query);
+$foto_status = [];
+if ($foto_result) {
+    while ($foto_row = mysqli_fetch_assoc($foto_result)) {
+        $no_faktur = $foto_row['no_faktur'];
+        $foto_count = 0;
+        if (!empty($foto_row['foto1'])) $foto_count++;
+        if (!empty($foto_row['foto2'])) $foto_count++;
+        if (!empty($foto_row['foto3'])) $foto_count++;
+        $foto_status[$no_faktur] = $foto_count;
+    }
+}
+
 // Proses data untuk rowspan
 $data = [];
 if ($result && mysqli_num_rows($result) > 0) {
@@ -177,15 +192,119 @@ if ($result && mysqli_num_rows($result) > 0) {
         .action-btn {
             display: inline-block;
             padding: 6px 12px;
-            background: #28a745;
             color: white;
             text-decoration: none;
             border-radius: 4px;
             font-size: 12px;
             white-space: nowrap;
+            position: relative;
+            transition: all 0.3s ease;
         }
-        .action-btn:hover {
+        
+        /* Status foto - Belum ada foto (merah) */
+        .action-btn.no-photo {
+            background: #dc3545;
+        }
+        .action-btn.no-photo:hover {
+            background: #c82333;
+        }
+        .action-btn.no-photo::before {
+            content: "📷 ";
+        }
+        .action-btn.no-photo {
+            animation: pulse-red 2s infinite;
+        }
+        
+        /* Status foto - Ada foto sebagian (orange) */
+        .action-btn.partial-photo {
+            background: #fd7e14;
+        }
+        .action-btn.partial-photo:hover {
+            background: #e8630d;
+        }
+        .action-btn.partial-photo::before {
+            content: "📸 ";
+        }
+        .action-btn.partial-photo {
+            animation: pulse-orange 3s infinite;
+        }
+        
+        /* Status foto - Foto lengkap (hijau) */
+        .action-btn.full-photo {
+            background: #28a745;
+        }
+        .action-btn.full-photo:hover {
             background: #218838;
+        }
+        .action-btn.full-photo::before {
+            content: "✅ ";
+        }
+        
+        /* Animasi pulse untuk status foto */
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
+        }
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(253, 126, 20, 0.3); }
+            50% { box-shadow: 0 0 0 6px rgba(253, 126, 20, 0); }
+        }
+        
+        /* Badge untuk jumlah foto */
+        .action-btn .photo-badge {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 1px 6px;
+            font-size: 10px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        
+        /* Legend Status Foto */
+        .photo-legend {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .photo-legend h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+            font-size: 14px;
+        }
+        .legend-items {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 90px;
+            text-align: center;
+        }
+        .legend-color.no-photo {
+            background: #dc3545;
+        }
+        .legend-color.partial-photo {
+            background: #fd7e14;
+        }
+        .legend-color.full-photo {
+            background: #28a745;
+        }
+        .legend-desc {
+            font-size: 12px;
+            color: #666;
         }
         .no-data {
             text-align: center;
@@ -224,7 +343,30 @@ if ($result && mysqli_num_rows($result) > 0) {
                 font-size: 12px;
             }
             .action-btn {
-                padding: 4px 8px;
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+            .action-btn .photo-badge {
+                font-size: 9px;
+                margin-left: 3px;
+                padding: 1px 4px;
+            }
+            .photo-legend {
+                padding: 12px;
+            }
+            .legend-items {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .legend-item {
+                gap: 6px;
+            }
+            .legend-color {
+                min-width: 80px;
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            .legend-desc {
                 font-size: 11px;
             }
         }
@@ -274,6 +416,25 @@ if ($result && mysqli_num_rows($result) > 0) {
         <button type="submit">Filter</button>
     </form>
 
+    <!-- Legend Status Foto -->
+    <div class="photo-legend">
+        <h4>📊 Status Upload Foto:</h4>
+        <div class="legend-items">
+            <div class="legend-item">
+                <span class="legend-color no-photo">📷 Belum Upload</span>
+                <span class="legend-desc">Belum ada foto yang diupload</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color partial-photo">📸 Upload Sebagian</span>
+                <span class="legend-desc">1-2 foto sudah diupload</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color full-photo">✅ Upload Lengkap</span>
+                <span class="legend-desc">Semua foto sudah diupload (3/3)</span>
+            </div>
+        </div>
+    </div>
+
         <div class="table-container">
             <table>
         <tr>
@@ -307,7 +468,31 @@ if ($result && mysqli_num_rows($result) > 0) {
                     <td><?php echo htmlspecialchars($row['kode_sat']); ?></td>
                     <?php if ($first): ?>
                         <td rowspan="<?= $rowspan ?>">
-                            <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" class="action-btn">Upload Foto</a>
+                            <?php
+                            $no_faktur = $row['no_faktur'];
+                            $foto_count = isset($foto_status[$no_faktur]) ? $foto_status[$no_faktur] : 0;
+                            
+                            // Tentukan class CSS berdasarkan jumlah foto
+                            if ($foto_count == 0) {
+                                $btn_class = 'no-photo';
+                                $btn_text = 'Upload Foto';
+                                $btn_title = 'Belum ada foto yang diupload';
+                            } elseif ($foto_count < 3) {
+                                $btn_class = 'partial-photo';
+                                $btn_text = 'Tambah Foto';
+                                $btn_title = $foto_count . ' dari 3 foto sudah diupload';
+                            } else {
+                                $btn_class = 'full-photo';
+                                $btn_text = 'Lihat Foto';
+                                $btn_title = 'Semua foto sudah lengkap (3/3)';
+                            }
+                            ?>
+                            <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" 
+                               class="action-btn <?= $btn_class ?>" 
+                               title="<?= $btn_title ?>">
+                                <?= $btn_text ?>
+                                <span class="photo-badge"><?= $foto_count ?>/3</span>
+                            </a>
                         </td>
                     <?php endif; ?>
                 </tr>
