@@ -116,9 +116,6 @@ foreach ($all_kode as $kode) {
 <body>
 <div class="container" id="allTables">
     <h1>Kontrol Mutasi Barang Medis</h1>
-    <div class="back-button">
-        <a href="farmasi.php">Kembali ke Menu Farmasi</a>
-    </div>
     <form method="get" class="filter-form">
         <label for="no_permintaan">No Permintaan:</label>
         <select name="no_permintaan" id="no_permintaan" class="select2">
@@ -139,7 +136,13 @@ foreach ($all_kode as $kode) {
             <?php endforeach; ?>
         </select>
         <button type="submit">Tampilkan</button>
+        
     </form>
+
+    <div class="back-button">
+        <a href="farmasi.php">Kembali ke Menu Farmasi</a>
+    </div>
+
     <button class="copy-btn" id="copyTableBtn">Copy Tabel ke Clipboard</button>
     <table>
         <thead>

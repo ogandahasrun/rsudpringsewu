@@ -39,11 +39,46 @@
             border: none;
             cursor: pointer;
         }
+        .copy-btn {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #1976D2;
+        }
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+        }
+        th.sortable:hover {
+            background-color: #c8e6c9;
+        }
+        th.sortable::after {
+            content: ' ⇅';
+            color: #666;
+        }
+        th.sortable.asc::after {
+            content: ' ▲';
+            color: #333;
+        }
+        th.sortable.desc::after {
+            content: ' ▼';
+            color: #333;
+        }
     </style>
 </head>
 <body>
 
 <h2>Data Stok Barang Farmasi</h2>
+
+        <div class="back-button">
+            <a href="farmasi.php">← Kembali ke Menu Farmasi</a>
+        </div>
 
 <form method="GET" class="filter-form">
     <label>Cari Barang (Kode atau Nama): </label>
@@ -51,19 +86,25 @@
     <input type="submit" value="Filter">
 </form>
 
-<table>
+        <div class="export-button">
+            <button class="copy-btn" onclick="copyTableToClipboard('dataTable')">Copy ke Clipboard</button>
+        </div>
+
+<h4>Klik pada header tabel untuk mengurutkan</h4>
+
+<table id="dataTable">
     <thead>
         <tr>
             <th>No</th>
-            <th>Kode Barang</th>
-            <th>Nama Barang</th>
-            <th>Satuan</th>
-            <th>Harga</th>
-            <th>Stok GO</th>
-            <th>Stok DRI</th>
-            <th>Stok AP</th>
-            <th>Stok DI</th>
-            <th>Stok DO</th>
+            <th class="sortable" onclick="sortTable(1)">Kode Barang</th>
+            <th class="sortable" onclick="sortTable(2)">Nama Barang</th>
+            <th class="sortable" onclick="sortTable(3)">Harga</th>
+            <th class="sortable" onclick="sortTable(4)">Satuan</th>
+            <th class="sortable" onclick="sortTable(5)">Stok GO</th>
+            <th class="sortable" onclick="sortTable(6)">Stok DRI</th>
+            <th class="sortable" onclick="sortTable(7)">Stok AP</th>
+            <th class="sortable" onclick="sortTable(8)">Stok DI</th>
+            <th class="sortable" onclick="sortTable(9)">Stok DO</th>
         </tr>
     </thead>
     <tbody>
@@ -119,6 +160,80 @@
         ?>
     </tbody>
 </table>
+
+    <script>
+    function copyTableToClipboard(tableID) {
+        const table = document.getElementById(tableID);
+        const textarea = document.createElement("textarea");
+        let text = "";
+
+        for (let row of table.rows) {
+            let rowData = [];
+            for (let cell of row.cells) {
+                rowData.push(cell.innerText);
+            }
+            text += rowData.join("\t") + "\n";
+        }
+
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Data tabel telah disalin ke clipboard!");
+    }
+
+    let sortDirection = {}; // Track sort direction for each column
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById("dataTable");
+        const tbody = table.getElementsByTagName("tbody")[0];
+        const rows = Array.from(tbody.rows);
+        const header = table.getElementsByTagName("th")[columnIndex];
+        
+        // Determine sort direction
+        const isAscending = !sortDirection[columnIndex] || sortDirection[columnIndex] === 'desc';
+        sortDirection[columnIndex] = isAscending ? 'asc' : 'desc';
+        
+        // Clear all header classes
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.classList.remove('asc', 'desc');
+        });
+        
+        // Add class to current header
+        header.classList.add(sortDirection[columnIndex]);
+        
+        // Sort rows
+        rows.sort((a, b) => {
+            let aValue = a.cells[columnIndex].textContent.trim();
+            let bValue = b.cells[columnIndex].textContent.trim();
+            
+            // Check if values are numeric
+            const aNumeric = !isNaN(aValue.replace(/[,.]/g, ''));
+            const bNumeric = !isNaN(bValue.replace(/[,.]/g, ''));
+            
+            if (aNumeric && bNumeric) {
+                // Numeric comparison
+                aValue = parseFloat(aValue.replace(/[,.]/g, ''));
+                bValue = parseFloat(bValue.replace(/[,.]/g, ''));
+                return isAscending ? aValue - bValue : bValue - aValue;
+            } else {
+                // String comparison
+                return isAscending ? 
+                    aValue.localeCompare(bValue) : 
+                    bValue.localeCompare(aValue);
+            }
+        });
+        
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // Update row numbers
+        rows.forEach((row, index) => {
+            row.cells[0].textContent = index + 1;
+        });
+    }
+    </script>
 
 </body>
 </html>
