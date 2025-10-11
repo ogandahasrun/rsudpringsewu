@@ -2,15 +2,18 @@
 <html lang="en">
 <head>
     <title>Laporan Kunjungan Pasien</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         h1 {
             font-family: Arial, sans-serif;
             color: green;
         }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table {
             border-collapse: collapse;
             width: 100%;
             font-family: Arial, sans-serif;
+            min-width: 900px; /* aktifkan scroll horizontal di layar kecil */
         }
         th, td {
             padding: 8px;
@@ -38,10 +41,16 @@
         .stts-sudah { background-color: #d4edda; }    /* Hijau */
         .bayar-belum { background-color: #ffcccc; }   /* Merah */
         .bayar-sudah { background-color: #d4edda; }   /* Hijau */
+
+        @media (max-width: 600px) {
+            th, td { padding: 6px; font-size: 12px; }
+            .copy-button { width: 100%; box-sizing: border-box; }
+            table { min-width: 720px; } /* sedikit lebih kecil agar nyaman di HP */
+        }
     </style>
     <script>
         function copyTableData() {
-            let table = document.querySelector("table");
+            let table = document.querySelector(".table-responsive");
             let range = document.createRange();
             range.selectNode(table);
             window.getSelection().removeAllRanges();
@@ -49,6 +58,24 @@
             document.execCommand("copy");
             window.getSelection().removeAllRanges();
             alert("Tabel berhasil disalin!");
+        }
+
+        // Kirim ke halaman tujuan dengan POST agar langsung terfilter oleh no_rawat
+        function gotoPage(selectEl) {
+            const page = selectEl.value;
+            if (!page) return;
+            const noRawat = selectEl.dataset.no_rawat || '';
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = page;
+            // hidden inputs
+            const i1 = document.createElement('input'); i1.type = 'hidden'; i1.name = 'no_rawat'; i1.value = noRawat;
+            const i2 = document.createElement('input'); i2.type = 'hidden'; i2.name = 'filter'; i2.value = '1';
+            form.appendChild(i1); form.appendChild(i2);
+            document.body.appendChild(form);
+            form.submit();
+            // reset select option
+            selectEl.value = '';
         }
     </script>
 </head>
@@ -157,7 +184,7 @@
         $result = mysqli_query($koneksi, $query);
         if ($result) {
             echo '<button class="copy-button" onclick="copyTableData()">Copy Tabel</button>';
-            echo "<table>
+            echo "<div class='table-responsive'><table>
                 <tr>
                     <th>No</th>
                     <th>TANGGAL REGISTRASI</th>
@@ -167,7 +194,8 @@
                     <th>PENJAB</th>
                     <th>STATUS LANJUT</th>
                     <th>STATUS PERIKSA</th>
-                    <th>STATUS BAYAR</th> 
+                    <th>STATUS BAYAR</th>
+                    <th>Aksi</th>
                 </tr>";
             $no = 1; 
             while ($row = mysqli_fetch_assoc($result)) {
@@ -191,11 +219,19 @@
                         <td>{$row['png_jawab']}</td>
                         <td>{$row['status_lanjut']}</td>
                         <td class='$stts_class'>{$row['stts']}</td>                        
-                        <td class='$bayar_class'>{$row['status_bayar']}</td>    
+                        <td class='$bayar_class'>{$row['status_bayar']}</td>
+                        <td>
+                            <select data-no_rawat='" . htmlspecialchars($row['no_rawat'], ENT_QUOTES) . "' onchange='gotoPage(this)'>
+                                <option value=''>Pilih halaman…</option>
+                                <option value='generalconsent.php'>General Consent</option>
+                                <option value='informedconsent.php'>Informed Consent</option>
+                                <!-- Tambah opsi lain di sini sesuai kebutuhan -->
+                            </select>
+                        </td>
                     </tr>";
                 $no++;    
             }
-            echo "</table>";
+            echo "</table></div>";
         }
         mysqli_close($koneksi);
     }
