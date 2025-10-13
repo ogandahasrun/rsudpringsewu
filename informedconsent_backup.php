@@ -7,8 +7,24 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        .signature {
-            text-align: left;
+        .signa                    <tr>
+                        <th colspan="6">
+                            Dengan ini menyatakan <u>PERSETUJUAN TINDAKAN MEDIK</u> :
+                            <br>
+                            (..............................................................................................................................)
+                        </th>
+                    </tr>
+                    <tr>
+                        <td colspan="6" class="compact-lines">
+                            <!--Terhadap :   Saya    Anak     Istri      Suami    Orang Tua     Lain-lain : ...............-->
+                            <br>
+                            Nama : <strong><?php echo htmlspecialchars($nm_pasien); ?> &nbsp; (<?php echo htmlspecialchars($jk); ?>)</strong>
+                            <br>
+                            Umur : <strong><?php echo htmlspecialchars($umur); ?></strong>
+                            <br>
+                            Alamat : <strong><?php echo htmlspecialchars($alamat); ?></strong><br>
+                            Identitas : <strong><?php echo htmlspecialchars($ktp); ?></strong>&nbsp;
+                            NORM : <strong><?php echo htmlspecialchars($no_rkm_medis); ?></strong>     text-align: left;
             margin-top: 30px;
             width: 100%;
             max-width: 370px;
@@ -18,19 +34,6 @@
             border: none;
             box-sizing: border-box;
         }
-        /* Signature khusus untuk pemberi dan penerima - ukuran lebih besar */
-        .signature[data-slot="pemberi"], 
-        .signature[data-slot="penerima"] {
-            max-width: none;
-            width: 100%;
-            margin-top: 10px;
-            padding: 15px;
-        }
-        .signature[data-slot="pemberi"] .sig-pad,
-        .signature[data-slot="penerima"] .sig-pad {
-            height: 150px;
-            min-height: 150px;
-        }
         .signature img {
             display: block;
             margin: 10px 0 10px 0;
@@ -38,9 +41,7 @@
         .signature p {
             margin: 4px 0;
         }
-        .signature button { 
-            margin-top: 6px; 
-        }
+        .signature button { margin-top: 6px; }
         .no-border-table {
             width: 100%;
             border-collapse: collapse;
@@ -58,9 +59,7 @@
             border-collapse: collapse;
         }
         /* Izinkan scroll horizontal bila tabel melebar di layar kecil */
-        .form-section { 
-            overflow-x: auto; 
-        }
+        .form-section { overflow-x: auto; }
         .form-section td, .form-section th {
             padding: 8px;
             vertical-align: top;
@@ -86,77 +85,32 @@
         }
 
         /* Canvas responsif mengikuti lebar container */
-        .sig-pad { 
-            display: block; 
-            width: 100%; 
-            height: auto; 
-        }
+        .sig-pad { display: block; width: 100%; height: auto; }
 
         /* Lebih rapat untuk blok teks tertentu */
-        .compact-lines { 
-            line-height: 1.2; 
-        }
-        .form-section td.compact-lines { 
-            padding-top: 4px; 
-            padding-bottom: 4px; 
-        }
+        .compact-lines { line-height: 1.2; }
+        .form-section td.compact-lines { padding-top: 4px; padding-bottom: 4px; }
 
         @media (max-width: 600px) {
-            .form-section td { 
-                padding: 6px; 
-            }
-            .form-section table { 
-                font-size: 14px; 
-            }
+            .form-section td { padding: 6px; }
+            .form-section table { font-size: 14px; }
         }
 
         /* Sembunyikan elemen non-perlu saat cetak */
         @media print {
             .search-form,
             .print-button,
-            .signature button { 
-                display: none !important; 
-            }
-            .signature { 
-                border: none !important; 
-                box-shadow: none !important; 
-            }
-            /* Pastikan signature tetap sejajar saat print */
-            .signatures-row {
-                display: flex !important;
-                flex-direction: row !important;
-                gap: 16px !important;
-                align-items: flex-start !important;
-            }
-            .signatures-row .sig-col {
-                flex: 1 1 0 !important;
-            }
+            .signature button { display: none !important; }
+            .signature { border: none !important; box-shadow: none !important; }
         }
 
         /* Baris tanda tangan 3 kolom sama lebar */
-        .signatures-row { 
-            display: flex; 
-            gap: 16px; 
-            align-items: flex-start; 
-        }
-        .signatures-row .sig-col { 
-            flex: 1 1 0; 
-        }
+        .signatures-row { display: flex; gap: 16px; align-items: flex-start; }
+        .signatures-row .sig-col { flex: 1 1 0; }
         /* Hilangkan batas max agar ketiganya mengikuti lebar kolom masing-masing */
-        .signatures-row .signature { 
-            max-width: none; 
-        }
-        .sig-label { 
-            text-align: center; 
-            font-weight: 600; 
-            margin-bottom: 6px; 
-        }
-        @media (max-width: 768px) { 
-            .signatures-row { 
-                flex-direction: column; 
-                gap: 12px; 
-            } 
-        }
+        .signatures-row .signature { max-width: none; }
+    .sig-label { text-align: center; font-weight: 600; margin-bottom: 6px; }
+        @media (max-width: 768px) { .signatures-row { flex-direction: column; gap: 12px; } }
     </style>
 </head>
 <body>
@@ -179,6 +133,7 @@
 
         <!-- Konten Surat -->
         <div class="content">
+
             <h3 class="center-text">PEMBERIAN INFORMASI DAN PERSETUJUAN TINDAKAN MEDIK</h3>
 
             <?php
@@ -250,7 +205,7 @@
                         $hubunganpj     = $row['hubunganpj'] ?? '';
                         $jk             = $row['jk'] ?? '';
                         $namakeluarga   = $row['namakeluarga'] ?? '';
-                        $alamatpj       = $row['alamatpj'] ?? '';
+                        $alamatpj   = $row['alamatpj'] ?? '';
                         $ktp            = $row['no_ktp'] ?? '';
                         $tlp            = $row['no_tlp'] ?? '';
                         $dokter         = $row['nm_dokter'] ?? '';
@@ -299,93 +254,95 @@
                 <table>
                     <!-- PEMBERIAN INFORMASI DAN PERSETUJUAN TINDAKAN MEDIK -->
                     <tr>
-                        <td colspan="6">
-                            Dokter Pelaksana Tindakan : <strong><?php echo htmlspecialchars($dokter); ?></strong><br>
-                            Penerima Informasi : <strong><?php echo htmlspecialchars($keluarga); ?></strong><br>
-                            Pemberi Informasi : <strong>Perawat</strong>
-                        </td>
-                    </tr>                    
+                        <td colspan="2">Dokter Pelaksana Tindakan </td>
+                        <td colspan="2"><strong><?php echo htmlspecialchars($dokter); ?></strong></td>
+                        <td colspan="2">Penerima Informasi : <strong><?php echo htmlspecialchars($keluarga); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Pemberi Informasi</td>
+                        <td colspan="2"><b>Perawat</b></td>
+                    </tr>
                     <tr>
                         <th colspan="1">No</th>
                         <th colspan="1">Jenis Informasi</th>
-                        <th colspan="3">Isi Informasi</th>
-                        <th colspan="1">Tanda</th>
+                        <th colspan="2">Isi Informasi</th>
+                        <th colspan="1">tanda</th>
                     </tr>
                     <tr>
                         <td>1</td>
                         <td>Diagnosis ( WD dan DD )</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>2</td>
                         <td>Dasar diagnosis</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>3</td>
                         <td>Tindakan kedokteran</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>4</td>
                         <td>Indikasi tindakan</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>5</td>
                         <td>Tata cara</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>6</td>
                         <td>Tujuan</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>7</td>
                         <td>Resiko</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>8</td>
                         <td>Komplikasi</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>9</td>
                         <td>Alternatif dan resiko</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>10</td>
                         <td>Prognosis</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
                         <td>11</td>
                         <td>Biaya*</td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                         <td>√</td>
                     </tr>
                     <tr>
-                        <td colspan="4">Tanggal : <?php echo htmlspecialchars(formatTanggalIndo($tgl_registrasi)); ?></td>
-                        <td colspan="2">Pukul :</td>
+                        <td colspan="3">Tanggal :</td>
+                        <td colspan="1">Pukul :</td>
                     </tr>
                     <tr>
                         <td colspan="4">Dengan ini menyatakan bahwa saya telah menerangkan hal-hal diatas secara benar dan jujur dan memberikan kesempatan untuk bertanya dan /atau berdiskusi</td>
                         <td colspan="2">
                             <div class="signature" data-slot="pemberi">
-                                <canvas class="sig-pad" width="300" height="150" style="border:1px solid #888; background:#fff;"></canvas>
+                                <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
                                 <br>
                                 <button type="button" data-action="clear">Hapus Tanda Tangan</button>
                                 <br>
@@ -397,11 +354,11 @@
                         <td colspan="4">Dengan ini menyatakan bahwa saya telah menerima informasi sebagaimana adanya di atas yang sudah diberi tanda /paraf dikolom kanannya dan saya telah memahaminya.</td>
                         <td colspan="2">
                             <div class="signature" data-slot="penerima">
-                                <canvas class="sig-pad" width="300" height="150" style="border:1px solid #888; background:#fff;"></canvas>
-                                <br>
-                                <button type="button" data-action="clear">Hapus Tanda Tangan</button>
-                                <br>
-                                <button type="button" data-action="save">Simpan Tanda Tangan</button>
+                <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
+                <br>
+                <button type="button" data-action="clear">Hapus Tanda Tangan</button>
+                <br>
+                <button type="button" data-action="save">Simpan Tanda Tangan</button>
                             </div>
                         </td>
                     </tr>
@@ -416,81 +373,104 @@
                             <br>
                             Hubungan dengan pasien : <strong><?php echo htmlspecialchars($hubunganpj); ?></strong>
                             <br>
-                            Alamat : <strong><?php echo htmlspecialchars($alamatpj); ?></strong>&nbsp; No. Telepon : <strong><?php echo htmlspecialchars($tlp); ?></strong>
-                            <br>
+                            Alamat : <strong><?php echo htmlspecialchars($alamatpj); ?></strong>&nbsp; No. Telepon : <strong><?php echo htmlspecialchars($tlp); ?></strong><br>
                         </td>
-                    </tr>
-                    <tr>
-                        <th colspan="6">
-                            Dengan ini menyatakan <u>PERSETUJUAN TINDAKAN MEDIK</u> :
-                            <br>
-                            (..............................................................................................................................)
-                        </th>
-                    </tr>
-                    <tr>
-                        <td colspan="6" class="compact-lines">
-                            <!--Terhadap :   Saya    Anak     Istri      Suami    Orang Tua     Lain-lain : ...............-->
-                            <br>
-                            Nama : <strong><?php echo htmlspecialchars($nm_pasien); ?> &nbsp; (<?php echo htmlspecialchars($jk); ?>)</strong>
-                            <br>
-                            Umur : <strong><?php echo htmlspecialchars($umur); ?></strong>
-                            <br>
-                            Alamat : <strong><?php echo htmlspecialchars($alamat); ?></strong>
-                            <br>
-                            Identitas : <strong><?php echo htmlspecialchars($ktp); ?></strong>&nbsp;
-                            NORM : <strong><?php echo htmlspecialchars($no_rkm_medis); ?></strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="6">
-                            <p><?php echo htmlspecialchars($kabupaten); ?>, <?php echo formatTanggalIndo($tgl_registrasi); ?></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="6">
-                            <div class="signatures-row">
-                                <div class="sig-col">
-                                    <div class="sig-label">Yang menyatakan</div>
-                                    <div class="signature" data-slot="yangmenyatakan">
-                                        <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
-                                        <br>
-                                        <button type="button" data-action="clear">Hapus Tanda Tangan</button>
-                                        <br>
-                                        <button type="button" data-action="save">Simpan Tanda Tangan</button>
-                                    </div>
-                                </div>
-                                <div class="sig-col">
-                                    <div class="sig-label">Saksi 1</div>
-                                    <div class="signature" data-slot="saksi1">
-                                        <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
-                                        <br>
-                                        <button type="button" data-action="clear">Hapus Tanda Tangan</button>
-                                        <br>
-                                        <button type="button" data-action="save">Simpan Tanda Tangan</button>
-                                    </div>
-                                </div>
-                                <div class="sig-col">
-                                    <div class="sig-label">Saksi 2</div>
-                                    <div class="signature" data-slot="saksi2">
-                                        <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
-                                        <br>
-                                        <button type="button" data-action="clear">Hapus Tanda Tangan</button>
-                                        <br>
-                                        <button type="button" data-action="save">Simpan Tanda Tangan</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="6">
-                            Biaya adalah perkiraan biaya yang harus dibayarkan oleh pihak pasien berdasarkan perkiraan dalam kasus-kasus sewajarnya dan tidak mengikat kedua belah pihak apabila ada perluasan
-                            <!--* isilah kolom dan ……  diatas dengan benar, berilah tanda ceklis (√) pada jawaban yang benar dan sesuai. Bubuhkan tandatangan dan nama jelas pada kolom yang disediakan.-->
-                        </td>
-                    </tr>
-                </table>
-            </div>
+  </tr>
+  <tr>
+  
+  
+    <th colspan="6">Dengan ini menyatakan  <u>PERSETUJUAN TINDAKAN MEDIK</u> :
+    <br>
+    (..............................................................................................................................)
+    </th>
+  </tr>
+<tr>
+    <td colspan="6" class="compact-lines"><!--Terhadap :   Saya    Anak     Istri      Suami    Orang Tua     Lain-lain : ...............-->
+<br>
+Nama             : <strong><?php echo htmlspecialchars($nm_pasien); ?> &nbsp; (<?php echo htmlspecialchars($jk); ?>)</strong> 
+<br>
+Umur             : <strong><?php echo htmlspecialchars($umur); ?> </strong>	
+<br>
+Alamat          : <strong><?php echo htmlspecialchars($alamat); ?> </strong><br>
+Identitas        : <strong><?php echo htmlspecialchars($ktp); ?></strong>&nbsp;
+NORM        : <strong><?php echo htmlspecialchars($no_rkm_medis); ?></strong>
+</td>
+  </tr>
+  
+ <tr>
+    <td colspan="6"><p><?php echo htmlspecialchars($kabupaten); ?>, <?php echo formatTanggalIndo($tgl_registrasi); ?> </p>
 
+</td>
+  </tr>
+    <tr>
+        <td colspan="6">
+            <div class="signatures-row">
+                <div class="sig-col">
+                    <div class="sig-label">Yang menyatakan</div>
+                    <div class="signature" data-slot="yangmenyatakan">
+                        <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
+                        <br>
+                        <button type="button" data-action="clear">Hapus Tanda Tangan</button>
+                        <br>
+                        <button type="button" data-action="save">Simpan Tanda Tangan</button>
+                    </div>
+                </div>
+                <div class="sig-col">
+                    <div class="sig-label">Saksi 1</div>
+                    <div class="signature" data-slot="saksi1">
+                        <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
+                        <br>
+                        <button type="button" data-action="clear">Hapus Tanda Tangan</button>
+                        <br>
+                        <button type="button" data-action="save">Simpan Tanda Tangan</button>
+                    </div>
+                </div>
+                <div class="sig-col">
+                    <div class="sig-label">Saksi 2</div>
+                    <div class="signature" data-slot="saksi2">
+                        <canvas class="sig-pad" width="200" height="120" style="border:1px solid #888; background:#fff;"></canvas>
+                        <br>
+                        <button type="button" data-action="clear">Hapus Tanda Tangan</button>
+                        <br>
+                        <button type="button" data-action="save">Simpan Tanda Tangan</button>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+               
+           
+
+           <!-- <table class="no-border-table">-->
+                <tr>
+                <td colspan="6">Biaya adalah perkiraan biaya yang  harus dibayarkan oleh pihak pasien berdasarkan perkiraan dalam kasus-kasus sewajarnya dan tidak mengikat kedua belah pihak apabila ada perluasan 
+<!--* isilah kolom dan ……  diatas dengan benar, berilah tanda ceklis (√) pada jawaban yang benar dan sesuai. Bubuhkan tandatangan dan nama jelas pada kolom yang disediakan.-->
+</td>
+                </tr> 
+            </table>
+
+<!--             <table class="no-border-table">
+                <tr><td width="30%">Nama Pasien</td><td width="5%">:</td><td width="65%"><strong><?php echo htmlspecialchars($nm_pasien); ?></strong></td></tr>
+                <tr><td>Nomor Rekam Medis</td><td>:</td><td><strong><?php echo htmlspecialchars($no_rkm_medis); ?></strong></td></tr>
+                <tr><td>Tanggal Lahir</td><td>:</td><td><strong><?php echo htmlspecialchars($tgl_lahir); ?></strong></td></tr>
+                <tr><td>Jenis Kelamin</td><td>:</td><td><strong><?php echo htmlspecialchars($jk); ?></strong></td></tr>
+                <tr><td>Pekerjaan</td><td>:</td><td><strong><?php echo htmlspecialchars($pekerjaan); ?></strong></td></tr>
+                <tr><td>Status</td><td>:</td><td><strong><?php echo htmlspecialchars($stts_nikah); ?></strong></td></tr>
+                <tr><td>Alamat</td><td>:</td><td><strong><?php echo htmlspecialchars($alamat); ?></strong></td></tr>
+                <tr><td>Nama Keluarga</td><td>:</td><td><strong><?php echo htmlspecialchars($namakeluarga); ?></strong></td></tr>
+                <tr><td>Hubungan Keluarga</td><td>:</td><td><strong><?php echo htmlspecialchars($keluarga); ?></strong></td></tr>
+                <tr><td>Penanggung Jawab</td><td>:</td><td><strong><?php echo htmlspecialchars($p_jawab); ?></strong></td></tr>
+                <tr><td>Hubungan dengan Pasien</td><td>:</td><td><strong><?php echo htmlspecialchars($hubunganpj); ?></strong></td></tr>
+                <tr><td>Tempat Pemeriksaan</td><td>:</td><td><strong>RS Mata LEC</strong></td></tr>
+                <tr><td>Tanggal Registrasi</td><td>:</td><td><strong><?php echo htmlspecialchars($tgl_registrasi); ?></strong></td></tr>
+            </table>
+
+            <table class="no-border-table">
+                <tr>
+                    <td>Demikian Surat Keterangan ini dibuat dengan sebenarnya, agar dapat dipergunakan sebagaimana mestinya</td>
+                </tr>
+            </table>
+ -->
             <?php
             function formatTanggalIndo($tanggal) {
                 if (empty($tanggal)) return '';
@@ -513,9 +493,23 @@
                 $mi = intval($m); $di = intval($d);
                 return $di.' '.($bulanIndo[$mi] ?? $m).' '.$y;
             }
-            ?>
-        </div>
-    </div>
+            ?>            
+<!--
+            <div class="signature">
+                <p><?php echo htmlspecialchars($kabupaten); ?>, <?php echo formatTanggalIndo($tgl_registrasi); ?> </p>
+                <p>Pasien/ Keluarga/ Penanggung Jawab Pasien</p>
+                <br><br>
+                <canvas id="signature-pad" width="350" height="120" style="border:1px solid #888; background:#fff;"></canvas>
+                <br>
+                <button type="button" onclick="signaturePad.clear()">Hapus Tanda Tangan</button>
+                <button type="button" onclick="saveSignature()">Simpan Tanda Tangan</button>
+                <br><br>
+                <p><strong><u id="signed-name"><?php echo htmlspecialchars($p_jawab); ?></u></strong></p>                               
+            </div>
+--> 
+            
+        </div>       
+    </div>    
 
     <script>
         // Preview Cetak: simpan PDF server-side terlebih dahulu
