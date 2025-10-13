@@ -175,6 +175,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-user-friends"></i>
                 <span>Kunjungan Pasien</span>
             </a>
+                        <a href="kunjunganpasienranap.php" title="Kunjungan Pasien Ranap">
+                <i class="fas fa-user-friends"></i>
+                <span>Kunjungan Pasien Ranap</span>
+            </a>
             <a href="pasienmeninggalralan.php" title="Pasien Meninggal Ralan">
                 <i class="fas fa-skull"></i>
                 <span>Pasien Meninggal Ralan</span>
