@@ -504,9 +504,8 @@
                         <td>
                             <select class='action-select' data-no_rawat='" . htmlspecialchars($row['no_rawat'], ENT_QUOTES) . "' onchange='gotoPage(this)'>
                                 <option value=''>⚙️ Aksi</option>
-                                <option value='generalconsent.php'>📋 General Consent</option>
-                                <option value='informedconsent.php'>📋 Informed Consent</option>
                                 <option value='persetujuanumum.php'>📋 Persetujuan Umum</option>
+                                <option value='persetujuanpenolakantindakan.php'>📋 Persetujuan Penolakan Tindakan</option>
                                 <!-- Tambah opsi lain di sini sesuai kebutuhan -->
                             </select>
                         </td>
