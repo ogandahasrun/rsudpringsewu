@@ -121,7 +121,7 @@ if ($dokter_result) {
                 
                 <div class="filter-actions">
                     <button type="submit" class="btn btn-primary">🔍 Tampilkan Data</button>
-                    <a href="data_prb.php" class="btn btn-secondary">🔄 Reset Filter</a>
+                    <a href="prb.php" class="btn btn-secondary">🔄 Reset Filter</a>
                     <button type="button" class="btn export-btn" onclick="exportToExcel()">📊 Export Excel</button>
                 </div>
             </form>
