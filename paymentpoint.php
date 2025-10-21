@@ -282,6 +282,7 @@
             document.getElementById('penjab').value = '';
             document.getElementById('nm_poli').value = '';
             document.getElementById('jenis_rawat').value = '';
+            document.getElementById('show_column').value = 'all';
         }
 
     </script>
@@ -381,6 +382,15 @@
                             <option value="RAWAT JALAN" <?php if ($jenis_rawat == 'RAWAT JALAN') echo "selected"; ?>>🚶 Rawat Jalan</option>
                         </select>
                     </div>
+                    
+                    <div class="filter-group">
+                        <label for="show_column">💰 Pilih Tunai/Piutang</label>
+                        <select id="show_column" name="show_column">
+                            <option value="all" <?php if (isset($show_column) && $show_column == 'all') echo 'selected'; ?>>Semua</option>
+                            <option value="total_bayar" <?php if (isset($show_column) && $show_column == 'total_bayar') echo 'selected'; ?>>Total Bayar saja</option>
+                            <option value="sisapiutang" <?php if (isset($show_column) && $show_column == 'sisapiutang') echo 'selected'; ?>>Sisa Piutang saja</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
@@ -395,88 +405,86 @@
 
     <?php
     if (isset($_POST['filter'])) {
-        $queries = [];
+        $show_column = isset($_POST['show_column']) ? $_POST['show_column'] : 'all';
         
-        // Query untuk data rawat inap (hanya jika jenis_rawat kosong atau 'RAWAT INAP')
-        if ($jenis_rawat == '' || $jenis_rawat == 'RAWAT INAP') {
-            $where_inap = "WHERE nota_inap.tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'";
-            if ($penjab != '') $where_inap .= " AND penjab.png_jawab = '$penjab'";
-            if ($nm_poli != '') $where_inap .= " AND poliklinik.nm_poli = '$nm_poli'";
-
-            $query_inap = "SELECT
-                        'RAWAT INAP' as jenis_rawat,
-                        nota_inap.tanggal as tanggal_bayar,
-                        nota_inap.jam as jam_bayar,
-                        reg_periksa.no_rawat,
-                        pasien.no_rkm_medis,
-                        pasien.nm_pasien,
-                        penjab.png_jawab,
-                        poliklinik.nm_poli,
-                        SUM(detail_nota_inap.besar_bayar) as total_bayar
-                    FROM
-                        nota_inap
-                        INNER JOIN reg_periksa ON nota_inap.no_rawat = reg_periksa.no_rawat
-                        INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
-                        INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
-                        INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
-                        INNER JOIN detail_nota_inap ON nota_inap.no_rawat = detail_nota_inap.no_rawat
-                    $where_inap
-                    GROUP BY nota_inap.no_rawat, nota_inap.tanggal, nota_inap.jam";
-            
-            $queries[] = $query_inap;
+        // Query utama dengan reg_periksa sebagai tabel utama
+        $query = "SELECT DISTINCT
+                    CASE 
+                        WHEN nota_inap.no_rawat IS NOT NULL THEN 'RAWAT INAP'
+                        WHEN nota_jalan.no_rawat IS NOT NULL THEN 'RAWAT JALAN'
+                        ELSE 'PIUTANG'
+                    END as jenis_rawat,
+                    COALESCE(nota_inap.tanggal, nota_jalan.tanggal, piutang_pasien.tgl_piutang) as tanggal_bayar,
+                    COALESCE(nota_inap.jam, nota_jalan.jam, '00:00:00') as jam_bayar,
+                    reg_periksa.no_rawat,
+                    pasien.no_rkm_medis,
+                    pasien.nm_pasien,
+                    penjab.png_jawab,
+                    poliklinik.nm_poli,
+                    COALESCE(
+                        (SELECT SUM(detail_nota_inap.besar_bayar) FROM detail_nota_inap WHERE detail_nota_inap.no_rawat = reg_periksa.no_rawat),
+                        (SELECT SUM(detail_nota_jalan.besar_bayar) FROM detail_nota_jalan WHERE detail_nota_jalan.no_rawat = reg_periksa.no_rawat),
+                        0
+                    ) as total_bayar,
+                    COALESCE(piutang_pasien.sisapiutang, 0) as sisapiutang
+                FROM 
+                    reg_periksa
+                    INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+                    INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
+                    INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
+                    LEFT JOIN nota_inap ON reg_periksa.no_rawat = nota_inap.no_rawat 
+                        AND nota_inap.tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+                    LEFT JOIN nota_jalan ON reg_periksa.no_rawat = nota_jalan.no_rawat 
+                        AND nota_jalan.tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+                    LEFT JOIN piutang_pasien ON reg_periksa.no_rawat = piutang_pasien.no_rawat 
+                        AND piutang_pasien.tgl_piutang BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+                WHERE 
+                    (nota_inap.tanggal IS NOT NULL OR nota_jalan.tanggal IS NOT NULL OR piutang_pasien.tgl_piutang IS NOT NULL)";
+        
+        // Tambahkan filter jenis rawat
+        if ($jenis_rawat == 'RAWAT INAP') {
+            $query .= " AND nota_inap.no_rawat IS NOT NULL";
+        } elseif ($jenis_rawat == 'RAWAT JALAN') {
+            $query .= " AND nota_jalan.no_rawat IS NOT NULL";
         }
-
-        // Query untuk data rawat jalan (hanya jika jenis_rawat kosong atau 'RAWAT JALAN')
-        if ($jenis_rawat == '' || $jenis_rawat == 'RAWAT JALAN') {
-            $where_jalan = "WHERE nota_jalan.tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'";
-            if ($penjab != '') $where_jalan .= " AND penjab.png_jawab = '$penjab'";
-            if ($nm_poli != '') $where_jalan .= " AND poliklinik.nm_poli = '$nm_poli'";
-
-            $query_jalan = "SELECT
-                        'RAWAT JALAN' as jenis_rawat,
-                        nota_jalan.tanggal as tanggal_bayar,
-                        nota_jalan.jam as jam_bayar,
-                        reg_periksa.no_rawat,
-                        pasien.no_rkm_medis,
-                        pasien.nm_pasien,
-                        penjab.png_jawab,
-                        poliklinik.nm_poli,
-                        SUM(detail_nota_jalan.besar_bayar) as total_bayar
-                    FROM
-                        nota_jalan
-                        INNER JOIN reg_periksa ON nota_jalan.no_rawat = reg_periksa.no_rawat
-                        INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
-                        INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
-                        INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
-                        INNER JOIN detail_nota_jalan ON nota_jalan.no_rawat = detail_nota_jalan.no_rawat
-                    $where_jalan
-                    GROUP BY nota_jalan.no_rawat, nota_jalan.tanggal, nota_jalan.jam";
-            
-            $queries[] = $query_jalan;
+        
+        // Tambahkan filter penjab
+        if ($penjab != '') {
+            $query .= " AND penjab.png_jawab = '$penjab'";
         }
-
-        // Gabungkan query dengan UNION jika ada lebih dari 1 query
-        if (count($queries) > 1) {
-            $query = "(" . implode(") UNION (", $queries) . ") ORDER BY tanggal_bayar DESC, jam_bayar DESC";
-        } elseif (count($queries) == 1) {
-            $query = $queries[0] . " ORDER BY tanggal_bayar DESC, jam_bayar DESC";
-        } else {
-            $query = "SELECT 'RAWAT INAP' as jenis_rawat, '' as tanggal_bayar, '' as jam_bayar, '' as no_rawat, '' as no_rkm_medis, '' as nm_pasien, '' as png_jawab, '' as nm_poli, 0 as total_bayar WHERE 1=0";
+        
+        // Tambahkan filter poliklinik
+        if ($nm_poli != '') {
+            $query .= " AND poliklinik.nm_poli = '$nm_poli'";
         }
+        
+        $query .= " ORDER BY tanggal_bayar DESC, jam_bayar DESC";
         
         $result = mysqli_query($koneksi, $query);
         if ($result) {
             $total_rows = mysqli_num_rows($result);
             $total_pembayaran = 0;
+            $total_sisapiutang = 0;
             
-            // Hitung total pembayaran
+            // Hitung total pembayaran dan total sisapiutang
             $temp_result = mysqli_query($koneksi, $query);
             while ($temp_row = mysqli_fetch_assoc($temp_result)) {
-                $total_pembayaran += $temp_row['total_bayar'];
+                $total_pembayaran += isset($temp_row['total_bayar']) ? $temp_row['total_bayar'] : 0;
+                $total_sisapiutang += isset($temp_row['sisapiutang']) ? $temp_row['sisapiutang'] : 0;
             }
             
+            $summary_text = 'Total Data: <span style="color: #007bff;">' . $total_rows . '</span>';
+            if ($show_column == 'sisapiutang') {
+                $summary_text .= ' | Total Sisa Piutang: <span style="color: #dc3545;">Rp ' . number_format($total_sisapiutang, 0, ',', '.') . '</span>';
+            } elseif ($show_column == 'total_bayar') {
+                $summary_text .= ' | Total Pembayaran: <span style="color: #28a745;">Rp ' . number_format($total_pembayaran, 0, ',', '.') . '</span>';
+            } else {
+                $summary_text .= ' | Total Pembayaran: <span style="color: #28a745;">Rp ' . number_format($total_pembayaran, 0, ',', '.') . '</span>';
+                $summary_text .= ' | Total Sisa Piutang: <span style="color: #dc3545;">Rp ' . number_format($total_sisapiutang, 0, ',', '.') . '</span>';
+            }
+
             echo '<div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">';
-            echo '<div style="font-weight: bold; color: #495057;">� Total Data: <span style="color: #007bff;">' . $total_rows . '</span> pembayaran | Total: <span style="color: #28a745;">Rp ' . number_format($total_pembayaran, 0, ',', '.') . '</span></div>';
+            echo '<div style="font-weight: bold; color: #495057;">� ' . $summary_text . '</div>';
             echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
             echo '</div>';
             
@@ -490,9 +498,10 @@
                     <th>NOMOR RM</th>
                     <th>NAMA PASIEN</th>
                     <th>PENJAB</th>
-                    <th>POLIKLINIK</th>
-                    <th>TOTAL BAYAR</th>
-                </tr>";
+                    <th>POLIKLINIK</th>";
+            if ($show_column == 'all' || $show_column == 'total_bayar') echo "<th>TOTAL BAYAR</th>";
+            if ($show_column == 'all' || $show_column == 'sisapiutang') echo "<th>SISA PIUTANG</th>";
+            echo "</tr>";
             $no = 1; 
             while ($row = mysqli_fetch_assoc($result)) {
                 // Color coding untuk jenis rawat
@@ -510,8 +519,14 @@
                         <td>{$row['nm_pasien']}</td>
                         <td>{$row['png_jawab']}</td>
                         <td>{$row['nm_poli']}</td>
-                        <td style='text-align: right; font-weight: bold;'>Rp " . number_format($row['total_bayar'], 0, ',', '.') . "</td>
-                    </tr>";
+                        ";
+                if ($show_column == 'all' || $show_column == 'total_bayar') {
+                    echo "<td style='text-align: right; font-weight: bold;'>Rp " . number_format($row['total_bayar'], 0, ',', '.') . "</td>";
+                }
+                if ($show_column == 'all' || $show_column == 'sisapiutang') {
+                    echo "<td style='text-align: right; font-weight: bold; color: #dc3545;'>Rp " . number_format(isset($row['sisapiutang']) ? $row['sisapiutang'] : 0, 0, ',', '.') . "</td>";
+                }
+                echo "</tr>";
                 $no++;    
             }
             echo "</table></div>";
