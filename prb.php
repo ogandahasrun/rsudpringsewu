@@ -5,6 +5,7 @@ include 'koneksi.php';
 $tanggal_awal = isset($_GET['tanggal_awal']) ? $_GET['tanggal_awal'] : date('Y-m-d');
 $tanggal_akhir = isset($_GET['tanggal_akhir']) ? $_GET['tanggal_akhir'] : date('Y-m-d');
 $nm_dokter = isset($_GET['nm_dokter']) ? $_GET['nm_dokter'] : '';
+$nm_poli = isset($_GET['nm_poli']) ? $_GET['nm_poli'] : '';
 
 // Get dokter list untuk dropdown
 $dokter_query = "SELECT DISTINCT dokter.kd_dokter, dokter.nm_dokter 
@@ -18,6 +19,21 @@ $dokter_options = [];
 if ($dokter_result) {
     while ($row = mysqli_fetch_assoc($dokter_result)) {
         $dokter_options[] = $row;
+    }
+}
+
+// Get poliklinik list untuk dropdown
+$poli_query = "SELECT DISTINCT poliklinik.kd_poli, poliklinik.nm_poli 
+               FROM poliklinik 
+               INNER JOIN reg_periksa ON poliklinik.kd_poli = reg_periksa.kd_poli
+               INNER JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat
+               INNER JOIN bpjs_prb ON bpjs_prb.no_sep = bridging_sep.no_sep
+               ORDER BY poliklinik.nm_poli";
+$poli_result = mysqli_query($koneksi, $poli_query);
+$poli_options = [];
+if ($poli_result) {
+    while ($row = mysqli_fetch_assoc($poli_result)) {
+        $poli_options[] = $row;
     }
 }
 ?>
@@ -41,7 +57,7 @@ if ($dokter_result) {
         .back-button a:hover { background: #5a6268; transform: translateY(-2px); }
         .filter-form { background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
         .filter-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .filter-group { display: flex; flex-direction: column; gap: 8px; }
         .filter-group label { font-weight: bold; color: #495057; font-size: 14px; }
         .filter-group input, .filter-group select { padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
@@ -117,6 +133,19 @@ if ($dokter_result) {
                             <?php endforeach; ?>
                         </select>
                     </div>
+                    
+                    <div class="filter-group">
+                        <label for="nm_poli">🏥 Poliklinik</label>
+                        <select id="nm_poli" name="nm_poli">
+                            <option value="">-- Semua Poliklinik --</option>
+                            <?php foreach ($poli_options as $poli): ?>
+                                <option value="<?php echo htmlspecialchars($poli['kd_poli']); ?>" 
+                                        <?php echo ($nm_poli == $poli['kd_poli']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($poli['nm_poli']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
@@ -135,6 +164,10 @@ if ($dokter_result) {
                 $where_conditions[] = "dokter.kd_dokter = '" . mysqli_real_escape_string($koneksi, $nm_dokter) . "'";
             }
             
+            if (!empty($nm_poli)) {
+                $where_conditions[] = "poliklinik.kd_poli = '" . mysqli_real_escape_string($koneksi, $nm_poli) . "'";
+            }
+            
             $where_sql = 'WHERE ' . implode(' AND ', $where_conditions);
             
             // Query untuk data PRB sesuai kolom yang diminta
@@ -144,12 +177,14 @@ if ($dokter_result) {
                         pasien.nm_pasien,
                         dokter.nm_dokter,   
                         bridging_sep.no_sep,
-                        bpjs_prb.prb
+                        bpjs_prb.prb,
+                        poliklinik.nm_poli
                     FROM reg_periksa
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
                     INNER JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat
                     INNER JOIN bpjs_prb ON bpjs_prb.no_sep = bridging_sep.no_sep
                     INNER JOIN dokter ON reg_periksa.kd_dokter = dokter.kd_dokter
+                    INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
                     $where_sql
                     ORDER BY reg_periksa.tgl_registrasi DESC, reg_periksa.kd_dokter ASC, bpjs_prb.prb ASC";
             
@@ -165,6 +200,7 @@ if ($dokter_result) {
                         INNER JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat
                         INNER JOIN bpjs_prb ON bpjs_prb.no_sep = bridging_sep.no_sep
                         INNER JOIN dokter ON reg_periksa.kd_dokter = dokter.kd_dokter
+                        INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
                         $where_sql";
             
             $stats_result = mysqli_query($koneksi, $stats_query);
@@ -201,6 +237,7 @@ if ($dokter_result) {
                                 <th>No. RM</th>
                                 <th>Nama Pasien</th>
                                 <th>Nama Dokter</th>
+                                <th>Poliklinik</th>
                                 <th>No. SEP</th>
                                 <th>PRB</th>
                             </tr>
@@ -216,6 +253,7 @@ if ($dokter_result) {
                                     <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_rkm_medis']); ?></td>
                                     <td><?php echo htmlspecialchars($row['nm_pasien']); ?></td>
                                     <td><?php echo htmlspecialchars($row['nm_dokter']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nm_poli']); ?></td>
                                     <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_sep']); ?></td>
                                     <td style="text-align: center;">
                                         <span class="prb-badge <?php echo ($row['prb'] == 'Ya') ? 'prb-ya' : 'prb-tidak'; ?>">
