@@ -55,16 +55,18 @@ ORDER BY pemesanan.tgl_pesan DESC, pemesanan.no_faktur DESC";
 $result = mysqli_query($koneksi, $sql);
 
 // Query untuk mengecek status foto
-$foto_query = "SELECT no_faktur, foto1, foto2, foto3 FROM pemesanan_dokumentasi";
+$foto_query = "SELECT no_faktur, foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8, foto9, foto10 FROM pemesanan_dokumentasi";
 $foto_result = mysqli_query($koneksi, $foto_query);
 $foto_status = [];
 if ($foto_result) {
     while ($foto_row = mysqli_fetch_assoc($foto_result)) {
         $no_faktur = $foto_row['no_faktur'];
         $foto_count = 0;
-        if (!empty($foto_row['foto1'])) $foto_count++;
-        if (!empty($foto_row['foto2'])) $foto_count++;
-        if (!empty($foto_row['foto3'])) $foto_count++;
+        for ($i = 1; $i <= 10; $i++) {
+            if (!empty($foto_row['foto' . $i])) {
+                $foto_count++;
+            }
+        }
         $foto_status[$no_faktur] = $foto_count;
     }
 }
@@ -215,28 +217,14 @@ if ($result && mysqli_num_rows($result) > 0) {
             animation: pulse-red 2s infinite;
         }
         
-        /* Status foto - Ada foto sebagian (orange) */
-        .action-btn.partial-photo {
-            background: #fd7e14;
-        }
-        .action-btn.partial-photo:hover {
-            background: #e8630d;
-        }
-        .action-btn.partial-photo::before {
-            content: "📸 ";
-        }
-        .action-btn.partial-photo {
-            animation: pulse-orange 3s infinite;
-        }
-        
-        /* Status foto - Foto lengkap (hijau) */
-        .action-btn.full-photo {
+        /* Status foto - Ada foto minimal 1 (hijau) */
+        .action-btn.has-photo {
             background: #28a745;
         }
-        .action-btn.full-photo:hover {
+        .action-btn.has-photo:hover {
             background: #218838;
         }
-        .action-btn.full-photo::before {
+        .action-btn.has-photo::before {
             content: "✅ ";
         }
         
@@ -244,10 +232,6 @@ if ($result && mysqli_num_rows($result) > 0) {
         @keyframes pulse-red {
             0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
             50% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
-        }
-        @keyframes pulse-orange {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(253, 126, 20, 0.3); }
-            50% { box-shadow: 0 0 0 6px rgba(253, 126, 20, 0); }
         }
         
         /* Badge untuk jumlah foto */
@@ -296,10 +280,7 @@ if ($result && mysqli_num_rows($result) > 0) {
         .legend-color.no-photo {
             background: #dc3545;
         }
-        .legend-color.partial-photo {
-            background: #fd7e14;
-        }
-        .legend-color.full-photo {
+        .legend-color.has-photo {
             background: #28a745;
         }
         .legend-desc {
@@ -422,15 +403,11 @@ if ($result && mysqli_num_rows($result) > 0) {
         <div class="legend-items">
             <div class="legend-item">
                 <span class="legend-color no-photo">📷 Belum Upload</span>
-                <span class="legend-desc">Belum ada foto yang diupload</span>
+                <span class="legend-desc">Belum ada foto yang diupload (0/10)</span>
             </div>
             <div class="legend-item">
-                <span class="legend-color partial-photo">📸 Upload Sebagian</span>
-                <span class="legend-desc">1-2 foto sudah diupload</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color full-photo">✅ Upload Lengkap</span>
-                <span class="legend-desc">Semua foto sudah diupload (3/3)</span>
+                <span class="legend-color has-photo">✅ Sudah Upload</span>
+                <span class="legend-desc">Minimal 1 foto sudah diupload (1-10/10)</span>
             </div>
         </div>
     </div>
@@ -472,26 +449,22 @@ if ($result && mysqli_num_rows($result) > 0) {
                             $no_faktur = $row['no_faktur'];
                             $foto_count = isset($foto_status[$no_faktur]) ? $foto_status[$no_faktur] : 0;
                             
-                            // Tentukan class CSS berdasarkan jumlah foto
+                            // Tentukan class CSS berdasarkan jumlah foto (2 status saja)
                             if ($foto_count == 0) {
                                 $btn_class = 'no-photo';
                                 $btn_text = 'Upload Foto';
                                 $btn_title = 'Belum ada foto yang diupload';
-                            } elseif ($foto_count < 3) {
-                                $btn_class = 'partial-photo';
-                                $btn_text = 'Tambah Foto';
-                                $btn_title = $foto_count . ' dari 3 foto sudah diupload';
                             } else {
-                                $btn_class = 'full-photo';
-                                $btn_text = 'Lihat Foto';
-                                $btn_title = 'Semua foto sudah lengkap (3/3)';
+                                $btn_class = 'has-photo';
+                                $btn_text = 'Lihat/Tambah Foto';
+                                $btn_title = $foto_count . ' dari 10 foto sudah diupload';
                             }
                             ?>
                             <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" 
                                class="action-btn <?= $btn_class ?>" 
                                title="<?= $btn_title ?>">
                                 <?= $btn_text ?>
-                                <span class="photo-badge"><?= $foto_count ?>/3</span>
+                                <span class="photo-badge"><?= $foto_count ?>/10</span>
                             </a>
                         </td>
                     <?php endif; ?>

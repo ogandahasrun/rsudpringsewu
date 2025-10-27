@@ -3,7 +3,7 @@ include 'koneksi.php';
 
 $no_faktur = isset($_GET['no_faktur']) ? $_GET['no_faktur'] : '';
 $pesan = '';
-$foto_paths = ['','',''];
+$foto_paths = array_fill(0, 10, '');
 
 // Ambil parameter filter dari GET untuk tombol kembali
 $filter_params = '';
@@ -17,9 +17,9 @@ foreach ($filter_keys as $key) {
 // Ambil data dokumentasi jika sudah ada
 $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='$no_faktur' LIMIT 1");
 if ($row = mysqli_fetch_assoc($q)) {
-    $foto_paths[0] = $row['foto1'];
-    $foto_paths[1] = $row['foto2'];
-    $foto_paths[2] = $row['foto3'];
+    for ($i = 0; $i < 10; $i++) {
+        $foto_paths[$i] = $row['foto' . ($i + 1)];
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
@@ -32,14 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     // Cek sudah ada berapa foto
     $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='$no_faktur' LIMIT 1");
     if ($row = mysqli_fetch_assoc($q)) {
-        $foto_paths[0] = $row['foto1'];
-        $foto_paths[1] = $row['foto2'];
-        $foto_paths[2] = $row['foto3'];
+        for ($i = 0; $i < 10; $i++) {
+            $foto_paths[$i] = $row['foto' . ($i + 1)];
+        }
     }
 
     // Cari slot kosong
     $slot = -1;
-    for ($i=0; $i<3; $i++) {
+    for ($i=0; $i<10; $i++) {
         if (empty($foto_paths[$i])) {
             $slot = $i;
             break;
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     }
 
     if ($slot === -1) {
-        $pesan = "Sudah ada 3 foto untuk faktur ini!";
+        $pesan = "Sudah ada 10 foto untuk faktur ini!";
     } else {
         $safe_no_faktur = preg_replace('/[^A-Za-z0-9]/', '', $no_faktur);
         $file_name = $safe_no_faktur . '_' . ($slot+1) . '.jpg';
@@ -111,10 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 if ($q && mysqli_num_rows($q) > 0) {
                     mysqli_query($koneksi, "UPDATE pemesanan_dokumentasi SET $field='$file_name' WHERE no_faktur='$no_faktur'");
                 } else {
-                    $foto1 = $slot==0 ? $file_name : '';
-                    $foto2 = $slot==1 ? $file_name : '';
-                    $foto3 = $slot==2 ? $file_name : '';
-                    mysqli_query($koneksi, "INSERT INTO pemesanan_dokumentasi (no_faktur, foto1, foto2, foto3) VALUES ('$no_faktur', '$foto1', '$foto2', '$foto3')");
+                    // Buat array untuk INSERT dengan semua field foto
+                    $foto_fields = array();
+                    $foto_values = array();
+                    for ($i = 0; $i < 10; $i++) {
+                        $foto_fields[] = 'foto' . ($i + 1);
+                        $foto_values[] = ($i == $slot) ? "'$file_name'" : "''";
+                    }
+                    $fields_str = implode(', ', $foto_fields);
+                    $values_str = implode(', ', $foto_values);
+                    mysqli_query($koneksi, "INSERT INTO pemesanan_dokumentasi (no_faktur, $fields_str) VALUES ('$no_faktur', $values_str)");
                 }
                 $pesan = "Foto berhasil diupload dan dikompresi!";
                 $foto_paths[$slot] = $file_name;
@@ -245,24 +251,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
         }
         .foto-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
             margin-bottom: 25px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
         }
         .foto-preview {
             text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
+            padding: 12px;
+            background: white;
             border-radius: 8px;
             border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .foto-preview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-color: #007bff;
         }
         .foto-preview img {
             width: 100%;
-            max-height: 150px;
+            max-height: 120px;
             object-fit: cover;
             border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .foto-preview img:hover {
+            transform: scale(1.05);
         }
         .foto-preview .foto-label {
             font-size: 14px;
@@ -300,6 +324,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             border: 1px solid #ffeaa7;
         }
         
+        /* Progress bar untuk foto */
+        .foto-progress {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        .foto-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .foto-progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+        .foto-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+
         /* Mobile Styles */
         @media (max-width: 768px) {
             body {
@@ -315,11 +368,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 padding: 20px 15px;
             }
             .foto-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 12px;
+                max-height: 400px;
+            }
+            .foto-preview {
+                padding: 10px;
             }
             .foto-preview img {
-                max-height: 120px;
+                max-height: 100px;
             }
             button {
                 padding: 12px;
@@ -378,6 +435,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 padding: 15px 20px;
             }
         }
+        
+        /* Modal untuk view foto penuh */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #bbb;
+        }
+        .modal-caption {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -397,19 +502,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 </div>
             <?php endif; ?>
             
-            <!-- Tampilkan foto yang sudah ada -->
+            <!-- Progress Bar -->
             <?php
             $foto_tersedia = 0;
-            for ($i=0; $i<3; $i++) if (!empty($foto_paths[$i])) $foto_tersedia++;
+            for ($i=0; $i<10; $i++) if (!empty($foto_paths[$i])) $foto_tersedia++;
+            $progress_percent = ($foto_tersedia / 10) * 100;
             ?>
+            
+            <div class="foto-progress">
+                <div class="foto-stats">
+                    <span><strong>📊 Progress Upload:</strong></span>
+                    <span><strong><?php echo $foto_tersedia; ?>/10 Foto</strong></span>
+                </div>
+                <div class="foto-progress-bar">
+                    <div class="foto-progress-fill" style="width: <?php echo $progress_percent; ?>%"></div>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: #666; margin-top: 5px;">
+                    <?php echo number_format($progress_percent, 1); ?>% Complete
+                </div>
+            </div>
+            
+            <!-- Tampilkan foto yang sudah ada -->
             
             <?php if ($foto_tersedia > 0): ?>
                 <div class="foto-grid">
-                    <?php for ($i=0; $i<3; $i++): ?>
+                    <?php for ($i=0; $i<10; $i++): ?>
                         <?php if (!empty($foto_paths[$i])): ?>
                             <div class="foto-preview">
                                 <div class="foto-label">📷 Foto <?php echo $i+1; ?></div>
-                                <img src="uploads/faktur/<?php echo htmlspecialchars($foto_paths[$i]); ?>" alt="Foto <?php echo $i+1; ?>">
+                                <img src="uploads/faktur/<?php echo htmlspecialchars($foto_paths[$i]); ?>" 
+                                     alt="Foto <?php echo $i+1; ?>" 
+                                     onclick="openModal('uploads/faktur/<?php echo htmlspecialchars($foto_paths[$i]); ?>', 'Foto <?php echo $i+1; ?> - <?php echo htmlspecialchars($no_faktur); ?>')"
+                                     title="Klik untuk memperbesar">
                             </div>
                         <?php endif; ?>
                     <?php endfor; ?>
@@ -417,19 +541,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             <?php endif; ?>
             
             <!-- Form upload -->
-            <?php if ($foto_tersedia < 3): ?>
+            <?php if ($foto_tersedia < 10): ?>
                 <form method="post" enctype="multipart/form-data">
                     <input type="hidden" name="no_faktur" value="<?php echo htmlspecialchars($no_faktur); ?>">
                     
                     <label>📤 Upload Foto Faktur ke-<?php echo $foto_tersedia+1; ?>:</label>
                     <input type="file" name="foto" accept="image/*" required>
                     <button type="submit">
-                        ⬆️ Upload Foto
+                        ⬆️ Upload Foto (<?php echo $foto_tersedia; ?>/10)
                     </button>
                 </form>
             <?php else: ?>
                 <div class="max-photos">
-                    ✅ Maksimal 3 foto telah tercapai
+                    ✅ Maksimal 10 foto telah tercapai
                 </div>
             <?php endif; ?>
             
@@ -440,5 +564,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             </div>
         </div>
     </div>
+
+    <!-- Modal untuk melihat foto penuh -->
+    <div id="fotoModal" class="modal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="">
+            <div id="modalCaption" class="modal-caption"></div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk membuka modal foto
+        function openModal(imgSrc, caption) {
+            const modal = document.getElementById('fotoModal');
+            const modalImg = document.getElementById('modalImg');
+            const modalCaption = document.getElementById('modalCaption');
+            
+            modal.style.display = 'block';
+            modalImg.src = imgSrc;
+            modalCaption.textContent = caption;
+        }
+
+        // Fungsi untuk menutup modal
+        function closeModal() {
+            const modal = document.getElementById('fotoModal');
+            modal.style.display = 'none';
+        }
+
+        // Tutup modal ketika diklik di luar gambar
+        window.onclick = function(event) {
+            const modal = document.getElementById('fotoModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Tutup modal dengan tombol ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Auto refresh progress setelah upload
+        <?php if (strpos($pesan, 'berhasil') !== false): ?>
+        setTimeout(function() {
+            const progressBar = document.querySelector('.foto-progress-fill');
+            const newWidth = '<?php echo $progress_percent; ?>%';
+            progressBar.style.width = newWidth;
+        }, 100);
+        <?php endif; ?>
+    </script>
 </body>
 </html>
