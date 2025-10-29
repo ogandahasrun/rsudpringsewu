@@ -27,7 +27,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <div class="header-content">
         <h1>PEMERINTAH KABUPATEN PRINGSEWU</h1>
         <h1><strong><?php echo htmlspecialchars($nama_instansi); ?></strong></h1>
-        <p><?php echo htmlspecialchars($alamat); ?></p>
+        <p><?php echo htmlspecialchars($alamat); ?>, <?php echo htmlspecialchars($kabupaten); ?>, <?php echo htmlspecialchars($propinsi); ?></p>
         <p>Phone: <?php echo htmlspecialchars($kontak); ?> | Email: <?php echo htmlspecialchars($email); ?></p>
     </div>
 </div>
