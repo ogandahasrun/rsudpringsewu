@@ -186,7 +186,7 @@ if ($poli_result) {
                     INNER JOIN dokter ON reg_periksa.kd_dokter = dokter.kd_dokter
                     INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
                     $where_sql
-                    ORDER BY reg_periksa.tgl_registrasi DESC, reg_periksa.kd_dokter ASC, bpjs_prb.prb ASC";
+                    ORDER BY reg_periksa.tgl_registrasi DESC, reg_periksa.kd_dokter ASC, pasien.nm_pasien ASC";
             
             $result = mysqli_query($koneksi, $query);
             
