@@ -116,6 +116,10 @@ if (!isset($_SESSION['username'])) {
             <img src="images/bpjs.png" alt="BPJS">
             <span>BPJS</span>
         </a>
+        <a href="jasapelayanan.php" class="menu-item">
+            <img src="images/jasapelayanan.png" alt="Jasa Pelayanan">
+            <span>Jasa Pelayanan</span>
+        </a>
     </div>
 
     <a href="logout.php" class="logout">Logout</a>
