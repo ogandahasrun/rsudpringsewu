@@ -291,9 +291,9 @@
         
         <div class="content">
             <div class="back-button">
-                <a href="index.php">
+                <a href="farmasi.php">
                     <img src="images/logo.png" alt="Logo">
-                    ← Kembali ke Dashboard
+                    ← Kembali ke Farmasi
                 </a>
             </div>
 
