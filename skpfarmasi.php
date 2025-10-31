@@ -165,265 +165,700 @@ while ($row = mysqli_fetch_assoc($r13)) {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>SKP Farmasi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKP Farmasi - RSUD Pringsewu</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        h2 { margin-top: 30px; }
-        table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-        th, td { border: 1px solid #ccc; padding: 6px 10px; font-size: 13px; }
-        th { background: #4CAF50; color: #fff; }
-        .filter-form { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; }
-        .filter-form input { padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .filter-form button { padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .filter-form button:hover { background: #45a049; }
-        #copyTableBtn { margin-bottom:15px; padding:8px 15px; background:#2196F3; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-        #copyTableBtn:hover { background:#1976D2; }
+        * {
+            box-sizing: border-box;
+        }
+        body, table, th, td, input, select, button {
+            font-family: Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        .content {
+            padding: 25px;
+        }
+        .back-button {
+            margin-bottom: 20px;
+        }
+        .back-button a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        .back-button a:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        .filter-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        .filter-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            gap: 15px;
+            align-items: end;
+            justify-content: start;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .filter-group label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 14px;
+        }
+        .filter-group input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .filter-group input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 30px 0 15px 0;
+            padding: 15px 20px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border-left: 5px solid #007bff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 400px;
+        }
+        th {
+            background: linear-gradient(45deg, #343a40, #495057);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+        }
+        tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+        tr:hover td {
+            background: #e3f2fd;
+        }
+        .number-cell {
+            text-align: right;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .date-cell {
+            text-align: center;
+            font-family: monospace;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .summary-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        .summary-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .header {
+                padding: 20px 15px;
+            }
+            .header h1 {
+                font-size: 1.5em;
+            }
+            .content {
+                padding: 15px;
+            }
+            .filter-form {
+                padding: 20px 15px;
+            }
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            th, td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            table {
+                min-width: 300px;
+            }
+            .section-title {
+                font-size: 16px;
+                padding: 12px 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            .summary-card .value {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="allTables">
-    <h1>SKP Farmasi</h1>
-    <form method="POST" class="filter-form">
-        Periode :
-        <input type="date" name="tanggal_awal" required value="<?php echo htmlspecialchars($tanggal_awal); ?>">
-        <input type="date" name="tanggal_akhir" required value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
-        <button type="submit" name="filter">Tampilkan</button>
-    </form>
+    <div class="container">
+        <div class="header">
+            <h1>📊 SKP Farmasi</h1>
+        </div>
+        
+        <div class="content">
+            <div class="back-button">
+                <a href="farmasi.php">
+                    ← Kembali ke Menu Farmasi
+                </a>
+            </div>
 
-    <div class="back-button">
-        <a href="farmasi.php">Kembali ke Menu Farmasi</a>
-    </div>
+            <form method="POST" class="filter-form">
+                <div class="filter-title">
+                    📅 Filter Periode Laporan SKP Farmasi
+                </div>
+                
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="tanggal_awal">📅 Tanggal Awal</label>
+                        <input type="date" 
+                               id="tanggal_awal"
+                               name="tanggal_awal" 
+                               required 
+                               value="<?php echo htmlspecialchars($tanggal_awal); ?>">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="tanggal_akhir">📅 Tanggal Akhir</label>
+                        <input type="date" 
+                               id="tanggal_akhir"
+                               name="tanggal_akhir" 
+                               required 
+                               value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+                    </div>
+                    
+                    <div>
+                        <button type="submit" name="filter" class="btn btn-primary">
+                            📊 Tampilkan Laporan
+                        </button>
+                    </div>
+                </div>
+            </form>
 
-    <button id="copyTableBtn">Copy Semua Tabel ke Clipboard</button>
+            <?php
+            // Hitung total untuk summary cards
+            $total_data = [];
+            for ($i = 1; $i <= 13; $i++) {
+                $varName = "data$i";
+                $total_data[$i] = array_sum($$varName);
+            }
+            ?>
 
-    <h2>1. Permintaan Barang dari Depo Rawat Inap</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Permintaan</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data1[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>📋 Total Permintaan Depo</h3>
+                    <div class="value"><?php echo number_format($total_data[1]); ?></div>
+                </div>
+                <div class="summary-card">
+                    <h3>🏥 Total Permintaan Gudang</h3>
+                    <div class="value"><?php echo number_format($total_data[2]); ?></div>
+                </div>
+                <div class="summary-card">
+                    <h3>📦 Total Penerimaan</h3>
+                    <div class="value"><?php echo number_format($total_data[3]); ?></div>
+                </div>
+                <div class="summary-card">
+                    <h3>💊 Total Resep</h3>
+                    <div class="value"><?php echo number_format($total_data[4] + $total_data[5]); ?></div>
+                </div>
+            </div>
 
-    <h2>2. Permintaan Barang ke Gudang Obat</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Permintaan</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data2[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="actions-bar">
+                <div style="color: #6c757d; font-size: 14px;">
+                    📋 <strong>Periode:</strong> <?php echo date('d/m/Y', strtotime($tanggal_awal)); ?> - <?php echo date('d/m/Y', strtotime($tanggal_akhir)); ?>
+                </div>
+                <button id="copyTableBtn" class="btn btn-success">
+                    📋 Copy Semua Data
+                </button>
+            </div>
 
-    <h2>3. Rekap Penerimaan Barang per Tanggal</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Penerimaan</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data3[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div id="allTables">
 
-    <h2>4. Resep depo Rawat Inap (08.00 - 14.00)</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Resep</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data4[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                📋 1. Permintaan Barang dari Depo Rawat Inap
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Permintaan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data1[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>5. Resep depo Rawat Jalan (08.00 - 14.00)</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Resep</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data5[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                🏥 2. Permintaan Barang ke Gudang Obat
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Permintaan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data2[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>6. PIO depo Rawat Inap</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah PIO</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data6[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                📦 3. Rekap Penerimaan Barang per Tanggal
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Penerimaan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data3[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>7. PIO depo Rawat Jalan</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah PIO</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data7[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                💊 4. Resep depo Rawat Inap (08.00 - 14.00)
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Resep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data4[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>8. Resep Racikan Depo Rawat Inap</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Racikan</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data8[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                🏥 5. Resep depo Rawat Jalan (08.00 - 14.00)
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Resep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data5[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>9. Resep Racikan Depo Rawat Jalan</h2>
-    <table class="skp-table">
-        <thead>
-            <tr><th>Tanggal</th><th>Jumlah Racikan</th></tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data9[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                📋 6. PIO depo Rawat Inap
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah PIO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data6[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>10. Mutasi Masuk dari Gudang Obat ke Depo Rawat Jalan</h2>
-    <table class="skp-table">
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>Jumlah Data</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-                <tr>
-                    <td><?php echo $tgl; ?></td>
-                    <td><?php echo $data10[$tgl]; ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                🏥 7. PIO depo Rawat Jalan
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah PIO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data7[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>11. Penerimaan Barang ke Gudang Farmasi</h2>
-    <table class="skp-table">
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>Jumlah Penerimaan</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data11[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                🧪 8. Resep Racikan Depo Rawat Inap
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Racikan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data8[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>12. Stok Keluar Gudang Farmasi</h2>
-    <table class="skp-table">
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>Jumlah Keluar</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data12[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                💉 9. Resep Racikan Depo Rawat Jalan
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Racikan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data9[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
-    <h2>13. Mutasi dari Gudang Farmasi</h2>
-    <table class="skp-table">
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>Jumlah Mutasi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($periode as $tgl): ?>
-            <tr>
-                <td><?php echo $tgl; ?></td>
-                <td><?php echo $data13[$tgl]; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            <div class="section-title">
+                🔄 10. Mutasi Masuk dari Gudang Obat ke Depo Rawat Jalan
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data10[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-title">
+                📥 11. Penerimaan Barang ke Gudang Farmasi
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Penerimaan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data11[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-title">
+                📤 12. Stok Keluar Gudang Farmasi
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Keluar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data12[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-title">
+                🔄 13. Mutasi dari Gudang Farmasi
+            </div>
+            <div class="table-responsive">
+                <table class="skp-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tanggal</th>
+                            <th style="text-align: right;">Jumlah Mutasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($periode as $tgl): ?>
+                        <tr>
+                            <td class="date-cell"><?php echo date('d/m/Y', strtotime($tgl)); ?></td>
+                            <td class="number-cell"><?php echo number_format($data13[$tgl]); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            </div> <!-- Tutup allTables -->
+            
+        </div> <!-- Tutup content -->
+    </div> <!-- Tutup container -->
 
     <script>
-document.getElementById('copyTableBtn').onclick = function() {
-    var allTables = document.getElementById('allTables');
-    var range = document.createRange();
-    range.selectNode(allTables);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
+    document.getElementById('copyTableBtn').onclick = function() {
+        var allTables = document.getElementById('allTables');
+        var range = document.createRange();
+        range.selectNode(allTables);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
 
-    try {
-        var successful = document.execCommand('copy');
-        if (successful) {
-            alert('Semua tabel berhasil disalin ke clipboard!');
-        } else {
-            alert('Gagal menyalin tabel.');
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                showNotification('✅ Semua tabel berhasil disalin ke clipboard!', 'success');
+            } else {
+                showNotification('❌ Gagal menyalin tabel.', 'error');
+            }
+        } catch (err) {
+            showNotification('❌ Browser tidak mendukung copy tabel otomatis.', 'error');
         }
-    } catch (err) {
-        alert('Browser tidak mendukung copy tabel otomatis.');
+        window.getSelection().removeAllRanges();
+    };
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => document.body.removeChild(notification), 300);
+        }, 3000);
     }
-    window.getSelection().removeAllRanges();
-};
     </script>
-    </div>
 </body>
 </html>
