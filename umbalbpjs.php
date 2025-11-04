@@ -195,8 +195,8 @@ include 'koneksi.php';
                         <div style="font-weight: bold; color: #495057;">
                             📊 Ditemukan: <span style="color: #28a745;"><?php echo number_format($total_rows); ?></span> data umpan balik BPJS
                         </div>
-                        <button onclick="exportToExcel()" class="btn export-btn">
-                            📤 Export Excel
+                        <button onclick="copyTableToClipboard()" class="btn export-btn">
+                            � Copy ke Clipboard
                         </button>
                     </div>
                     
@@ -309,47 +309,102 @@ include 'koneksi.php';
     </div>
 
     <script>
-        function exportToExcel() {
+        function copyTableToClipboard() {
             const table = document.getElementById('dataTable');
             if (!table) {
-                alert('❌ Tidak ada data untuk di-export');
+                showNotification('❌ Tidak ada data untuk disalin', 'error');
                 return;
             }
             
-            // Create a new table for export (copy original)
-            const exportTable = table.cloneNode(true);
+            // Create text content from table
+            let text = "Data Umpan Balik BPJS - RSUD Pringsewu\n";
+            text += "Tanggal: " + new Date().toLocaleDateString('id-ID') + "\n\n";
             
-            // Create a new window for export
-            const win = window.open('', '_blank');
-            win.document.write(`
-                <html>
-                <head>
-                    <title>Export Data Umpan Balik BPJS</title>
-                    <meta charset="utf-8">
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        table { border-collapse: collapse; width: 100%; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f2f2f2; font-weight: bold; }
-                        tr:nth-child(even) { background-color: #f9f9f9; }
-                        .header { margin-bottom: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h2>🏥 Data Umpan Balik BPJS - RSUD Pringsewu</h2>
-                        <p><strong>Tanggal Export:</strong> ${new Date().toLocaleDateString('id-ID')}</p>
-                        <p><strong>Total Data:</strong> <?php echo $total_rows ?? 0; ?> records</p>
-                    </div>
-                    ${exportTable.outerHTML}
-                    <br>
-                    <p><small><em>Data diekspor dari Sistem Informasi RSUD Pringsewu</em></small></p>
-                </body>
-                </html>
-            `);
+            // Get table headers
+            const headers = table.querySelectorAll('thead th');
+            const headerTexts = Array.from(headers).map(th => th.textContent.trim());
+            text += headerTexts.join('\t') + '\n';
             
-            win.document.close();
-            win.print();
+            // Get table rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const cellTexts = Array.from(cells).map(td => {
+                    // Clean up currency formatting and other formatting
+                    let cellText = td.textContent.trim();
+                    cellText = cellText.replace(/Rp\s?/g, '').replace(/\./g, '');
+                    return cellText;
+                });
+                text += cellTexts.join('\t') + '\n';
+            });
+            
+            // Copy to clipboard
+            if (navigator.clipboard && window.isSecureContext) {
+                // Use modern clipboard API
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('✅ Data berhasil disalin ke clipboard!', 'success');
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showNotification('✅ Data berhasil disalin ke clipboard!', 'success');
+                } else {
+                    showNotification('❌ Gagal menyalin data. Silakan copy manual.', 'error');
+                }
+            } catch (err) {
+                showNotification('❌ Browser tidak mendukung copy otomatis.', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-weight: bold;
+                transform: translateX(400px);
+                transition: all 0.3s ease;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
         
         function resetForm() {
