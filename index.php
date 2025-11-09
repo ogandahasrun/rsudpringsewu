@@ -6,6 +6,22 @@ if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit();
 }
+
+// Query untuk mengambil nama instansi dan logo dari database
+$query_instansi = "SELECT nama_instansi, logo FROM setting LIMIT 1";
+$result_instansi = mysqli_query($koneksi, $query_instansi);
+$nama_instansi = "RSUD PRINGSEWU"; // default jika tidak ada di database
+$logo_src = "images/logo.png"; // default jika tidak ada di database
+
+if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
+    $nama_instansi = $row_instansi['nama_instansi'];
+    if (!empty($row_instansi['logo'])) {
+        // Konversi BLOB ke base64
+        $logo_blob = $row_instansi['logo'];
+        $logo_base64 = base64_encode($logo_blob);
+        $logo_src = "data:image/png;base64," . $logo_base64;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,7 +29,7 @@ if (!isset($_SESSION['username'])) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSUD PRINGSEWU</title>
+<title><?php echo htmlspecialchars($nama_instansi); ?></title>
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -77,11 +93,11 @@ if (!isset($_SESSION['username'])) {
 <body>
 
 <a href="index.php" style="display: block; text-align: center; margin-top: 30px;">
-    <img src="images/logo.png" alt="Logo" width="80" height="100">
+    <img src="<?php echo htmlspecialchars($logo_src); ?>" alt="Logo" width="80" height="100">
 </a>
 
 <div class="container">
-    <h1>RSUD PRINGSEWU</h1>
+    <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
 
     <div class="menu-grid">
         <a href="farmasi.php" class="menu-item">
