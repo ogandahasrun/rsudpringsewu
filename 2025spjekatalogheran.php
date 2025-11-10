@@ -343,6 +343,11 @@
                     bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
             </table>
+
+            <table class="no-border-table">
+                <tr><td>Yang bertanda tangan di bawah ini :</td></tr>
+            </table>
+
             <table class="no-border-table">        
                 <tr><td>Nama</td><td>:</td><td>dr. Herman Syahrial</td></tr>
                 <tr><td>NIP</td><td>:</td><td>19690927 200212 1 003</td></tr>
