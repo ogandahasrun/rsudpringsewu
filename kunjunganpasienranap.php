@@ -285,10 +285,39 @@
         }
 
         function resetForm() {
-            document.getElementById('tanggal_awal').value = '<?php echo date('Y-m-01'); ?>';
-            document.getElementById('tanggal_akhir').value = '<?php echo date('Y-m-d'); ?>';
+            document.getElementById('tanggal_awal').value = '';
+            document.getElementById('tanggal_akhir').value = '';
+            document.getElementById('tgl_keluar_awal').value = '';
+            document.getElementById('tgl_keluar_akhir').value = '';
             document.getElementById('cara_bayar').value = '';
+            document.getElementById('filter_type').value = 'registrasi';
+            toggleFilterFields();
         }
+        
+        function toggleFilterFields() {
+            const filterType = document.getElementById('filter_type').value;
+            const registrasiFilter = document.getElementById('registrasi-filter');
+            const keluarFilter = document.getElementById('keluar-filter');
+            
+            if (filterType === 'registrasi') {
+                registrasiFilter.style.display = 'grid';
+                keluarFilter.style.display = 'none';
+                // Clear keluar fields
+                document.getElementById('tgl_keluar_awal').value = '';
+                document.getElementById('tgl_keluar_akhir').value = '';
+            } else {
+                registrasiFilter.style.display = 'none';
+                keluarFilter.style.display = 'grid';
+                // Clear registrasi fields
+                document.getElementById('tanggal_awal').value = '';
+                document.getElementById('tanggal_akhir').value = '';
+            }
+        }
+        
+        // Initialize filter toggle on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleFilterFields();
+        });
     </script>
 </head>
 <body>
@@ -296,9 +325,12 @@
     include 'koneksi.php';
     
     // Inisialisasi nilai default
-    $tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y-m-01');
-    $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
+    $tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : '';
+    $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : '';
+    $tgl_keluar_awal = isset($_POST['tgl_keluar_awal']) ? $_POST['tgl_keluar_awal'] : '';
+    $tgl_keluar_akhir = isset($_POST['tgl_keluar_akhir']) ? $_POST['tgl_keluar_akhir'] : '';
     $cara_bayar = isset($_POST['cara_bayar']) ? $_POST['cara_bayar'] : '';
+    $filter_type = isset($_POST['filter_type']) ? $_POST['filter_type'] : 'registrasi';
 
     // Ambil daftar cara bayar untuk dropdown
     $cara_bayar_options = [];
@@ -321,26 +353,20 @@
 
             <form method="POST" class="filter-form">
                 <div class="filter-title">
-                    📊 Filter Data Kunjungan
+                    📊 Filter Data Kunjungan Pasien Rawat Inap
                 </div>
                 
                 <div class="filter-grid">
                     <div class="filter-group">
-                        <label for="tanggal_awal">📅 Tanggal Registrasi Awal</label>
-                        <input type="date" 
-                               id="tanggal_awal" 
-                               name="tanggal_awal" 
-                               required 
-                               value="<?php echo htmlspecialchars($tanggal_awal); ?>">
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label for="tanggal_akhir">📅 Tanggal Registrasi Akhir</label>
-                        <input type="date" 
-                               id="tanggal_akhir" 
-                               name="tanggal_akhir" 
-                               required 
-                               value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+                        <label for="filter_type">📋 Jenis Filter</label>
+                        <select id="filter_type" name="filter_type" onchange="toggleFilterFields()">
+                            <option value="registrasi" <?php echo ($filter_type == 'registrasi') ? 'selected' : ''; ?>>
+                                📅 Berdasarkan Tanggal Registrasi
+                            </option>
+                            <option value="keluar" <?php echo ($filter_type == 'keluar') ? 'selected' : ''; ?>>
+                                🏠 Berdasarkan Tanggal Keluar/Pulang
+                            </option>
+                        </select>
                     </div>
                     
                     <div class="filter-group">
@@ -357,6 +383,44 @@
                     </div>
                 </div>
                 
+                <!-- Filter Tanggal Registrasi -->
+                <div id="registrasi-filter" class="filter-grid" style="<?php echo ($filter_type == 'keluar') ? 'display: none;' : ''; ?>">
+                    <div class="filter-group">
+                        <label for="tanggal_awal">📅 Tanggal Registrasi Awal</label>
+                        <input type="date" 
+                               id="tanggal_awal" 
+                               name="tanggal_awal"
+                               value="<?php echo htmlspecialchars($tanggal_awal); ?>">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="tanggal_akhir">� Tanggal Registrasi Akhir</label>
+                        <input type="date" 
+                               id="tanggal_akhir" 
+                               name="tanggal_akhir"
+                               value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+                    </div>
+                </div>
+                
+                <!-- Filter Tanggal Keluar -->
+                <div id="keluar-filter" class="filter-grid" style="<?php echo ($filter_type == 'registrasi') ? 'display: none;' : ''; ?>">
+                    <div class="filter-group">
+                        <label for="tgl_keluar_awal">🏠 Tanggal Keluar/Pulang Awal</label>
+                        <input type="date" 
+                               id="tgl_keluar_awal" 
+                               name="tgl_keluar_awal"
+                               value="<?php echo htmlspecialchars($tgl_keluar_awal); ?>">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="tgl_keluar_akhir">🏠 Tanggal Keluar/Pulang Akhir</label>
+                        <input type="date" 
+                               id="tgl_keluar_akhir" 
+                               name="tgl_keluar_akhir"
+                               value="<?php echo htmlspecialchars($tgl_keluar_akhir); ?>">
+                    </div>
+                </div>
+                
                 <div class="filter-actions">
                     <button type="submit" name="filter" class="btn btn-primary">
                         🔍 Tampilkan Data
@@ -369,37 +433,101 @@
 
             <?php
             if (isset($_POST['filter'])) {
-                // Bangun WHERE clause
-                $where_conditions = ["reg_periksa.status_lanjut = 'ranap'"];
-                $where_conditions[] = "reg_periksa.tgl_registrasi BETWEEN '$tanggal_awal' AND '$tanggal_akhir'";
+                // Validasi input berdasarkan filter type
+                $valid_filter = false;
+                $date_info = '';
                 
-                if (!empty($cara_bayar)) {
-                    $where_conditions[] = "reg_periksa.kd_pj = '" . mysqli_real_escape_string($koneksi, $cara_bayar) . "'";
+                if ($filter_type == 'registrasi') {
+                    if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                        $valid_filter = true;
+                        $date_info = "Registrasi: " . date('d/m/Y', strtotime($tanggal_awal)) . " - " . date('d/m/Y', strtotime($tanggal_akhir));
+                    }
+                } else if ($filter_type == 'keluar') {
+                    if (!empty($tgl_keluar_awal) && !empty($tgl_keluar_akhir)) {
+                        $valid_filter = true;
+                        $date_info = "Keluar/Pulang: " . date('d/m/Y', strtotime($tgl_keluar_awal)) . " - " . date('d/m/Y', strtotime($tgl_keluar_akhir));
+                    }
                 }
                 
-                $where_sql = implode(' AND ', $where_conditions);
+                if (!$valid_filter) {
+                    echo '<div class="no-data">
+                            <h3>⚠️ Filter Tidak Lengkap</h3>
+                            <p>Silakan lengkapi tanggal awal dan akhir sesuai jenis filter yang dipilih.</p>
+                          </div>';
+                } else {
+                    // Bangun WHERE clause
+                    $where_conditions = ["reg_periksa.status_lanjut = 'ranap'"];
+                    
+                    if ($filter_type == 'registrasi') {
+                        $where_conditions[] = "reg_periksa.tgl_registrasi BETWEEN '" . mysqli_real_escape_string($koneksi, $tanggal_awal) . "' AND '" . mysqli_real_escape_string($koneksi, $tanggal_akhir) . "'";
+                    } else if ($filter_type == 'keluar') {
+                        // Untuk filter berdasarkan tanggal keluar, kita perlu join dengan subquery
+                        // untuk mendapatkan tanggal keluar terakhir setiap no_rawat
+                        $where_conditions[] = "ki_terakhir.tgl_keluar BETWEEN '" . mysqli_real_escape_string($koneksi, $tgl_keluar_awal) . "' AND '" . mysqli_real_escape_string($koneksi, $tgl_keluar_akhir) . "'";
+                        $where_conditions[] = "ki_terakhir.tgl_keluar IS NOT NULL";
+                        $where_conditions[] = "ki_terakhir.tgl_keluar != '0000-00-00'";
+                    }
+                    
+                    if (!empty($cara_bayar)) {
+                        $where_conditions[] = "reg_periksa.kd_pj = '" . mysqli_real_escape_string($koneksi, $cara_bayar) . "'";
+                    }
+                    
+                    $where_sql = implode(' AND ', $where_conditions);
 
-                $query = "SELECT
-                            reg_periksa.tgl_registrasi,
-                            reg_periksa.no_rawat,
-                            pasien.no_rkm_medis,
-                            pasien.nm_pasien,
-                            pasien.jk,
-                            pasien.tgl_lahir,
-                            penjab.png_jawab,
-                            COALESCE(detail_nota_inap.besar_bayar, 0) as besar_bayar,
-                            COALESCE(detail_piutang_pasien.sisapiutang, 0) as sisapiutang
-                        FROM reg_periksa
-                        INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
-                        INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
-                        LEFT JOIN detail_nota_inap ON detail_nota_inap.no_rawat = reg_periksa.no_rawat
-                        LEFT JOIN detail_piutang_pasien ON detail_piutang_pasien.no_rawat = reg_periksa.no_rawat
-                        WHERE $where_sql
-                        ORDER BY reg_periksa.tgl_registrasi DESC, reg_periksa.no_rawat DESC";
+                    if ($filter_type == 'keluar') {
+                        // Query dengan subquery untuk mendapatkan tanggal keluar terakhir
+                        $query = "SELECT
+                                    reg_periksa.tgl_registrasi,
+                                    reg_periksa.no_rawat,
+                                    pasien.no_rkm_medis,
+                                    pasien.nm_pasien,
+                                    pasien.jk,
+                                    pasien.tgl_lahir,
+                                    penjab.png_jawab,
+                                    ki_terakhir.tgl_keluar,
+                                    COALESCE(detail_nota_inap.besar_bayar, 0) as besar_bayar,
+                                    COALESCE(detail_piutang_pasien.sisapiutang, 0) as sisapiutang
+                                FROM reg_periksa
+                                INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+                                INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
+                                INNER JOIN (
+                                    SELECT 
+                                        no_rawat,
+                                        MAX(tgl_keluar) as tgl_keluar
+                                    FROM kamar_inap 
+                                    WHERE tgl_keluar IS NOT NULL 
+                                      AND tgl_keluar != '0000-00-00'
+                                    GROUP BY no_rawat
+                                ) ki_terakhir ON reg_periksa.no_rawat = ki_terakhir.no_rawat
+                                LEFT JOIN detail_nota_inap ON detail_nota_inap.no_rawat = reg_periksa.no_rawat
+                                LEFT JOIN detail_piutang_pasien ON detail_piutang_pasien.no_rawat = reg_periksa.no_rawat
+                                WHERE $where_sql
+                                ORDER BY ki_terakhir.tgl_keluar DESC, reg_periksa.no_rawat DESC";
+                    } else {
+                        // Query normal untuk filter registrasi
+                        $query = "SELECT
+                                    reg_periksa.tgl_registrasi,
+                                    reg_periksa.no_rawat,
+                                    pasien.no_rkm_medis,
+                                    pasien.nm_pasien,
+                                    pasien.jk,
+                                    pasien.tgl_lahir,
+                                    penjab.png_jawab,
+                                    NULL as tgl_keluar,
+                                    COALESCE(detail_nota_inap.besar_bayar, 0) as besar_bayar,
+                                    COALESCE(detail_piutang_pasien.sisapiutang, 0) as sisapiutang
+                                FROM reg_periksa
+                                INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+                                INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj
+                                LEFT JOIN detail_nota_inap ON detail_nota_inap.no_rawat = reg_periksa.no_rawat
+                                LEFT JOIN detail_piutang_pasien ON detail_piutang_pasien.no_rawat = reg_periksa.no_rawat
+                                WHERE $where_sql
+                                ORDER BY reg_periksa.tgl_registrasi DESC, reg_periksa.no_rawat DESC";
+                    }
 
-                $result = mysqli_query($koneksi, $query);
-                
-                if ($result) {
+                    $result = mysqli_query($koneksi, $query);
+                    
+                    if ($result) {
                     $total_records = mysqli_num_rows($result);
                     $total_tunai = 0;
                     $total_piutang = 0;
@@ -414,6 +542,10 @@
                     
                     // Tampilkan statistik
                     if ($total_records > 0) {
+                        echo '<div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                                <strong>📊 Filter Aktif:</strong> ' . htmlspecialchars($date_info) . 
+                              '</div>';
+                        
                         echo '<div class="summary-stats">
                                 <div class="stat-card">
                                     <div class="stat-number">' . number_format($total_records) . '</div>
@@ -440,7 +572,8 @@
                                     <thead>
                                         <tr>
                                             <th>No</th>
-                                            <th>Tgl Registrasi</th>
+                                            <th>Tgl Registrasi</th>' . 
+                                            ($filter_type == 'keluar' ? '<th>Tgl Keluar</th>' : '') . '
                                             <th>No Rawat</th>
                                             <th>No RM</th>
                                             <th>Nama Pasien</th>
@@ -464,9 +597,15 @@
                                 $umur = $today->diff($lahir)->y . ' th';
                             }
                             
+                            $tgl_keluar_col = '';
+                            if ($filter_type == 'keluar' && isset($row['tgl_keluar'])) {
+                                $tgl_keluar_col = "<td>" . ($row['tgl_keluar'] && $row['tgl_keluar'] != '0000-00-00' ? date('d/m/Y', strtotime($row['tgl_keluar'])) : '-') . "</td>";
+                            }
+                            
                             echo "<tr>
                                     <td style='text-align: center;'>{$no}</td>
                                     <td>" . date('d/m/Y', strtotime($row['tgl_registrasi'])) . "</td>
+                                    {$tgl_keluar_col}
                                     <td>" . htmlspecialchars($row['no_rawat']) . "</td>
                                     <td>" . htmlspecialchars($row['no_rkm_medis']) . "</td>
                                     <td>" . htmlspecialchars($row['nm_pasien']) . "</td>
@@ -488,18 +627,27 @@
                                 <p>Tidak ada kunjungan pasien rawat inap pada periode dan kriteria yang dipilih.</p>
                               </div>';
                     }
-                } else {
-                    echo '<div class="no-data">
-                            <h3>❌ Terjadi Kesalahan</h3>
-                            <p>Error: ' . htmlspecialchars(mysqli_error($koneksi)) . '</p>
-                          </div>';
+                    } else {
+                        echo '<div class="no-data">
+                                <h3>❌ Terjadi Kesalahan</h3>
+                                <p>Error: ' . htmlspecialchars(mysqli_error($koneksi)) . '</p>
+                              </div>';
+                    }
+                    
+                    mysqli_close($koneksi);
                 }
-                
-                mysqli_close($koneksi);
             } else {
                 echo '<div class="no-data">
                         <h3>🔍 Silakan Gunakan Filter</h3>
-                        <p>Pilih tanggal dan cara bayar, kemudian klik "Tampilkan Data" untuk melihat hasil kunjungan pasien rawat inap.</p>
+                        <p>Pilih jenis filter (Registrasi atau Keluar), isi tanggal, kemudian klik "Tampilkan Data" untuk melihat hasil kunjungan pasien rawat inap.</p>
+                        <br>
+                        <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                            <strong>📋 Jenis Filter:</strong>
+                            <ul style="text-align: left; color: #6c757d;">
+                                <li><strong>📅 Berdasarkan Tanggal Registrasi:</strong> Menampilkan pasien yang mendaftar rawat inap pada periode tertentu</li>
+                                <li><strong>🏠 Berdasarkan Tanggal Keluar/Pulang:</strong> Menampilkan pasien yang keluar/pulang dari rawat inap pada periode tertentu</li>
+                            </ul>
+                        </div>
                       </div>';
             }
             ?>

@@ -1,0 +1,192 @@
+/* ==================== */
+/* SPJ COMPLETE STYLESHEET */
+/* F4 Paper Configuration + Print Optimization */
+/* ==================== */
+
+/* F4 Paper Size Configuration (21.5 cm x 33 cm) */
+@page {
+    size: 21.5cm 33cm !important;
+    margin: 1cm !important;
+}
+
+/* Force 1cm margin for all page orientations and positions */
+@page :first {
+    margin: 1cm !important;
+}
+
+@page :left {
+    margin: 1cm !important;
+}
+
+@page :right {
+    margin: 1cm !important;
+}
+
+/* Print Media Styles */
+@media print {
+    body {
+        width: 19.5cm !important; /* 21.5cm - 2cm margins */
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 12pt !important;
+        line-height: 1 !important;
+    }
+    
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 1cm !important;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+        min-height: 32cm !important;
+    }
+    
+    /* Last container should not have page break */
+    .container:last-child {
+        page-break-after: auto !important;
+    }
+    
+    /* Page breaks */
+    .page-break {
+        page-break-before: always;
+        page-break-inside: avoid;
+    }
+    
+    /* Hide web-only elements */
+    .search-form,
+    .print-button {
+        display: none !important;
+    }
+    
+    /* Header positioning - minimal top margin */
+    .header-container {
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
+    }
+    
+    /* Force first elements to start from very top */
+    body > .container > *:first-child,
+    .container > *:first-child,
+    .content > *:first-child {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Remove top spacing from header include */
+    .container > div:first-child {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Header normal position */
+    .header, .search-form {
+        margin-top: 0 !important;
+    }
+    
+    /* Content positioning */
+    .content {
+        margin-top: 5px !important;
+    }
+    
+    /* Headings */
+    h2, h3, h4 {
+        margin: 5px 0 !important;
+        page-break-after: avoid;
+    }
+    
+    .center-text {
+        text-align: center;
+        font-weight: bold;
+        margin: 10px 0 !important;
+    }
+    
+    .center-nomorsurat {
+        text-align: center;
+        margin: 5px 0 10px 0 !important;
+    }
+    
+    /* Garis pembatas */
+    .garis-pembatas {
+        margin: 5px 0 !important;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        page-break-inside: avoid;
+        margin-bottom: 10px !important;
+    }
+    
+    table th,
+    table td {
+        padding: 3px 5px !important;
+        border: 1px solid #000;
+        font-size: 11pt !important;
+    }
+    
+    .no-border-table,
+    .no-border-table td,
+    .no-border-table th {
+        border: none !important;
+        padding: 1px 0 !important;
+    }
+    
+    /* Signature spacing - optimized font and line height */
+    .signature {
+        margin-top: 20px !important;
+        margin-bottom: 20px !important;
+        font-size: 10pt !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Images */
+    img {
+        max-width: 100%;
+        height: auto;
+        page-break-inside: avoid;
+    }
+}
+
+/* Screen display optimization for F4 preview */
+@media screen {
+    body {
+        background-color: #f5f5f5 !important;
+        margin: 0 !important;
+        padding: 20px 0 !important;
+    }
+    
+    .container {
+        width: 21.5cm !important;
+        max-width: 21.5cm !important;
+        min-height: 33cm !important;
+        margin: 0 auto 20px auto !important;
+        background: white !important;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
+        padding: 1cm !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+    }
+    
+    .page-break .container {
+        margin-top: 20px;
+        border-top: 2px dashed #ccc;
+        padding-top: 1cm;
+    }
+    
+    /* Header positioning for screen */
+    .header-container {
+        margin-top: 0 !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .content {
+        margin-top: 10px !important;
+    }
+}
+
+/* Terbilang font optimization */
+p[style*="font-size: 10pt"] {
+    font-size: 10pt !important;
+}

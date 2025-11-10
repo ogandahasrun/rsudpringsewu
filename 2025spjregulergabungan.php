@@ -47,7 +47,6 @@
         <?php
         include 'koneksi.php';
         include 'functions.php';
-        include 'auth.php';
 
         $nopgdn = isset($_GET['nopgdn']) ? $_GET['nopgdn'] : '';
         $data = [];

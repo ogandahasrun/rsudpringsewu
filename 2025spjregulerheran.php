@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ e-katalog</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -177,7 +178,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 2</title>
     <link rel="stylesheet" href="style.css">
-    
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -247,7 +248,7 @@
                 <br>
                 <p><strong><u>dr. Herman Syahrial</u></strong></p>
                 <p>NIP. 19690927 200212 1 003</p>
-            </div>   
+            </div>  
         </div>
     </div>
 </body>
@@ -262,7 +263,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 2a</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -369,7 +370,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -460,7 +461,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -555,7 +556,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -662,7 +663,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 3</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -763,7 +764,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 6</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -859,7 +860,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 7</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -962,7 +963,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 8</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -1060,7 +1061,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 9</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -1172,7 +1173,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ Halaman 10</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
