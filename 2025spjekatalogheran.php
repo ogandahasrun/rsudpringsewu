@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPJ e-katalog</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="spj-complete.css">
 </head>
 <body>
     <div class="container">
@@ -136,7 +137,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
             
@@ -165,21 +166,9 @@
             </table>
         </div>       
     </div>    
-</body>
-</html>
 
 <!------------------------------ BATAS HALAMAN 1  ------------------------------->
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 2</title>
-    <link rel="stylesheet" href="style.css">
-    
-</head>
-<body>
     <div class="container">
         <!-- Halaman Kedua -->
         <div class="page-break">
@@ -236,7 +225,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -250,22 +239,11 @@
             </div>   
         </div>
     </div>
-</body>
-</html>
 
-<!------------------------------ BATAS HALAMAN 2  ------------------------------->
+<!-- BATAS HALAMAN -->
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
-    <link rel="stylesheet" href="style.css">
-
-</head>
-<body>
     <div class="container">
+
         <!-- Halaman Ketiga -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -326,7 +304,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -345,22 +323,10 @@
             </div>   
         </div>
     </div>
-</body>
-</html>
+<!-- BATAS HALAMAN -->
 
-<!------------------------------ BATAS HALAMAN 3  ------------------------------->
-
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
-    <link rel="stylesheet" href="style.css">
-
-</head>
-<body>
     <div class="container">
+
         <!-- Halaman Ketiga -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -372,7 +338,10 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">
-                <tr><td>yang bertanda tangan di bawah ini :</td></tr>
+                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
             </table>
             <table class="no-border-table">        
                 <tr><td>Nama</td><td>:</td><td>dr. Herman Syahrial</td></tr>
@@ -422,7 +391,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -445,22 +414,21 @@
             </table>
         </div>
     </div>
-</body>
-</html>
-
-<!------------------------------ BATAS HALAMAN 4  ------------------------------->
+<!-- BATAS HALAMAN -->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
+    <title>SPJ Halaman 5 - BASTP</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
+
         <!-- Halaman Kelima -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -530,7 +498,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -545,23 +513,21 @@
                 <tr><td></td><td>NIP. 19690927 200212 1 003</td><td></td><td><?php echo isset($datasuplier['jabatan']) ? $datasuplier['jabatan'] : ''; ?></td></tr>
             </table>
         </div>
-    </div>
-</body>
-</html>
-
-<!------------------------------ BATAS HALAMAN 5  ------------------------------->
+        </div><!-- BATAS HALAMAN -->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 6</title>
+    <title>SPJ Halaman 6 - BASTB</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
+
         <!-- Halaman Keenam -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -620,7 +586,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -640,11 +606,7 @@
                 <tr><td></td><td>NIP. 19830619 201101 2 005</td><td></td><td>NIP. 19690927 200212 1 003</td></tr>
             </table>
         </div>
-    </div>
-</body>
-</html>
-
-<!------------------------------ BATAS HALAMAN 6  ------------------------------->
+        </div><!-- BATAS HALAMAN -->
 
 
 <!DOCTYPE html>
@@ -652,12 +614,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 7</title>
+    <title>SPJ Halaman 7 - SPPA</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
+
         <!-- Halaman Ketujuh -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -723,7 +687,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -744,23 +708,21 @@
                 <td style="text-align: center;">NIP 19760308 201407 1 003</td><td></td><td style="text-align: center;">NIP. 19690927 200212 1 003</td></tr>
             </table>
         </div>
-    </div>
-</body>
-</html>
-
-<!------------------------------ BATAS HALAMAN 7  ------------------------------->
+        </div><!-- BATAS HALAMAN -->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 8</title>
+    <title>SPJ Halaman 8 - SPP</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
+
         <!-- Halaman Kedelapan -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -827,7 +789,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?> -->
 
@@ -841,24 +803,21 @@
                 <p>NIP. 19830619 201101 2 005</p>
             </div>
         </div>
-    </div>
-</body>
-</html>
-
-
-<!------------------------------ BATAS HALAMAN 8  ------------------------------->
+        </div><!-- BATAS HALAMAN -->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 9</title>
+    <title>SPJ Halaman 9 - BASTB IF</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
+
         <!-- Halaman Kesembilan -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -933,7 +892,7 @@
             // Menampilkan terbilang dari total akhir
             if (isset($total_akhir)) {
                 $terbilang_total = terbilang($total_akhir);
-                echo "<p>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
+                echo "<p style='font-size: 10pt;'>Terbilang: <strong><em>" . ucfirst($terbilang_total) . " rupiah</em></strong></p>";
             }
             ?>
 
@@ -953,24 +912,21 @@
                 <tr><td></td><td>NIP. 197010202000032002</td><td></td><td>NIP. 197603082014071003</td></tr>
             </table>
         </div>
-    </div>
-</body>
-</html>
-
-
-<!------------------------------ BATAS HALAMAN 9  ------------------------------->
+        </div><!-- BATAS HALAMAN -->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 10</title>
+    <title>SPJ Halaman 10 - BAPB</title>
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
+
         <!-- Halaman Kesepuluh -->
         <div class="page-break">
             <!-- Panggil file header.php -->
@@ -1045,10 +1001,20 @@
 
 <!------------------------------ BATAS HALAMAN 10  ------------------------------->
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPJ Halaman 11 - Dokumentasi Faktur</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="spj-complete.css">
+    
 </head>
 <body>
     <div class="container">
-        <!-- Halaman Kedua -->
+
+        <!-- Halaman Dokumentasi Faktur -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -1073,6 +1039,8 @@
                 }
                 ?>
             </table>
+        </div>
+    </div>
 </body>
 
 <!------------------------------ BATAS HALAMAN terakhir  ------------------------------->
