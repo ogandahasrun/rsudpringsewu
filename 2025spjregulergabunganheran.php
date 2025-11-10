@@ -1232,22 +1232,42 @@
             <?php include 'header.php'; ?>
 
             <table class="no-border-table">
-                <tr><td>Dokumentasi Faktur</td></tr>
+                <tr><td><h4>Dokumentasi Faktur</h4></td></tr>
                 <?php
-                if (!empty($no_faktur)) {
-                    $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='" . mysqli_real_escape_string($koneksi, $no_faktur) . "' LIMIT 1");
-                    if ($row = mysqli_fetch_assoc($q)) {
-                        for ($i = 1; $i <= 3; $i++) {
-                            $foto = $row['foto' . $i];
-                            if (!empty($foto)) {
-                                echo '<tr><td><img src="uploads/faktur/' . htmlspecialchars($foto) . '" alt="Foto Faktur ' . $i . '" style="max-width:350px;max-height:350px;margin:10px 0;"></td></tr>';
+                if (!empty($faktur_list) && is_array($faktur_list)) {
+                    $found_foto = false;
+                    
+                    // Loop semua faktur yang ada di faktur_list
+                    foreach ($faktur_list as $faktur_item) {
+                        $current_no_faktur = $faktur_item['no_faktur'];
+                        
+                        // Query dokumentasi untuk setiap faktur
+                        $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='" . mysqli_real_escape_string($koneksi, $current_no_faktur) . "'");
+                        
+                        if ($row = mysqli_fetch_assoc($q)) {
+                            // Tampilkan nomor faktur sebagai header untuk setiap kelompok foto
+                            echo '<tr><td><strong>Faktur: ' . htmlspecialchars($current_no_faktur) . '</strong></td></tr>';
+                            
+                            // Loop untuk menampilkan foto1, foto2, foto3
+                            for ($i = 1; $i <= 3; $i++) {
+                                $foto = $row['foto' . $i];
+                                if (!empty($foto)) {
+                                    echo '<tr><td><img src="uploads/faktur/' . htmlspecialchars($foto) . '" alt="Foto Faktur ' . htmlspecialchars($current_no_faktur) . ' - ' . $i . '" style="max-width:350px;max-height:350px;margin:10px 0;"></td></tr>';
+                                    $found_foto = true;
+                                }
                             }
+                            
+                            // Tambahkan spasi antar faktur
+                            echo '<tr><td style="height:10px;"></td></tr>';
                         }
-                    } else {
-                        echo '<tr><td><em>Tidak ada dokumentasi faktur.</em></td></tr>';
+                    }
+                    
+                    // Jika tidak ada foto sama sekali
+                    if (!$found_foto) {
+                        echo '<tr><td><em>Tidak ada dokumentasi faktur untuk semua faktur yang terkait.</em></td></tr>';
                     }
                 } else {
-                    echo '<tr><td><em>Nomor faktur tidak ditemukan.</em></td></tr>';
+                    echo '<tr><td><em>Tidak ada data faktur yang ditemukan.</em></td></tr>';
                 }
                 ?>
             </table>
