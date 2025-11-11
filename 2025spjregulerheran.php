@@ -30,22 +30,6 @@
         <div class="content">
             <h4 class="center-text">PERMOHONAN BELANJA BARANG/JASA (PPBJ)</h4>
 
-            <table class="no-border-table">
-                <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</td></tr>
-                <tr><td>Dari</td><td>:</td><td>Pejabat Pelaksana Teknis Kegiatan</td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>.........</td></tr>
-                <tr><td>Nomor</td><td>:</td><td>445 / ..........01/ PPBJ / LL.04 /...../ 2025</td></tr>
-                <tr><td>Program</td><td>:</td><td>Peningkatan Mutu Pelayanan Kesehatan RSUD</td></tr>
-                <tr><td>Kegiatan</td><td>:</td><td>Belanja Operasional BLUD</td></tr>
-                <tr><td>Kode Rekening</td><td>:</td><td>5.1.02.99.99.9999</td></tr>
-            </table>
-
-            <table class="no-border-table">
-                <tr><td> Dengan hormat,</td></tr>
-                <tr><td>Berikut kami sampaikan permintaan pengadaan Belanja Bahan Habis Pakai dari Pengguna atau user untuk Operasional
-                Pelayanan Rumah Sakit</td></tr>    
-            </table>
-
             <?php
             include 'koneksi.php';
             include 'functions.php';
@@ -54,6 +38,10 @@
             $no_faktur = "";
             $pemesanan = [];
             $datasuplier = [];
+            $tanggal_awal_bulan = "";
+            $tanggal_akhir_bulan = "";
+            $tanggal_lengkap = "";
+            $bulan_romawi = "";
 
             // Proses filter jika tombol "Filter" diklik
             if (isset($_POST['filter'])) {
@@ -104,6 +92,106 @@
 
                     // Ambil data pemesanan
                     $pemesanan = mysqli_fetch_assoc($result);
+                    
+                    // Buat tanggal awal bulan dari tgl_faktur
+                    if (!empty($pemesanan['tgl_faktur'])) {
+                        $tgl_faktur = $pemesanan['tgl_faktur'];
+                        // Parse tanggal untuk mendapatkan bulan dan tahun
+                        $date = DateTime::createFromFormat('Y-m-d', $tgl_faktur);
+                        if ($date) {
+                            // Array nama bulan dalam Bahasa Indonesia
+                            $bulan_indonesia = [
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ];
+                            
+                            $bulan = (int)$date->format('n'); // Bulan tanpa leading zero
+                            $tahun = $date->format('Y');
+                            
+                            // Konversi bulan ke angka Romawi
+                            $angka_romawi_bulan = [
+                                1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+                                7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+                            ];
+                            $bulan_romawi = $angka_romawi_bulan[$bulan];
+                            
+                            // Buat tanggal 1 dari bulan tersebut
+                            $tanggal_pertama = DateTime::createFromFormat('Y-m-d', $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '-01');
+                            
+                            // Cek apakah tanggal 1 adalah hari Minggu (0 = Minggu dalam format 'w')
+                            $hari = $tanggal_pertama->format('w');
+                            
+                            // Jika hari Minggu, gunakan tanggal 2, selain itu tanggal 1
+                            $tanggal = ($hari == '0') ? 2 : 1;
+                            
+                            // Format: "1 September 2025" atau "2 September 2025"
+                            $tanggal_awal_bulan = $tanggal . " " . $bulan_indonesia[$bulan] . " " . $tahun;
+                            
+                            // === TANGGAL AKHIR BULAN ===
+                            // Buat tanggal terakhir dari bulan tersebut
+                            $tanggal_terakhir = DateTime::createFromFormat('Y-m-d', $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '-01');
+                            $tanggal_terakhir->modify('last day of this month');
+                            
+                            // Cek apakah tanggal terakhir adalah hari Minggu
+                            $hari_terakhir = $tanggal_terakhir->format('w');
+                            
+                            // Jika hari Minggu, mundur 1 hari (jadi Sabtu)
+                            if ($hari_terakhir == '0') {
+                                $tanggal_terakhir->modify('-1 day');
+                            }
+                            
+                            // Format: "30 September 2025" atau "29 September 2025"
+                            $tgl_akhir = $tanggal_terakhir->format('j'); // Tanggal tanpa leading zero
+                            $tanggal_akhir_bulan = $tgl_akhir . " " . $bulan_indonesia[$bulan] . " " . $tahun;
+                            
+                            // === FORMAT TANGGAL LENGKAP UNTUK BERITA ACARA ===
+                            // Array nama hari dalam Bahasa Indonesia
+                            $hari_indonesia = [
+                                0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu',
+                                4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu'
+                            ];
+                            
+                            // Fungsi untuk mengkonversi angka ke terbilang
+                            function angka_ke_terbilang($angka) {
+                                $angka = abs($angka);
+                                $bilangan = array('', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas');
+                                
+                                if ($angka < 12) {
+                                    return $bilangan[$angka];
+                                } elseif ($angka < 20) {
+                                    return angka_ke_terbilang($angka - 10) . ' Belas';
+                                } elseif ($angka < 100) {
+                                    return angka_ke_terbilang($angka / 10) . ' Puluh ' . angka_ke_terbilang($angka % 10);
+                                } elseif ($angka < 200) {
+                                    return 'Seratus ' . angka_ke_terbilang($angka - 100);
+                                } elseif ($angka < 1000) {
+                                    return angka_ke_terbilang($angka / 100) . ' Ratus ' . angka_ke_terbilang($angka % 100);
+                                } elseif ($angka < 2000) {
+                                    return 'Seribu ' . angka_ke_terbilang($angka - 1000);
+                                } elseif ($angka < 1000000) {
+                                    return angka_ke_terbilang($angka / 1000) . ' Ribu ' . angka_ke_terbilang($angka % 1000);
+                                }
+                                return trim($angka);
+                            }
+                            
+                            // Ambil nama hari
+                            $nama_hari = $hari_indonesia[$tanggal_terakhir->format('w')];
+                            
+                            // Terbilang tanggal
+                            $tgl_terbilang = angka_ke_terbilang($tgl_akhir);
+                            
+                            // Terbilang tahun (pisahkan digit)
+                            $tahun_int = (int)$tahun;
+                            $tahun_terbilang = angka_ke_terbilang($tahun_int);
+                            
+                            // Format numerik dd/mm/yyyy
+                            $tgl_numerik = str_pad($tgl_akhir, 2, '0', STR_PAD_LEFT) . '/' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '/' . $tahun;
+                            
+                            // Format lengkap: "Senin, tanggal Tiga Puluh Bulan Juni Tahun Dua Ribu Dua Puluh Lima (30/06/2025)"
+                            $tanggal_lengkap = $nama_hari . ", tanggal " . trim($tgl_terbilang) . " Bulan " . $bulan_indonesia[$bulan] . " Tahun " . trim($tahun_terbilang) . " (" . $tgl_numerik . ")";
+                        }
+                    }
 
                     // Ambil data suplier
                     $query_suplier = "SELECT * FROM datasuplier WHERE kode_suplier = (SELECT kode_suplier FROM pemesanan WHERE no_faktur = ?)";
@@ -115,6 +203,22 @@
                 }
             }
             ?>
+
+            <table class="no-border-table">
+                <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</td></tr>
+                <tr><td>Dari</td><td>:</td><td>Pejabat Pelaksana Teknis Kegiatan</td></tr>
+                <tr><td>Tanggal</td><td>:</td><td><?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td></tr>
+                <tr><td>Nomor</td><td>:</td><td>445 / ..........01/ PPBJ / LL.04 /...../ 2025</td></tr>
+                <tr><td>Program</td><td>:</td><td>Peningkatan Mutu Pelayanan Kesehatan RSUD</td></tr>
+                <tr><td>Kegiatan</td><td>:</td><td>Belanja Operasional BLUD</td></tr>
+                <tr><td>Kode Rekening</td><td>:</td><td>5.1.02.99.99.9999</td></tr>
+            </table>
+
+            <table class="no-border-table">
+                <tr><td> Dengan hormat,</td></tr>
+                <tr><td>Berikut kami sampaikan permintaan pengadaan Belanja Bahan Habis Pakai dari Pengguna atau user untuk Operasional
+                Pelayanan Rumah Sakit</td></tr>    
+            </table>
 
             <!-- Tabel Daftar Barang -->
             <table>
@@ -190,7 +294,7 @@
             <table class="no-border-table">
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</td></tr>
                 <tr><td>Dari</td><td>:</td><td>Pejabat Pembuat Komitmen</td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>.........</td></tr>
+                <tr><td>Tanggal</td><td>:</td><td><?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td></tr>
                 <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /...../ 2025</td></tr>
                 <tr><td>Perihal</td><td>:</td><td>Pengadaan Langsung</td></tr>    
             </table>
@@ -348,7 +452,7 @@
 
             <!-- Tanda Tangan -->
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, ...................................... 2025</p>
+                <p>Pringsewu, <?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></p>
                 <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>
                 <br>
                 <br>
@@ -654,14 +758,14 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 4  ------------------------------->
+<!------------------------------ BATAS HALAMAN 6  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPJ Halaman 3</title>
+    <title>SPJ Halaman 7</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="spj-complete.css">
 </head>
@@ -674,13 +778,10 @@
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA PEKERJAAN</h2>
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/BASTP/LL.04/
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'tanggal bulan tahun Dua Ribu Dua Puluh Lima ( / /2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -755,7 +856,7 @@
 </body>
 </html>
 
-<!------------------------------ BATAS HALAMAN 5  ------------------------------->
+<!------------------------------ BATAS HALAMAN 7  ------------------------------->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -775,13 +876,10 @@
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB/LL.04/
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'tanggal bulan tahun Dua Ribu Dua Puluh Lima ( / /2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -870,13 +968,11 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">SURAT PERINTAH PENCATATAN ASET</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SPPA.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SPPA.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'tanggal bulan tahun Dua Ribu Dua Puluh Lima ( / /2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -973,7 +1069,8 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">SURAT PERMOHONAN PEMBAYARAN</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SPP.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SPP.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
 
             <table class="no-border-table">        
                 <tr><td>Kepada Yth :</td></tr>
@@ -1038,7 +1135,7 @@
             ?> -->
 
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, ................................................2025</p>
+                <p>Pringsewu, <?php echo !empty($tanggal_akhir_bulan) ? $tanggal_akhir_bulan : '................................................2025'; ?></p>
                 <p>Pejabat Pelaksana Teknis Kegiatan</p>
                 <p>Belanja bahan Habis Pakai (BAHP) Rumah Sakit</p>
                 <br>
@@ -1071,13 +1168,12 @@
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB.IF/
+                <?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'tanggal bulan tahun Dua Ribu Dua Puluh Lima ( / /2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1183,13 +1279,11 @@
             <?php include 'header.php'; ?>
 
             <h3 class="center-text">BERITA ACARA PEMERIKSAAN BARANG</h3>
-            <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/LL.04/2025</h4>
+            <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/LL.04/
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Lima (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025),
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'tanggal bulan tahun Dua Ribu Dua Puluh Lima ( / /2025)'; ?>,
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
