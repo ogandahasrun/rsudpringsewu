@@ -208,7 +208,8 @@
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</td></tr>
                 <tr><td>Dari</td><td>:</td><td>Pejabat Pelaksana Teknis Kegiatan</td></tr>
                 <tr><td>Tanggal</td><td>:</td><td><?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td></tr>
-                <tr><td>Nomor</td><td>:</td><td>445 / ..........01/ PPBJ / LL.04 /...../ 2025</td></tr>
+                <tr><td>Nomor</td><td>:</td><td>445 / <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ LL.04 /
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/ 2025</td></tr>
                 <tr><td>Program</td><td>:</td><td>Peningkatan Mutu Pelayanan Kesehatan RSUD</td></tr>
                 <tr><td>Kegiatan</td><td>:</td><td>Belanja Operasional BLUD</td></tr>
                 <tr><td>Kode Rekening</td><td>:</td><td>5.1.02.99.99.9999</td></tr>
@@ -295,7 +296,8 @@
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</td></tr>
                 <tr><td>Dari</td><td>:</td><td>Pejabat Pembuat Komitmen</td></tr>
                 <tr><td>Tanggal</td><td>:</td><td><?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td></tr>
-                <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /...../ 2025</td></tr>
+                <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/ 2025</td></tr>
                 <tr><td>Perihal</td><td>:</td><td>Pengadaan Langsung</td></tr>    
             </table>
 
@@ -307,7 +309,9 @@
                 <tr><td> </td><td>1. Peraturan Presiden Nomor 12 Tahun 2021 tentang Pengadaan Barang/Jasa Pemerintah</td></tr>
                 <tr><td> </td><td>2. Peraturan Bupati Nomor 17 Tahun 2018 tentang Jenjang Nilai Pengadaan Barang dan Jasa pada Unit Pelayanan Umum Daerah </td></tr>
                 <tr><td> </td><td>&nbsp;&nbsp;&nbsp;&nbsp;Rumah Sakit Umum Daerah Pringsewu.</td></tr>
-                <tr><td> </td><td>3. Surat permintaan Pengadaan Barang/Jasa Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/2025 tanggal ... </td></tr>
+                <tr><td> </td><td>3. Surat permintaan Pengadaan Barang/Jasa Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/ 2025 tanggal 
+                    <?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td></tr>
             </table>
             <table class="no-border-table">
                 <tr><td>B.</td><td>Menugaskan</td><td>:</td><td></td></tr>
@@ -377,7 +381,8 @@
             <?php include 'header.php'; ?>
 
             <table class="no-border-table">
-                <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PIBH/LL.04/...../2025</td></tr>
+                <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PIBH/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</td></tr>
                 <tr><td>Lampiran</td><td>:</td><td>-</td></tr>
                 <tr><td>Perihal</td><td>:</td><td> Permohonan Informasi Barang dan Harga</td></tr>    
             </table>
@@ -503,7 +508,8 @@
             </table>
 
             <table class="no-border-table">
-                <tr><td>Nomor</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PIBH/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 2025</td></tr>
+                <tr><td>Nomor</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PIBH/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/ 2025</td></tr>
                 <tr><td>Tanggal</td><td>:</td></tr>
                 <tr><td>Paket Pekerjaan</td><td>: Belanja Bahan Alat Habis Pakai (BAHP) Rumah Sakit</td></tr>
                 <tr><td>Nama Paket Pekerjaan</td><td>: Belanja Bahan Alat Habis Pakai (BAHP) Rumah Sakit</td></tr>
@@ -575,7 +581,8 @@
             <?php include 'header.php'; ?>
             
             <table class="no-border-table">
-                <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /...../ 2025</td></tr>
+                <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/ 2025</td></tr>
                 <tr><td>Lampiran</td><td>:</td><td>-</td></tr>    
                 <tr><td>Perihal</td><td>:</td><td>Penyampaian Hasil Pengadaan Langsung</td></tr>    
             </table>
@@ -597,7 +604,8 @@
                 <tr><td> </td><td>1. Peraturan Presiden Nomor 12 Tahun 2021 tentang Pengadaan Barang/Jasa Pemerintah</td></tr>
                 <tr><td> </td><td>2. Peraturan Bupati Nomor 17 Tahun 2018 tentang Jenjang Nilai Pengadaan Barang dan Jasa pada Unit
                 Pelayanan Umum Daerah Rumah Sakit Umum Daerah Pringsewu.</td></tr>
-                <tr><td> </td><td>3. Surat permintaan pengadaan langsung Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/2025 tanggal ... </td></tr>
+                <tr><td> </td><td>3. Surat permintaan pengadaan langsung Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025 tanggal ... </td></tr>
                 <tr><td> </td></tr>
                 <tr><td>B.</td><td>Penyedia</td></tr>
                 <tr><td> </td><td>1. Nama Paket Pekerjaan : Belanja bahan habis Pakai (BAHP) RSUD</td></tr>
@@ -672,7 +680,7 @@
             <h4 class="center-text">SURAT PERINTAH KERJA</h4>
             <h4 class="center-nomorsurat">Nomor Surat : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/
                 <?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</h4>
 
             <table class="no-border-table">        
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -692,7 +700,8 @@
             <table class="no-border-table">        
                 <tr><td>Dalam hal ini bertindak untuk dan atas nama RSUD Pringsewu, yang Selanjutnya disebut sebagai Pejabat Pembuat Komitmen (PPK);</td></tr>
                 <tr><td>Berdasarkan Laporan Hasil Pengadaan Langsung</td></tr>
-                <tr><td>Nomor : 445 / <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 2025</td></tr>
+                <tr><td>Nomor : 445 / <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/ 2025</td></tr>
                 <tr><td>Tanggal :</td></tr>    
                 <tr><td>bersama ini memerintahkan kepada :</td></tr>    
             </table>
@@ -804,8 +813,9 @@
             <?php echo ""; ?>
 
             <table class="no-border-table">        
-                <tr><td>Berdasarkan Surat Pesanan Barang dan Jasa Nomor : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SP/ /LL.04/ /2025 untuk paket pekerjaan 
-                        belanja Bahan Habis Pakai dengan ini menerangkan bahwa :</td></tr>
+                <tr><td>Berdasarkan Surat Pesanan Barang dan Jasa Nomor : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/SP/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025 untuk paket pekerjaan 
+                    belanja Bahan Habis Pakai dengan ini menerangkan bahwa :</td></tr>
             </table>   
 
 
@@ -900,7 +910,8 @@
 
             <table class="no-border-table">        
                 <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Pihak I telah menyerahkan barang dan jasa sesuai dengan Permohonan Pengadaan Barang dan Jasa (PPBJ) </td></tr>
-                <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ/LL.04/ /2025 Tanggal , dengan rincian sebagai berikut :</td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025, dengan rincian sebagai berikut :</td></tr>
             </table>   
 
             <!-- Tabel Detail Barang -->
@@ -995,7 +1006,7 @@
             <table class="no-border-table">        
                 <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Dalam hal ini bertindak untuk dan atas nama RSUD Pringsewu, 
                     yang ditunjuk berdasarkan Surat Keputusan (SK) yang ditandatangani Kepala Daerah Kabupaten Pringsewu, 
-                    Nomor : B/52 /KPTS/B.02/2023 Tanggal 2 januari 2025 yang selanjutnya disebut sebagai Pengurus Barang Pembantu I;</td></tr>
+                    Nomor : B/52 /KPTS/B.02/2025 Tanggal 2 januari 2025 yang selanjutnya disebut sebagai Pengurus Barang Pembantu I;</td></tr>
             </table>   
 
             <table class="no-border-table">        
@@ -1090,11 +1101,13 @@
                 <tr><td>1</td><td>Program</td><td>: Operasional Pelayanan Rumah Sakit</td></tr>
                 <tr><td>2</td><td>Kegiatan</td><td>: Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>3</td><td>Pekerjaan</td><td>: Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td></tr>
+                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/ 
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</td></tr>
                 <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
                 <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
                 echo "" . ucfirst($terbilang_total) . " rupiah";}?> </td></tr>
-                <tr><td>5</td><td>Nomor Surat Pesanan</td><td>: <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td></tr>
+                <tr><td>5</td><td>Nomor Surat Pesanan</td><td>: <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                    <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</td></tr>
                 <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
                 <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
                 echo "" . ucfirst($terbilang_total) . " rupiah";}?></td></tr>
@@ -1205,7 +1218,8 @@
                     <tr>
                     <td>1</td>
                     <td>.</td>
-                    <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td>
+                    <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                        <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($pemesanan['tgl_faktur']) . "</p>"; ?> </div></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($no_faktur) . "</p>"; ?> </div></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($datasuplier['nama_suplier']) . "</p>"; ?> </div></td>
@@ -1289,7 +1303,8 @@
             <table class="no-border-table">        
                 <tr><td>Kegiatan</td><td>:</td><td>Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>Pekerjaan</td><td>:</td><td>Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>No. Surat Pesanan</td><td>:</td><td><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td></tr>
+                <tr><td>No. Surat Pesanan</td><td>:</td><td><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/
+                        <?php echo !empty($bulan_romawi) ? $bulan_romawi : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; ?>/2025</td></tr>
                 <tr><td>Pelaksana Pekerjaan</td><td>:</td><td></td></tr>
                 <tr><td>Nama Perusahaan</td><td>:</td><td><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td>Alamat Perusahaan</td><td>:</td><td><?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
