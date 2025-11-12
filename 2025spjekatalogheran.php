@@ -689,7 +689,7 @@
             <table class="no-border-table">        
                 <tr><td>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Pihak I telah menyerahkan barang dan jasa sesuai dengan Permohonan Pengadaan Barang dan Jasa (PPBJ) </td></tr>
                 <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ/LL.04/
-                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/2025 Tanggal , dengan rincian sebagai berikut :</td></tr>
+                <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/2025 Tanggal <?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?>, dengan rincian sebagai berikut :</td></tr>
             </table>   
 
             <!-- Tabel Detail Barang -->
