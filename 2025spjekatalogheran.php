@@ -40,7 +40,8 @@
             $datasuplier = [];
             $tanggal_awal_bulan = "";
             $tanggal_akhir_bulan = "";
-            $tanggal_lengkap = "";
+            $tanggal_lengkap_awal = "";
+            $tanggal_lengkap_akhir = "";
             $bulan_romawi = "";
 
             // Proses filter jika tombol "Filter" diklik
@@ -125,6 +126,11 @@
                             // Jika hari Minggu, gunakan tanggal 2, selain itu tanggal 1
                             $tanggal = ($hari == '0') ? 2 : 1;
                             
+                            // Update tanggal_pertama jika berubah dari tanggal 1 ke 2
+                            if ($tanggal == 2) {
+                                $tanggal_pertama->modify('+1 day');
+                            }
+                            
                             // Format: "1 September 2025" atau "2 September 2025"
                             $tanggal_awal_bulan = $tanggal . " " . $bulan_indonesia[$bulan] . " " . $tahun;
                             
@@ -188,8 +194,21 @@
                             // Format numerik dd/mm/yyyy
                             $tgl_numerik = str_pad($tgl_akhir, 2, '0', STR_PAD_LEFT) . '/' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '/' . $tahun;
                             
-                            // Format lengkap: "Senin, tanggal Tiga Puluh Bulan Juni Tahun Dua Ribu Dua Puluh Lima (30/06/2025)"
-                            $tanggal_lengkap = $nama_hari . ", tanggal " . trim($tgl_terbilang) . " Bulan " . $bulan_indonesia[$bulan] . " Tahun " . trim($tahun_terbilang) . " (" . $tgl_numerik . ")";
+                            // Format lengkap AKHIR BULAN: "Senin, tanggal Tiga Puluh Bulan Juni Tahun Dua Ribu Dua Puluh Lima (30/06/2025)"
+                            $tanggal_lengkap_akhir = $nama_hari . ", tanggal " . trim($tgl_terbilang) . " Bulan " . $bulan_indonesia[$bulan] . " Tahun " . trim($tahun_terbilang) . " (" . $tgl_numerik . ")";
+                            
+                            // === FORMAT TANGGAL LENGKAP AWAL BULAN ===
+                            // Ambil nama hari untuk tanggal awal
+                            $nama_hari_awal = $hari_indonesia[$tanggal_pertama->format('w')];
+                            
+                            // Terbilang tanggal awal
+                            $tgl_awal_terbilang = angka_ke_terbilang($tanggal);
+                            
+                            // Format numerik awal dd/mm/yyyy
+                            $tgl_numerik_awal = str_pad($tanggal, 2, '0', STR_PAD_LEFT) . '/' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '/' . $tahun;
+                            
+                            // Format lengkap AWAL BULAN: "Senin, tanggal Satu Bulan Juni Tahun Dua Ribu Dua Puluh Lima (01/06/2025)"
+                            $tanggal_lengkap_awal = $nama_hari_awal . ", tanggal " . trim($tgl_awal_terbilang) . " Bulan " . $bulan_indonesia[$bulan] . " Tahun " . trim($tahun_terbilang) . " (" . $tgl_numerik_awal . ")";
                         }
                     }
 
@@ -420,7 +439,7 @@
 
             <!-- Tanda Tangan -->
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, <?php echo !empty($tanggal_akhir_bulan) ? $tanggal_akhir_bulan : '.............................'; ?></p>
+                <p>Pringsewu, <?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.............................'; ?></p>
                 <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>
                 <br>
                 <br>
@@ -429,7 +448,7 @@
             </div>   
         </div>
     </div>
-<!-- BATAS HALAMAN 4 -->
+<!-- BATAS HALAMAN 3 -->
 
     <div class="container">
 
@@ -444,7 +463,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/2025</h4>
 
             <table class="no-border-table">
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_awal) ? $tanggal_lengkap_awal : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
             </table>
 
             <table class="no-border-table">
@@ -523,7 +542,7 @@
             </table>
         </div>
     </div>
-<!-- BATAS HALAMAN 5 -->
+<!-- BATAS HALAMAN 4 -->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -548,7 +567,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/2025</h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -648,7 +667,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -740,7 +759,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '.........'; ?>/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -937,7 +956,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '.........'; ?>/2025</h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -968,7 +987,7 @@
 
                     <tr>
                     <td>1</td>
-                    <td>.</td>
+                    <td><?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /2025</td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($pemesanan['tgl_faktur']) . "</p>"; ?> </div></td>
                     <td><div class="supplier-info"style="text-align: center;"><?php echo "<p>" . htmlspecialchars($no_faktur) . "</p>"; ?> </div></td>
@@ -1044,7 +1063,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '.........'; ?>/2025</h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap) ? $tanggal_lengkap : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
@@ -1149,3 +1168,4 @@
 </body>
 
 <!------------------------------ BATAS HALAMAN terakhir  ------------------------------->
+
