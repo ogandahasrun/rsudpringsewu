@@ -294,9 +294,39 @@ if ($poli_result) {
 
     <script>
         let sortDirection = {}; // Store sort direction for each column
+        let autoRefreshTimer;
+        let autoRefreshEnabled = true;
         
-        function sortTable(columnIndex, dataType) {
+        // Load saved sort state from localStorage
+        function loadSortState() {
+            const savedSort = localStorage.getItem('prb_sort_state');
+            if (savedSort) {
+                const sortState = JSON.parse(savedSort);
+                sortDirection = sortState.direction || {};
+                
+                // Apply saved sort
+                if (sortState.columnIndex !== undefined && sortState.dataType) {
+                    setTimeout(() => {
+                        sortTable(sortState.columnIndex, sortState.dataType, true);
+                    }, 100);
+                }
+            }
+        }
+        
+        // Save sort state to localStorage
+        function saveSortState(columnIndex, dataType) {
+            const sortState = {
+                columnIndex: columnIndex,
+                dataType: dataType,
+                direction: sortDirection
+            };
+            localStorage.setItem('prb_sort_state', JSON.stringify(sortState));
+        }
+        
+        function sortTable(columnIndex, dataType, skipSave = false) {
             const table = document.getElementById('dataTable');
+            if (!table) return;
+            
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
             const headers = table.querySelectorAll('th');
@@ -304,7 +334,7 @@ if ($poli_result) {
             // Toggle sort direction
             if (!sortDirection[columnIndex]) {
                 sortDirection[columnIndex] = 'asc';
-            } else {
+            } else if (!skipSave) {
                 sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
             }
             
@@ -347,14 +377,37 @@ if ($poli_result) {
             
             // Update row numbers
             updateRowNumbers();
+            
+            // Save sort state (except when loading from saved state)
+            if (!skipSave) {
+                saveSortState(columnIndex, dataType);
+            }
         }
         
         function updateRowNumbers() {
-            const tbody = document.getElementById('dataTable').querySelector('tbody');
+            const tbody = document.getElementById('dataTable')?.querySelector('tbody');
+            if (!tbody) return;
+            
             const rows = tbody.querySelectorAll('tr');
             rows.forEach((row, index) => {
                 row.cells[0].textContent = index + 1;
             });
+        }
+        
+        // Auto refresh function
+        function startAutoRefresh() {
+            if (!autoRefreshEnabled) return;
+            
+            autoRefreshTimer = setTimeout(() => {
+                // Reload page with current URL parameters
+                window.location.reload();
+            }, 60000); // 60000ms = 1 menit
+        }
+        
+        function stopAutoRefresh() {
+            if (autoRefreshTimer) {
+                clearTimeout(autoRefreshTimer);
+            }
         }
         
         function exportToExcel() {
@@ -398,6 +451,27 @@ if ($poli_result) {
             }
             if (!tanggalAkhir.value) {
                 tanggalAkhir.value = new Date().toISOString().split('T')[0];
+            }
+            
+            // Load saved sort state
+            loadSortState();
+            
+            // Start auto refresh
+            startAutoRefresh();
+        });
+        
+        // Stop refresh when user is interacting
+        document.addEventListener('click', function() {
+            stopAutoRefresh();
+            startAutoRefresh(); // Restart timer
+        });
+        
+        // Stop refresh when page is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
             }
         });
     </script>
