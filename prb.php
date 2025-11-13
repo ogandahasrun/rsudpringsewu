@@ -73,7 +73,11 @@ if ($poli_result) {
         .info-card p { margin: 0; font-size: 14px; opacity: 0.9; }
         .table-container { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; background: white; }
-        th { background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; }
+        th { background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; cursor: pointer; user-select: none; position: relative; transition: background 0.3s ease; }
+        th:hover { background: linear-gradient(45deg, #495057, #5a6268); }
+        th.sortable::after { content: ' ⇅'; opacity: 0.5; font-size: 11px; }
+        th.sort-asc::after { content: ' ▲'; opacity: 1; color: #28a745; }
+        th.sort-desc::after { content: ' ▼'; opacity: 1; color: #dc3545; }
         td { padding: 12px; border-bottom: 1px solid #e9ecef; font-size: 13px; }
         tr:nth-child(even) td { background: #f8f9fa; }
         tr:hover td { background: #e8f5e8; }
@@ -232,14 +236,14 @@ if ($poli_result) {
                     <table id="dataTable">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>No. Rawat</th>
-                                <th>No. RM</th>
-                                <th>Nama Pasien</th>
-                                <th>Nama Dokter</th>
-                                <th>Poliklinik</th>
-                                <th>No. SEP</th>
-                                <th>PRB</th>
+                                <th class="sortable" onclick="sortTable(0, 'number')">No</th>
+                                <th class="sortable" onclick="sortTable(1, 'text')">No. Rawat</th>
+                                <th class="sortable" onclick="sortTable(2, 'text')">No. RM</th>
+                                <th class="sortable" onclick="sortTable(3, 'text')">Nama Pasien</th>
+                                <th class="sortable" onclick="sortTable(4, 'text')">Nama Dokter</th>
+                                <th class="sortable" onclick="sortTable(5, 'text')">Poliklinik</th>
+                                <th class="sortable" onclick="sortTable(6, 'text')">No. SEP</th>
+                                <th class="sortable" onclick="sortTable(7, 'text')">PRB</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -289,6 +293,70 @@ if ($poli_result) {
     </div>
 
     <script>
+        let sortDirection = {}; // Store sort direction for each column
+        
+        function sortTable(columnIndex, dataType) {
+            const table = document.getElementById('dataTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const headers = table.querySelectorAll('th');
+            
+            // Toggle sort direction
+            if (!sortDirection[columnIndex]) {
+                sortDirection[columnIndex] = 'asc';
+            } else {
+                sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+            }
+            
+            const direction = sortDirection[columnIndex];
+            
+            // Remove sort classes from all headers
+            headers.forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Add appropriate class to current header
+            headers[columnIndex].classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+                
+                // Handle different data types
+                if (dataType === 'number') {
+                    aValue = parseInt(aValue) || 0;
+                    bValue = parseInt(bValue) || 0;
+                } else {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+                
+                if (aValue < bValue) {
+                    return direction === 'asc' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            
+            // Clear and re-append sorted rows
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+            
+            // Update row numbers
+            updateRowNumbers();
+        }
+        
+        function updateRowNumbers() {
+            const tbody = document.getElementById('dataTable').querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                row.cells[0].textContent = index + 1;
+            });
+        }
+        
         function exportToExcel() {
             const table = document.getElementById('dataTable');
             if (!table) {
