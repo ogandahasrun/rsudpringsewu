@@ -377,6 +377,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <div class="title">Hutang Barang Medis</div>
             </a>
             
+            <a href="kalkulatorfaktur.php" class="menu-card" title="Kalkulator Faktur">
+                <div class="icon-wrapper">
+                    <i class="fas fa-calculator icon"></i>
+                </div>
+                <div class="title">Kalkulator Faktur</div>
+            </a>
+
             <a href="reseppasienralan.php" class="menu-card" title="Resep Pasien Ralan">
                 <div class="icon-wrapper">
                     <i class="fas fa-file-prescription icon"></i>
