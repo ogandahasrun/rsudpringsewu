@@ -21,7 +21,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Laporan dan Surat</title>
+    <title>Menu Jasa Pelayanan</title>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -132,6 +132,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="umbalbpjs.php" title="Umpan Balik BPJS">
                 <img src="images/bpjs.png" alt="BPJS Icon" style="width: 60px; height: 60px; margin-bottom: 12px; object-fit: contain;">
                 <span>Umpan Balik BPJS</span>
+            </a>
+            <a href="ceknorawat.php" title="Cek Nomor Rawat">
+                <img src="images/bpjs.png" alt="BPJS Icon" style="width: 60px; height: 60px; margin-bottom: 12px; object-fit: contain;">
+                <span>Cek Nomor Rawat</span>
             </a>
         </div>
     </div>
