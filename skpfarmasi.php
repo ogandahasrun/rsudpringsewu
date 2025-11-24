@@ -540,6 +540,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data1[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[1]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -562,6 +566,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data2[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[2]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -584,6 +592,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data3[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[3]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -606,6 +618,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data4[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[4]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -628,6 +644,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data5[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[5]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -650,6 +670,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data6[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[6]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -672,6 +696,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data7[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[7]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -694,6 +722,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data8[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[8]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -716,6 +748,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data9[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[9]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -738,6 +774,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data10[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[10]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -760,6 +800,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data11[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[11]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -782,6 +826,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data12[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[12]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -804,6 +852,10 @@ while ($row = mysqli_fetch_assoc($r13)) {
                             <td class="number-cell"><?php echo number_format($data13[$tgl]); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <tr style="background: #343a40; color: white; font-weight: bold;">
+                            <td style="text-align: center; padding: 12px;">TOTAL</td>
+                            <td class="number-cell" style="color: white;"><?php echo number_format($total_data[13]); ?></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
