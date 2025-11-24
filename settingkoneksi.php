@@ -15,4 +15,11 @@ $CONSIDAPIMOBILEJKN = "your_consumer_id_here"; // Consumer ID dari BPJS
 $SECRETKEYAPIMOBILEJKN = "your_secret_key_here"; // Secret Key dari BPJS
 $USERKEYAPIMOBILEJKN = "your_user_key_here"; // User Key dari BPJS
 
+// ========================================
+// KONFIGURASI MOBILE JKN AUTH
+// ========================================
+$URLAUTHMJKN = "https://localhost/auth"; // URL Auth Mobile JKN
+$USERNAMEAUTHMJKN = "usermjkn"; // Username untuk Auth
+$PASSWORDAUTHMJKN = "passwordmjkn"; // Password untuk Auth
+
 ?>
