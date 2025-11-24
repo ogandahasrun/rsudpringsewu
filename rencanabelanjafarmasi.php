@@ -7,10 +7,11 @@ $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date
 
 // Ambil data barang
 $barang = [];
-$q_barang = mysqli_query($koneksi, "SELECT kode_brng, nama_brng, kode_sat FROM databarang");
+$q_barang = mysqli_query($koneksi, "SELECT kode_brng, nama_brng, h_beli, kode_sat FROM databarang");
 while ($row = mysqli_fetch_assoc($q_barang)) {
     $barang[$row['kode_brng']] = [
         'nama_brng' => $row['nama_brng'],
+        'h_beli'    => $row['h_beli'],
         'kode_sat'  => $row['kode_sat']
     ];
 }
@@ -128,6 +129,7 @@ while ($row = mysqli_fetch_assoc($q_jual)) {
                 <th>No</th>
                 <th>Kode Barang</th>
                 <th>Nama Barang</th>
+                <th>Harga Satuan</th>
                 <th>Kode Satuan</th>
                 <th>Stok GO</th>
                 <th>Stok DRI</th>
@@ -166,6 +168,7 @@ while ($row = mysqli_fetch_assoc($q_jual)) {
                     <td><?php echo $no++; ?></td>
                     <td><?php echo htmlspecialchars($kode_brng); ?></td>
                     <td><?php echo htmlspecialchars($info['nama_brng']); ?></td>
+                    <td style="text-align:right;"><?php echo number_format($info['h_beli'], 2, ',', '.'); ?></td>
                     <td><?php echo htmlspecialchars($info['kode_sat']); ?></td>
                     <td style="text-align:right;"><?php echo $stok_go; ?></td>
                     <td style="text-align:right;"><?php echo $stok_dri; ?></td>
