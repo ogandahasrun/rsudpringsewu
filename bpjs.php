@@ -138,6 +138,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-ban"></i>
                 <span>Batal Antrian</span>
             </a>
+            <a href="updatejadwaldokter.php" title="Update Jadwal Dokter BPJS">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Update Jadwal Dokter</span>
+            </a>            
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
