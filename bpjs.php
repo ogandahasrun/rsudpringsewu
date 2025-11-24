@@ -78,16 +78,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             box-shadow: 0 4px 16px rgba(0,123,255,0.08);
             color: #0056b3;
         }
-        .icon-menu img {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 12px;
-            object-fit: contain;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-        .icon-menu a:hover img {
+        .icon-menu a:hover i {
             transform: scale(1.1);
-            opacity: 0.8;
+        }
+        .icon-menu i {
+            font-size: 60px;
+            margin-bottom: 12px;
+            transition: transform 0.2s;
         }
         .icon-menu span {
             margin-top: 2px;
@@ -130,8 +127,16 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
         <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
         <div class="icon-menu">
             <a href="prb.php" title="Potensi Rujuk Balik">
-                <img src="images/bpjs.png" alt="BPJS Icon" style="width: 60px; height: 60px; margin-bottom: 12px; object-fit: contain;">
+                <i class="fas fa-hospital-user"></i>
                 <span>Potensi Rujuk Balik</span>
+            </a>
+            <a href="bpjssignature.php" title="BPJS Signature Generator">
+                <i class="fas fa-key"></i>
+                <span>Signature Generator</span>
+            </a>
+            <a href="batalantreanbpjs.php" title="Batal Antrian BPJS">
+                <i class="fas fa-ban"></i>
+                <span>Batal Antrian</span>
             </a>
         </div>
     </div>
