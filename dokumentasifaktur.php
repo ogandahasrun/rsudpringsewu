@@ -22,6 +22,35 @@ if ($row = mysqli_fetch_assoc($q)) {
     }
 }
 
+// Proses hapus foto
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_foto'])) {
+    $no_faktur = $_POST['no_faktur'];
+    $foto_index = intval($_POST['foto_index']);
+    
+    // Ambil data foto dari database
+    $q = mysqli_query($koneksi, "SELECT foto" . ($foto_index + 1) . " FROM pemesanan_dokumentasi WHERE no_faktur='$no_faktur' LIMIT 1");
+    if ($row = mysqli_fetch_assoc($q)) {
+        $foto_file = $row['foto' . ($foto_index + 1)];
+        
+        if (!empty($foto_file)) {
+            // Hapus file fisik
+            $file_path = 'uploads/faktur/' . $foto_file;
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+            
+            // Update database (set field foto jadi kosong)
+            $field = 'foto' . ($foto_index + 1);
+            mysqli_query($koneksi, "UPDATE pemesanan_dokumentasi SET $field='' WHERE no_faktur='$no_faktur'");
+            
+            $pesan = "Foto berhasil dihapus!";
+            
+            // Refresh data foto_paths
+            $foto_paths[$foto_index] = '';
+        }
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     $no_faktur = $_POST['no_faktur'];
     $upload_dir = 'uploads/faktur/';
@@ -294,6 +323,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             color: #666;
             margin-bottom: 10px;
         }
+        .btn-hapus {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            margin-top: 8px;
+        }
+        .btn-hapus:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+        .btn-hapus:active {
+            transform: translateY(0);
+        }
         .back-button {
             margin-top: 25px;
             text-align: center;
@@ -434,6 +484,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 min-height: 48px;
                 padding: 15px 20px;
             }
+            .btn-hapus {
+                min-height: 44px;
+                padding: 10px;
+                font-size: 12px;
+            }
         }
         
         /* Modal untuk view foto penuh */
@@ -534,6 +589,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                                      alt="Foto <?php echo $i+1; ?>" 
                                      onclick="openModal('uploads/faktur/<?php echo htmlspecialchars($foto_paths[$i]); ?>', 'Foto <?php echo $i+1; ?> - <?php echo htmlspecialchars($no_faktur); ?>')"
                                      title="Klik untuk memperbesar">
+                                <button type="button" 
+                                        class="btn-hapus" 
+                                        onclick="confirmHapus(<?php echo $i; ?>, '<?php echo htmlspecialchars($no_faktur); ?>')">
+                                    🗑️ Hapus
+                                </button>
                             </div>
                         <?php endif; ?>
                     <?php endfor; ?>
@@ -574,7 +634,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
         </div>
     </div>
 
+    <!-- Form hidden untuk hapus foto -->
+    <form id="formHapusFoto" method="POST" style="display: none;">
+        <input type="hidden" name="no_faktur" id="hapus_no_faktur" value="">
+        <input type="hidden" name="foto_index" id="hapus_foto_index" value="">
+        <input type="hidden" name="hapus_foto" value="1">
+    </form>
+
     <script>
+        // Fungsi untuk konfirmasi hapus foto
+        function confirmHapus(fotoIndex, noFaktur) {
+            if (confirm('⚠️ Apakah Anda yakin ingin menghapus Foto ' + (fotoIndex + 1) + '?\n\nFile akan dihapus permanen dan tidak dapat dikembalikan!')) {
+                document.getElementById('hapus_no_faktur').value = noFaktur;
+                document.getElementById('hapus_foto_index').value = fotoIndex;
+                document.getElementById('formHapusFoto').submit();
+            }
+        }
+        
         // Fungsi untuk membuka modal foto
         function openModal(imgSrc, caption) {
             const modal = document.getElementById('fotoModal');
