@@ -47,6 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 // Get filter parameters
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
+$filter_bangsal = isset($_GET['filter_bangsal']) ? $_GET['filter_bangsal'] : '';
+$filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -77,6 +79,7 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
         .btn { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
         .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: linear-gradient(45deg, #007bff, #0056b3); color: white; }
         .btn:hover { transform: translateY(-2px); }
         .message { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; }
         .message.success { background: #d1edff; color: #0c5460; border: 1px solid #bee5eb; }
@@ -147,6 +150,16 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                             <option value="no_location" <?php echo ($show_all == 'no_location') ? 'selected' : ''; ?>>Yang belum ada lokasi</option>
                         </select>
                     </div>
+                    
+                    <div class="filter-group">
+                        <label for="filter_bangsal">🏥 Filter Bangsal</label>
+                        <input type="text" id="filter_bangsal" name="filter_bangsal" placeholder="Contoh: GO, AP, DRI..." value="<?php echo htmlspecialchars($filter_bangsal); ?>">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="filter_lokasi">📍 Filter Lokasi</label>
+                        <input type="text" id="filter_lokasi" name="filter_lokasi" placeholder="Cari lokasi spesifik..." value="<?php echo htmlspecialchars($filter_lokasi); ?>">
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
@@ -166,16 +179,19 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
             )";
             mysqli_query($koneksi, $create_table);
             
-            if (!empty($search) || !empty($show_all)) {
-                // Query data barang dengan lokasi medis
+            if (!empty($search) || !empty($show_all) || !empty($filter_bangsal) || !empty($filter_lokasi)) {
+                // Query data barang dengan lokasi medis dan stok
                 $query = "SELECT 
                             databarang.kode_brng,
                             databarang.nama_brng,
                             databarang.kode_sat,
                             COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') as kd_bangsal,
-                            COALESCE(lokasi_barang_medis.lokasi, '') as lokasi
+                            COALESCE(lokasi_barang_medis.lokasi, '') as lokasi,
+                            COALESCE(gudangbarang.stok, 0) as stok
                         FROM databarang
-                        LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng";
+                        LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng
+                        LEFT JOIN gudangbarang ON databarang.kode_brng = gudangbarang.kode_brng 
+                            AND COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') = gudangbarang.kd_bangsal";
                 
                 // Build WHERE conditions
                 $where_conditions = [];
@@ -192,6 +208,18 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                     $where_conditions[] = "(lokasi_barang_medis.lokasi IS NULL OR lokasi_barang_medis.lokasi = '')";
                 }
                 
+                // Filter berdasarkan kd_bangsal
+                if (!empty($filter_bangsal)) {
+                    $bangsal_escaped = mysqli_real_escape_string($koneksi, $filter_bangsal);
+                    $where_conditions[] = "COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') LIKE '%$bangsal_escaped%'";
+                }
+                
+                // Filter berdasarkan lokasi
+                if (!empty($filter_lokasi)) {
+                    $lokasi_escaped = mysqli_real_escape_string($koneksi, $filter_lokasi);
+                    $where_conditions[] = "lokasi_barang_medis.lokasi LIKE '%$lokasi_escaped%'";
+                }
+                
                 $where_sql = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
                 
                 $query .= " $where_sql
@@ -202,7 +230,11 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                 $result = mysqli_query($koneksi, $query);
                 
                 if ($result && mysqli_num_rows($result) > 0) {
-                    echo '<div class="table-container">
+                    echo '<div style="margin-bottom: 15px; text-align: right;">
+                            <button id="copyTableBtn" class="btn btn-success">📋 Copy Tabel ke Clipboard</button>
+                          </div>';
+                    
+                    echo '<div class="table-container" id="tableData">
                             <table>
                                 <thead>
                                     <tr>
@@ -211,6 +243,7 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                                         <th>nama_brng</th>
                                         <th>kode_sat</th>
                                         <th>kd_bangsal</th>
+                                        <th>Stok</th>
                                         <th>Lokasi & Aksi</th>
                                     </tr>
                                 </thead>
@@ -218,12 +251,16 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                     
                     $no = 1;
                     while ($row = mysqli_fetch_assoc($result)) {
+                        $stok = $row['stok'];
+                        $stok_class = $stok > 0 ? 'color: #28a745; font-weight: bold;' : 'color: #dc3545; font-weight: bold;';
+                        
                         echo "<tr>
                                 <td style='text-align: center; font-weight: bold;'>{$no}</td>
                                 <td style='font-family: monospace;'>" . htmlspecialchars($row['kode_brng']) . "</td>
                                 <td>" . htmlspecialchars($row['nama_brng']) . "</td>
                                 <td style='text-align: center; font-family: monospace;'>" . htmlspecialchars($row['kode_sat'] ?: '-') . "</td>
                                 <td style='text-align: center;'><span class='bangsal-go'>" . htmlspecialchars($row['kd_bangsal']) . "</span></td>
+                                <td style='text-align: right; {$stok_class}'>" . number_format($stok) . "</td>
                                 <td>";
                         
                         if (!empty($row['lokasi'])) {
@@ -275,7 +312,8 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                                 <li><strong>Kolom 3:</strong> nama_brng (dari databarang)</li>
                                 <li><strong>Kolom 4:</strong> kode_sat (dari databarang)</li>
                                 <li><strong>Kolom 5:</strong> kd_bangsal (default: <span class="bangsal-go">GO</span>)</li>
-                                <li><strong>Kolom 6:</strong> Lokasi (input manual) + Tombol Aksi</li>
+                                <li><strong>Kolom 6:</strong> Stok (dari gudangbarang sesuai kd_bangsal)</li>
+                                <li><strong>Kolom 7:</strong> Lokasi (input manual) + Tombol Aksi</li>
                             </ol>
                             <br>
                             <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7;">
@@ -285,6 +323,7 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                                     <li><strong>Tombol Edit:</strong> Untuk mengubah data yang sudah ada</li>
                                     <li><strong>kd_bangsal:</strong> Default "GO", dapat diubah saat input</li>
                                     <li><strong>Lokasi:</strong> Input manual sesuai kebutuhan</li>
+                                    <li><strong>Stok:</strong> Otomatis dari tabel gudangbarang sesuai kd_bangsal (hijau = ada stok, merah = stok 0)</li>
                                 </ul>
                             </div>
                         </div>
@@ -298,6 +337,31 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Copy table to clipboard
+            const copyBtn = document.getElementById('copyTableBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    const tableData = document.getElementById('tableData');
+                    const range = document.createRange();
+                    range.selectNode(tableData);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            showNotification('✅ Tabel berhasil disalin ke clipboard!', 'success');
+                        } else {
+                            showNotification('❌ Gagal menyalin tabel.', 'error');
+                        }
+                    } catch (err) {
+                        showNotification('❌ Browser tidak mendukung copy tabel otomatis.', 'error');
+                    }
+                    
+                    window.getSelection().removeAllRanges();
+                });
+            }
+            
             // Auto-focus pada input lokasi yang kosong
             const emptyInputs = document.querySelectorAll('input[placeholder="Masukkan lokasi..."]');
             if (emptyInputs.length > 0) {
@@ -318,6 +382,33 @@ $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
                 });
             });
         });
+        
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-weight: bold;
+                transform: translateX(400px);
+                transition: all 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>

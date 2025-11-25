@@ -417,11 +417,11 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <div class="title">Surat Pesanan Barang Medis</div>
             </a>
             
-            <a href="stok_gudang.php" class="menu-card" title="Stok Lokasi Gudang Barang">
+            <a href="lokasibarangmedis.php" class="menu-card" title="Lokasi Barang Medis">
                 <div class="icon-wrapper">
                     <i class="fas fa-boxes icon"></i>
                 </div>
-                <div class="title">Stok Gudang</div>
+                <div class="title">Lokasi Barang Medis</div>
             </a>
             
             <a href="stokpertanggal.php" class="menu-card" title="Stok per Tanggal">
