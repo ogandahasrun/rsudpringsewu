@@ -147,6 +147,83 @@
             font-weight: bold;
         }
         
+        .filter-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+        
+        .form-group input {
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -164,6 +241,15 @@
                 padding: 8px 6px;
                 font-size: 12px;
             }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .button-group {
+                justify-content: center;
+            }
         }
     </style>
     <script>
@@ -176,6 +262,13 @@
             document.execCommand("copy");
             window.getSelection().removeAllRanges();
             alert("✅ Tabel berhasil disalin ke clipboard!");
+        }
+        
+        function resetFilter() {
+            document.getElementById('tgl_awal').value = '';
+            document.getElementById('tgl_akhir').value = '';
+            // Redirect ke halaman tanpa parameter
+            window.location.href = window.location.pathname;
         }
     </script>
 </head>
@@ -190,6 +283,27 @@
                 <a href="casemix.php">← Kembali ke Menu Casemix</a>
             </div>
 
+            <div class="filter-form">
+                <form method="GET" action="">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tgl_awal">📅 Tanggal Awal SEP:</label>
+                            <input type="date" id="tgl_awal" name="tgl_awal" value="<?php echo isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : ''; ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tgl_akhir">📅 Tanggal Akhir SEP:</label>
+                            <input type="date" id="tgl_akhir" name="tgl_akhir" value="<?php echo isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : ''; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">🔍 Filter Data</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetFilter()">🔄 Reset Filter</button>
+                    </div>
+                </form>
+            </div>
+
             <div class="alert-info">
                 <strong>ℹ️ Informasi:</strong> Halaman ini menampilkan data SEP (Surat Eligibilitas Peserta) yang memiliki duplikasi berdasarkan nomor rawat yang sama.
             </div>
@@ -197,10 +311,24 @@
             <?php
             include 'koneksi.php';
             
+            // Ambil parameter filter
+            $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : '';
+            $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : '';
+            
+            // Buat kondisi WHERE untuk filter tanggal
+            $where_condition = "";
+            if (!empty($tgl_awal) && !empty($tgl_akhir)) {
+                $where_condition = " AND bridging_sep.tglsep BETWEEN '$tgl_awal' AND '$tgl_akhir'";
+            } elseif (!empty($tgl_awal)) {
+                $where_condition = " AND bridging_sep.tglsep >= '$tgl_awal'";
+            } elseif (!empty($tgl_akhir)) {
+                $where_condition = " AND bridging_sep.tglsep <= '$tgl_akhir'";
+            }
+            
             // Query untuk menghitung total duplikasi
             $count_query = "SELECT COUNT(*) as total_duplicate FROM bridging_sep WHERE no_rawat IN (
-                SELECT no_rawat FROM bridging_sep GROUP BY no_rawat HAVING COUNT(*) > 1
-            )";
+                SELECT no_rawat FROM bridging_sep WHERE 1=1 $where_condition GROUP BY no_rawat HAVING COUNT(*) > 1
+            ) $where_condition";
             $count_result = mysqli_query($koneksi, $count_query);
             $total_duplicate = 0;
             if ($count_result) {
@@ -210,8 +338,8 @@
             
             // Query untuk menghitung berapa nomor rawat yang duplikasi
             $rawat_count_query = "SELECT COUNT(DISTINCT no_rawat) as rawat_duplicate FROM bridging_sep WHERE no_rawat IN (
-                SELECT no_rawat FROM bridging_sep GROUP BY no_rawat HAVING COUNT(*) > 1
-            )";
+                SELECT no_rawat FROM bridging_sep WHERE 1=1 $where_condition GROUP BY no_rawat HAVING COUNT(*) > 1
+            ) $where_condition";
             $rawat_count_result = mysqli_query($koneksi, $rawat_count_query);
             $rawat_duplicate = 0;
             if ($rawat_count_result) {
@@ -220,18 +348,27 @@
             }
             
             if ($total_duplicate > 0) {
+                $periode_text = "";
+                if (!empty($tgl_awal) && !empty($tgl_akhir)) {
+                    $periode_text = " (Periode: " . date('d/m/Y', strtotime($tgl_awal)) . " - " . date('d/m/Y', strtotime($tgl_akhir)) . ")";
+                } elseif (!empty($tgl_awal)) {
+                    $periode_text = " (Dari: " . date('d/m/Y', strtotime($tgl_awal)) . ")";
+                } elseif (!empty($tgl_akhir)) {
+                    $periode_text = " (Sampai: " . date('d/m/Y', strtotime($tgl_akhir)) . ")";
+                }
+                
                 echo '<div class="summary-stats">
                         <span class="stat-number">' . number_format($total_duplicate) . '</span>
-                        <span class="stat-label">Total SEP Ganda dari ' . number_format($rawat_duplicate) . ' No. Rawat</span>
+                        <span class="stat-label">Total SEP Ganda dari ' . number_format($rawat_duplicate) . ' No. Rawat' . $periode_text . '</span>
                       </div>';
             }
             
             $query = "SELECT bridging_sep.no_rawat, bridging_sep.no_sep, bridging_sep.nomr, bridging_sep.nama_pasien, bridging_sep.tglsep,
-                      (SELECT COUNT(*) FROM bridging_sep bs WHERE bs.no_rawat = bridging_sep.no_rawat) as jumlah_duplikasi
+                      (SELECT COUNT(*) FROM bridging_sep bs WHERE bs.no_rawat = bridging_sep.no_rawat $where_condition) as jumlah_duplikasi
               FROM bridging_sep
               WHERE bridging_sep.no_rawat IN (
-                  SELECT no_rawat FROM bridging_sep GROUP BY no_rawat HAVING COUNT(*) > 1
-              )
+                  SELECT no_rawat FROM bridging_sep WHERE 1=1 $where_condition GROUP BY no_rawat HAVING COUNT(*) > 1
+              ) $where_condition
               ORDER BY bridging_sep.no_rawat, bridging_sep.no_sep";
 
             $result = mysqli_query($koneksi, $query);
