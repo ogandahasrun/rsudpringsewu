@@ -29,6 +29,7 @@ while ($row = mysqli_fetch_assoc($status_result)) {
 $sql = "SELECT
     resep_obat.tgl_peresepan,
     reg_periksa.no_rawat,
+    reg_periksa.kd_poli,
     pasien.no_rkm_medis,
     pasien.nm_pasien,
     resep_obat.`status`,
@@ -200,6 +201,7 @@ if ($stmt) {
                 <th>Nomor Rawat</th>
                 <th>Nomor Rekam Medik</th>
                 <th>Nama Pasien</th>
+                <th>Poli</th>
                 <th>Status Resep</th>
             </tr>
         </thead>
@@ -210,6 +212,7 @@ if ($stmt) {
                         <td><?= htmlspecialchars($row['no_rawat']) ?></td>
                         <td><?= htmlspecialchars($row['no_rkm_medis']) ?></td>
                         <td><?= htmlspecialchars($row['nm_pasien']) ?></td>
+                        <td><?= htmlspecialchars($row['kd_poli']) ?></td>
                         <td><?= htmlspecialchars($row['status']) ?></td>
                     </tr>
                 <?php endwhile; ?>
