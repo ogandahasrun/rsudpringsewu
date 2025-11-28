@@ -473,6 +473,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <div class="title">Kontrol Permintaan dan Mutasi</div>
             </a>
             
+            <a href="kontrolpengeluarangudang.php" class="menu-card" title="Kontrol Pengeluaran Gudang">
+                <div class="icon-wrapper">
+                    <i class="fas fa-tasks icon"></i>
+                </div>
+                <div class="title">Kontrol Pengeluaran Gudang</div>
+            </a>
+
             <a href="laporanformularium.php" class="menu-card" title="Laporan Formularium">
                 <div class="icon-wrapper">
                     <i class="fas fa-notes-medical icon"></i>
