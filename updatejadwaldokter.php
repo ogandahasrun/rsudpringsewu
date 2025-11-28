@@ -18,14 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_jadwal'])) {
     
     // Loop untuk mengambil semua jadwal yang diinput
     for ($i = 1; $i <= 7; $i++) {
-        if (isset($_POST['hari_' . $i]) && 
-            !empty($_POST['buka_' . $i]) && 
-            !empty($_POST['tutup_' . $i])) {
+        if (isset($_POST['hari_' . $i])) {
+            // Jika jam buka dan tutup kosong, kirim sebagai jadwal libur
+            $buka = isset($_POST['buka_' . $i]) ? trim($_POST['buka_' . $i]) : '';
+            $tutup = isset($_POST['tutup_' . $i]) ? trim($_POST['tutup_' . $i]) : '';
             
             $jadwal_data[] = array(
                 'hari' => strval($i),
-                'buka' => $_POST['buka_' . $i],
-                'tutup' => $_POST['tutup_' . $i]
+                'buka' => $buka,
+                'tutup' => $tutup
             );
         }
     }
@@ -200,6 +201,7 @@ $nama_hari = [
                 <ul>
                     <li>Pilih kode poli dan dokter yang akan diupdate jadwalnya</li>
                     <li>Centang hari-hari yang ingin diupdate, lalu isi jam buka dan tutup</li>
+                    <li><strong>Untuk jadwal LIBUR:</strong> Centang hari saja, kosongkan jam buka dan tutup</li>
                     <li>Anda bisa update 1 hari saja atau beberapa hari sekaligus</li>
                     <li>Format jam harus HH:MM (contoh: 09:00, 14:30)</li>
                     <li>Jadwal akan tersinkronisasi dengan aplikasi HFIS BPJS</li>
@@ -299,7 +301,8 @@ $nama_hari = [
             <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
                 <div style="font-weight: bold; color: #333; margin-bottom: 15px;">📌 Contoh Request JSON:</div>
                 <div style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13px; overflow-x: auto;">
-<pre style="margin: 0; color: #f8f8f2;">{
+<pre style="margin: 0; color: #f8f8f2;">// Jadwal Praktek Normal:
+{
    "kodepoli": "MAT",
    "kodesubspesialis": "MAT",
    "kodedokter": 17496,
@@ -313,6 +316,25 @@ $nama_hari = [
          "hari": "4",
          "buka": "09:00",
          "tutup": "11:00"
+      }
+   ]
+}
+
+// Jadwal LIBUR (jam kosong):
+{
+   "kodepoli": "MAT",
+   "kodesubspesialis": "MAT",
+   "kodedokter": 17496,
+   "jadwal": [
+      {
+         "hari": "1",
+         "buka": "",
+         "tutup": ""
+      },
+      {
+         "hari": "7",
+         "buka": "",
+         "tutup": ""
       }
    ]
 }</pre>
@@ -331,8 +353,8 @@ $nama_hari = [
             if (checkbox.checked) {
                 bukaInput.disabled = false;
                 tutupInput.disabled = false;
-                bukaInput.required = true;
-                tutupInput.required = true;
+                bukaInput.required = false; // Tidak wajib untuk akomodasi jadwal libur
+                tutupInput.required = false; // Tidak wajib untuk akomodasi jadwal libur
                 jadwalItem.classList.add('active');
             } else {
                 bukaInput.disabled = true;
@@ -372,12 +394,13 @@ $nama_hari = [
             for (let i = 1; i <= 7; i++) {
                 const checkbox = document.getElementById('check_hari_' + i);
                 if (checkbox && checkbox.checked) {
-                    const buka = document.getElementById('buka_' + i).value;
-                    const tutup = document.getElementById('tutup_' + i).value;
+                    const buka = document.getElementById('buka_' + i).value.trim();
+                    const tutup = document.getElementById('tutup_' + i).value.trim();
                     
-                    if (!buka || !tutup) {
+                    // Validasi: jika salah satu diisi, keduanya harus diisi
+                    if ((buka && !tutup) || (!buka && tutup)) {
                         e.preventDefault();
-                        alert('⚠️ Jam buka dan tutup harus diisi untuk hari yang dipilih!');
+                        alert('⚠️ Jika mengisi jam, jam buka dan tutup harus diisi keduanya!\n\nUntuk jadwal LIBUR, kosongkan kedua jam.');
                         return false;
                     }
                     
