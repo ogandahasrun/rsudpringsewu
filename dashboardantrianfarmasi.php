@@ -410,7 +410,7 @@ if ($stmt) {
 
 <div style="position:fixed;left:0;right:0;bottom:0;background:#28a745;color:#fff;padding:8px 0;z-index:99;">
     <marquee behavior="scroll" direction="left" scrollamount="8" style="font-size:16px;font-family:Tahoma, Geneva, Verdana, sans-serif;">
-        💊 Dashboard Farmasi - Antrian Resep | Klik tombol "Serahkan" untuk menandai resep sudah diserahkan
+        Mohon bersabar, kami dahulukan pasien DARURAT dan OPERASI
     </marquee>
 </div>
 
