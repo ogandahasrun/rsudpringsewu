@@ -386,7 +386,14 @@ if ($stmt) {
                             <div style="font-weight: 600;"><?= htmlspecialchars($row['no_resep']) ?></div>
                             <div style="color: #6c757d;"><?= date('H:i', strtotime($row['jam_peresepan'])) ?></div>
                         </td>
-                        <td style="text-align: center;">
+                        <td style="text-align: center; display: flex; gap: 8px; justify-content: center;">
+                            <button class="btn-panggil" 
+                                    data-nama="<?= htmlspecialchars($row['nm_pasien']) ?>"
+                                    data-noresep="<?= htmlspecialchars($row['no_resep']) ?>"
+                                    data-norawat="<?= htmlspecialchars($row['no_rawat']) ?>"
+                                    title="Panggil pasien">
+                                🔊 Panggil
+                            </button>
                             <button class="btn-serahkan" 
                                     data-no-resep="<?= htmlspecialchars($row['no_resep']) ?>" 
                                     data-nama="<?= htmlspecialchars($row['nm_pasien']) ?>"
@@ -416,6 +423,15 @@ if ($stmt) {
 
 <script>
 $(document).ready(function() {
+    // Handler tombol panggil
+    $('.btn-panggil').click(function() {
+        var namaPasien = $(this).data('nama');
+        var noResep = $(this).data('noresep');
+        var noRawat = $(this).data('norawat');
+        var kalimat = 'Pasien atas nama ' + namaPasien + ', silakan menuju loket farmasi.';
+        panggilPasien(kalimat);
+    });
+
     // Handler untuk tombol serahkan
     $('.btn-serahkan').click(function() {
         var button = $(this);
@@ -484,14 +500,28 @@ $(document).ready(function() {
             });
         }
     });
-    
+
+    // Function untuk panggil pasien dengan suara
+    function panggilPasien(kalimat) {
+        if ('speechSynthesis' in window) {
+            var msg = new SpeechSynthesisUtterance();
+            msg.text = kalimat;
+            msg.lang = 'id-ID';
+            msg.rate = 1;
+            msg.pitch = 1;
+            window.speechSynthesis.cancel(); // Stop any previous
+            window.speechSynthesis.speak(msg);
+        } else {
+            alert('Browser tidak mendukung fitur suara panggilan.');
+        }
+    }
+
     // Function to update statistics
     function updateStatistics() {
         var totalRows = $('tbody tr').length;
         if (totalRows === 1 && $('tbody tr td').attr('colspan')) {
             totalRows = 0; // No data row
         }
-        
         // Update total resep if stats exist
         $('.stat-number').first().text(totalRows);
     }
