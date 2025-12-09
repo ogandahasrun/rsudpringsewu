@@ -283,23 +283,29 @@
     $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
     ?>
 
+
             <form method="POST" class="filter-form">
                 <div class="filter-title">
                     🔍 Filter Kelengkapan Berkas Rawat Inap
                 </div>
-                
                 <div class="filter-grid">
                     <div class="filter-group">
-                        <label for="tanggal_awal">📅 Tanggal Registrasi Awal</label>
+                        <label for="filter_by">🔽 Filter Berdasarkan</label>
+                        <select id="filter_by" name="filter_by">
+                            <option value="tgl_registrasi" <?php echo (!isset($_POST['filter_by']) || $_POST['filter_by'] == 'tgl_registrasi') ? 'selected' : ''; ?>>Tanggal Registrasi</option>
+                            <option value="tgl_keluar" <?php echo (isset($_POST['filter_by']) && $_POST['filter_by'] == 'tgl_keluar') ? 'selected' : ''; ?>>Tanggal Keluar</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="tanggal_awal">📅 Tanggal Awal</label>
                         <input type="date" 
                                id="tanggal_awal" 
                                name="tanggal_awal" 
                                required 
                                value="<?php echo htmlspecialchars($tanggal_awal); ?>">
                     </div>
-                    
                     <div class="filter-group">
-                        <label for="tanggal_akhir">📅 Tanggal Registrasi Akhir</label>
+                        <label for="tanggal_akhir">📅 Tanggal Akhir</label>
                         <input type="date" 
                                id="tanggal_akhir" 
                                name="tanggal_akhir" 
@@ -307,7 +313,6 @@
                                value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
                     </div>
                 </div>
-                
                 <div class="filter-actions">
                     <button type="submit" name="filter" class="btn btn-primary">
                         📊 Tampilkan Laporan
@@ -322,40 +327,76 @@
     if (isset($_POST['filter'])) {
         $tanggal_awal = $_POST['tanggal_awal'];
         $tanggal_akhir = $_POST['tanggal_akhir'];
-        $query = "SELECT 
-                    reg_periksa.no_rawat, 
-                    pasien.no_rkm_medis, 
-                    pasien.nm_pasien, 
-                    reg_periksa.kd_poli, 
-                    bridging_sep.no_sep,
-                    bridging_sep.nmdpdjp, 
-                    MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
-                    rspsw_umbal.diajukan,
-                    rspsw_umbal.disetujui
-                FROM 
-                    reg_periksa 
-                INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
-                LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat 
-                LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
-                LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
-                WHERE 
-                    reg_periksa.kd_pj = 'BPJ' 
-                    AND reg_periksa.status_lanjut = 'ranap' 
-                    AND reg_periksa.tgl_registrasi 
-                BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
-                GROUP BY 
-                    reg_periksa.no_rawat
-                ";
+        $filter_by = isset($_POST['filter_by']) ? $_POST['filter_by'] : 'tgl_registrasi';
+
+        if ($filter_by == 'tgl_keluar') {
+            // Filter berdasarkan tgl_keluar (ambil yang paling akhir per no_rawat)
+            $query = "SELECT 
+                        reg_periksa.no_rawat, 
+                        pasien.no_rkm_medis, 
+                        pasien.nm_pasien, 
+                        reg_periksa.kd_poli, 
+                        bridging_sep.no_sep,
+                        bridging_sep.nmdpdjp, 
+                        MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
+                        rspsw_umbal.diajukan,
+                        rspsw_umbal.disetujui,
+                        ki.tgl_keluar,
+                        ki.stts_pulang
+                    FROM 
+                        reg_periksa 
+                    INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
+                    LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat 
+                    LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
+                    LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
+                    LEFT JOIN (
+                        SELECT no_rawat, MAX(tgl_keluar) AS tgl_keluar, MAX(stts_pulang) AS stts_pulang
+                        FROM kamar_inap
+                        GROUP BY no_rawat
+                    ) ki ON ki.no_rawat = reg_periksa.no_rawat
+                    WHERE 
+                        reg_periksa.kd_pj = 'BPJ' 
+                        AND reg_periksa.status_lanjut = 'ranap' 
+                        AND ki.tgl_keluar BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+                    GROUP BY 
+                        reg_periksa.no_rawat
+                    ";
+        } else {
+            // Default: filter berdasarkan tgl_registrasi
+            $query = "SELECT 
+                        reg_periksa.no_rawat, 
+                        pasien.no_rkm_medis, 
+                        pasien.nm_pasien, 
+                        reg_periksa.kd_poli, 
+                        bridging_sep.no_sep,
+                        bridging_sep.nmdpdjp, 
+                        MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
+                        rspsw_umbal.diajukan,
+                        rspsw_umbal.disetujui,
+                        NULL AS tgl_keluar,
+                        NULL AS stts_pulang
+                    FROM 
+                        reg_periksa 
+                    INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
+                    LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat 
+                    LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
+                    LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
+                    WHERE 
+                        reg_periksa.kd_pj = 'BPJ' 
+                        AND reg_periksa.status_lanjut = 'ranap' 
+                        AND reg_periksa.tgl_registrasi BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+                    GROUP BY 
+                        reg_periksa.no_rawat
+                    ";
+        }
 
         $result = mysqli_query($koneksi, $query);
         if ($result) {
             $total_rows = mysqli_num_rows($result);
-            
             echo '<div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">';
             echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> pasien rawat inap</div>';
             echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
             echo '</div>';
-            
             echo "<div class='table-responsive'><table>
                 <tr>
                     <th>No</th>
@@ -366,6 +407,8 @@
                     <th>POLIKLINIK</th>
                     <th>NOMOR SEP</th>
                     <th>NAMA DPJP</th>
+                    <th>TGL KELUAR</th>
+                    <th>STATUS PULANG</th>
                     <th>DIAJUKAN</th>
                     <th>DISETUJUI</th>
                 </tr>";
@@ -384,19 +427,19 @@
                         <td>{$row['kd_poli']}</td>
                         <td>{$row['no_sep']}</td>
                         <td>{$row['nmdpdjp']}</td>
+                        <td>" . ($row['tgl_keluar'] ? $row['tgl_keluar'] : '-') . "</td>
+                        <td>" . ($row['stts_pulang'] ? $row['stts_pulang'] : '-') . "</td>
                         <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
                     </tr>";
                 $no++;    
             }
             echo "<tr class='total-row'>
-                    <td colspan='8' style='text-align:right;font-weight:bold;'>💰 Total Jumlah</td>
+                    <td colspan='10' style='text-align:right;font-weight:bold;'>💰 Total Jumlah</td>
                     <td style='font-weight:bold;'>{$total_diajukan}</td>
                     <td style='font-weight:bold;'>{$total_disetujui}</td>
                 </tr>";
-
             echo "</table></div>";
-            
             if ($total_rows == 0) {
                 echo '<div class="no-data">🏥 Tidak ada data kelengkapan berkas pada filter yang dipilih</div>';
             }

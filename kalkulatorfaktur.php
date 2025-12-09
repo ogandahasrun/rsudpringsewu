@@ -439,14 +439,17 @@ if (!isset($_SESSION['username'])) {
                 return;
             }
 
-            // Generate all calculation scenarios
+
+            // Generate all calculation scenarios (8 skenario)
             const results = {
-                scenario1: calculateScenario1(items),
-                scenario2: calculateScenario2(items, hargaTotal),
-                scenario3: calculateScenario3(items, hargaDiskon),
-                scenario4: calculateScenario4(items, hargaTotal, hargaDiskon),
-                scenario5: calculateScenario5(items, hargaTotal, ongkir),
-                scenario6: calculateScenario6(items, hargaTotal, hargaDiskon, ongkir)
+                scenario1: calculateScenario1(items), // harga belum PPN
+                scenario2: calculateScenario2(items), // harga termasuk PPN
+                scenario3: calculateScenario3(items, hargaDiskon), // harga belum PPN + diskon
+                scenario4: calculateScenario4(items, hargaDiskon), // harga termasuk PPN + diskon
+                scenario5: calculateScenario5(items, ongkir), // harga belum PPN + ongkir
+                scenario6: calculateScenario6(items, ongkir), // harga termasuk PPN + ongkir
+                scenario7: calculateScenario7(items, hargaDiskon, ongkir), // harga belum PPN + diskon + ongkir
+                scenario8: calculateScenario8(items, hargaDiskon, ongkir) // harga termasuk PPN + diskon + ongkir
             };
 
             displayResults(results, hargaTotal, hargaDiskon, ongkir);
@@ -462,15 +465,14 @@ if (!isset($_SESSION['username'])) {
         }
 
         // Skenario 2: Harga Termasuk PPN
-        function calculateScenario2(items, hargaTotal) {
+        function calculateScenario2(items) {
             return items.map(item => {
-                // Setiap nilai hitung dibagi 1.11 untuk dapat DPP
-                const dpp = item.value / 1.11;
-                const hargaPerItem = dpp / item.qty;
+                const hargaTermasukPPN = item.value * 1.11;
+                const hargaPerItem = hargaTermasukPPN / item.qty;
                 return {
                     ...item,
                     hargaPerItem: hargaPerItem,
-                    totalHarga: dpp
+                    totalHarga: hargaTermasukPPN
                 };
             });
         }
@@ -478,7 +480,6 @@ if (!isset($_SESSION['username'])) {
         // Skenario 3: Harga Belum PPN dengan Diskon
         function calculateScenario3(items, hargaDiskon) {
             const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
-            
             return items.map(item => {
                 const proporsi = item.value / totalNilaiHitung;
                 const potonganDiskon = hargaDiskon * proporsi;
@@ -493,68 +494,86 @@ if (!isset($_SESSION['username'])) {
         }
 
         // Skenario 4: Harga Termasuk PPN dengan Diskon
-        function calculateScenario4(items, hargaTotal, hargaDiskon) {
+        function calculateScenario4(items, hargaDiskon) {
             const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
-            
             return items.map(item => {
-                // Hitung proporsi diskon untuk item ini
                 const proporsi = item.value / totalNilaiHitung;
                 const potonganDiskon = hargaDiskon * proporsi;
-                
-                // Nilai setelah diskon, lalu dibagi 1.11 untuk dapat DPP
                 const nilaiSetelahDiskon = item.value - potonganDiskon;
-                const dpp = nilaiSetelahDiskon / 1.11;
-                const hargaPerItem = dpp / item.qty;
-                
+                const hargaTermasukPPN = nilaiSetelahDiskon * 1.11;
+                const hargaPerItem = hargaTermasukPPN / item.qty;
                 return {
                     ...item,
                     hargaPerItem: hargaPerItem,
-                    totalHarga: dpp
+                    totalHarga: hargaTermasukPPN
                 };
             });
         }
 
-        // Skenario 5: Harga Termasuk PPN dan Ongkir
-        function calculateScenario5(items, hargaTotal, ongkir) {
+        // Skenario 5: Harga Belum PPN termasuk Ongkir
+        function calculateScenario5(items, ongkir) {
             const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
-            
             return items.map(item => {
-                // Hitung proporsi ongkir untuk item ini
                 const proporsi = item.value / totalNilaiHitung;
                 const potonganOngkir = ongkir * proporsi;
-                
-                // Nilai setelah dikurangi ongkir, lalu dibagi 1.11 untuk dapat DPP
-                const nilaiSetelahOngkir = item.value - potonganOngkir;
-                const dpp = nilaiSetelahOngkir / 1.11;
-                const hargaPerItem = dpp / item.qty;
-                
+                const nilaiSetelahOngkir = item.value + potonganOngkir;
+                const hargaPerItem = nilaiSetelahOngkir / item.qty;
                 return {
                     ...item,
                     hargaPerItem: hargaPerItem,
-                    totalHarga: dpp
+                    totalHarga: nilaiSetelahOngkir
                 };
             });
         }
 
-        // Skenario 6: Harga Termasuk PPN, Ongkir, dan Diskon
-        function calculateScenario6(items, hargaTotal, hargaDiskon, ongkir) {
+        // Skenario 6: Harga Termasuk PPN termasuk Ongkir
+        function calculateScenario6(items, ongkir) {
             const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
-            
             return items.map(item => {
-                // Hitung proporsi diskon dan ongkir untuk item ini
+                const proporsi = item.value / totalNilaiHitung;
+                const potonganOngkir = ongkir * proporsi;
+                const nilaiSetelahOngkir = item.value + potonganOngkir;
+                const hargaTermasukPPN = nilaiSetelahOngkir * 1.11;
+                const hargaPerItem = hargaTermasukPPN / item.qty;
+                return {
+                    ...item,
+                    hargaPerItem: hargaPerItem,
+                    totalHarga: hargaTermasukPPN
+                };
+            });
+        }
+
+        // Skenario 7: Harga Belum PPN dengan Diskon dan Ongkir
+        function calculateScenario7(items, hargaDiskon, ongkir) {
+            const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
+            return items.map(item => {
                 const proporsi = item.value / totalNilaiHitung;
                 const potonganDiskon = hargaDiskon * proporsi;
                 const potonganOngkir = ongkir * proporsi;
-                
-                // Nilai setelah dikurangi diskon dan ongkir, lalu dibagi 1.11 untuk dapat DPP
-                const nilaiSetelahPotongan = item.value - potonganDiskon - potonganOngkir;
-                const dpp = nilaiSetelahPotongan / 1.11;
-                const hargaPerItem = dpp / item.qty;
-                
+                const nilaiSetelahPotongan = item.value - potonganDiskon + potonganOngkir;
+                const hargaPerItem = nilaiSetelahPotongan / item.qty;
                 return {
                     ...item,
                     hargaPerItem: hargaPerItem,
-                    totalHarga: dpp
+                    totalHarga: nilaiSetelahPotongan
+                };
+            });
+        }
+
+        // Skenario 8: Harga Termasuk PPN dengan Diskon dan Ongkir
+        function calculateScenario8(items, hargaDiskon, ongkir) {
+            const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
+            return items.map(item => {
+                const proporsi = item.value / totalNilaiHitung;
+                const potonganDiskon = hargaDiskon * proporsi;
+                const potonganOngkir = ongkir * proporsi;
+                const nilaiSetelahPotongan = item.value - potonganDiskon + potonganOngkir;
+                const hargaTermasukPPN = nilaiSetelahPotongan * 1.11;
+                const hargaPerItem = hargaTermasukPPN / item.qty;
+                return {
+                    ...item,
+                    hargaPerItem: hargaPerItem,
+                    totalHarga: hargaTermasukPPN
                 };
             });
         }
@@ -641,8 +660,10 @@ if (!isset($_SESSION['username'])) {
             html += createTable('2️⃣ Harga Termasuk PPN', results.scenario2);
             html += createTable('3️⃣ Harga Belum PPN dengan Diskon', results.scenario3);
             html += createTable('4️⃣ Harga Termasuk PPN dengan Diskon', results.scenario4);
-            html += createTable('5️⃣ Harga Termasuk PPN dan Ongkir', results.scenario5);
-            html += createTable('6️⃣ Harga Termasuk PPN, Ongkir, dan Diskon', results.scenario6);
+            html += createTable('5️⃣ Harga Belum PPN termasuk Ongkir', results.scenario5);
+            html += createTable('6️⃣ Harga Termasuk PPN termasuk Ongkir', results.scenario6);
+            html += createTable('7️⃣ Harga Belum PPN dengan Diskon dan Ongkir', results.scenario7);
+            html += createTable('8️⃣ Harga Termasuk PPN dengan Diskon dan Ongkir', results.scenario8);
 
             document.getElementById('resultsSection').innerHTML = html;
             document.getElementById('resultsSection').style.display = 'block';
