@@ -16,6 +16,7 @@ while ($d = mysqli_fetch_assoc($dokter_q)) {
 // Build WHERE
 $where = [];
 $where[] = "operasi.tgl_operasi BETWEEN '" . mysqli_real_escape_string($koneksi, $tgl_awal) . "' AND '" . mysqli_real_escape_string($koneksi, $tgl_akhir) . "'";
+$where[] = "operasi.kode_paket IN ('BPJSOP178','LECOP178')";
 if ($operator1 !== '') {
     $where[] = "operasi.operator1 = '" . mysqli_real_escape_string($koneksi, $operator1) . "'";
 }
