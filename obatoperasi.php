@@ -5,6 +5,7 @@ $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-01');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
 $operator1 = isset($_GET['operator1']) ? $_GET['operator1'] : '';
 $dokter_anestesi = isset($_GET['dokter_anestesi']) ? $_GET['dokter_anestesi'] : '';
+$kode_paket = isset($_GET['kode_paket']) ? $_GET['kode_paket'] : '';
 
 // Ambil data dokter untuk filter
 $dokter_list = [];
@@ -13,10 +14,19 @@ while ($d = mysqli_fetch_assoc($dokter_q)) {
     $dokter_list[] = $d;
 }
 
+// Ambil data kode_paket untuk filter
+$paket_list = [];
+$paket_q = mysqli_query($koneksi, "SELECT DISTINCT paket_operasi.kode_paket, paket_operasi.nm_perawatan FROM paket_operasi ORDER BY paket_operasi.nm_perawatan ASC");
+while ($p = mysqli_fetch_assoc($paket_q)) {
+    $paket_list[] = $p;
+}
+
 // Build WHERE
 $where = [];
 $where[] = "operasi.tgl_operasi BETWEEN '" . mysqli_real_escape_string($koneksi, $tgl_awal) . "' AND '" . mysqli_real_escape_string($koneksi, $tgl_akhir) . "'";
-$where[] = "operasi.kode_paket IN ('BPJSOP178','LECOP178')";
+if ($kode_paket !== '') {
+    $where[] = "operasi.kode_paket = '" . mysqli_real_escape_string($koneksi, $kode_paket) . "'";
+}
 if ($operator1 !== '') {
     $where[] = "operasi.operator1 = '" . mysqli_real_escape_string($koneksi, $operator1) . "'";
 }
@@ -85,6 +95,15 @@ $result = mysqli_query($koneksi, $sql);
             <label>Periode Tgl Operasi</label><br>
             <input type="date" name="tgl_awal" value="<?= htmlspecialchars($tgl_awal) ?>"> -
             <input type="date" name="tgl_akhir" value="<?= htmlspecialchars($tgl_akhir) ?>">
+        </div>
+        <div>
+            <label>Kode Paket Operasi</label><br>
+            <select name="kode_paket">
+                <option value="">Semua</option>
+                <?php foreach($paket_list as $p): ?>
+                <option value="<?= htmlspecialchars($p['kode_paket']) ?>" <?= $kode_paket==$p['kode_paket']?'selected':'' ?>><?= htmlspecialchars($p['nm_perawatan']) ?> (<?= htmlspecialchars($p['kode_paket']) ?>)</option>
+                <?php endforeach; ?>
+            </select>
         </div>
         <div>
             <label>Operator 1</label><br>
