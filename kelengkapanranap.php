@@ -346,7 +346,7 @@
                     FROM 
                         reg_periksa 
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
-                    LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat 
+                    LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat AND bridging_sep.jnspelayanan = '1'
                     LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
                     LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
                     LEFT JOIN (
@@ -355,7 +355,7 @@
                         GROUP BY no_rawat
                     ) ki ON ki.no_rawat = reg_periksa.no_rawat
                     WHERE 
-                        reg_periksa.kd_pj = 'BPJ' 
+                        (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                         AND reg_periksa.status_lanjut = 'ranap' 
                         AND ki.tgl_keluar BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
                     GROUP BY 
@@ -378,11 +378,11 @@
                     FROM 
                         reg_periksa 
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
-                    LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat 
+                    LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat AND bridging_sep.jnspelayanan = '1'
                     LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
                     LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
                     WHERE 
-                        reg_periksa.kd_pj = 'BPJ' 
+                        (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                         AND reg_periksa.status_lanjut = 'ranap' 
                         AND reg_periksa.tgl_registrasi BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
                     GROUP BY 

@@ -335,11 +335,11 @@
                 FROM 
                     reg_periksa 
                 INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
-                LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat 
+                LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat AND bridging_sep.jnspelayanan = '2'
                 LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
                 LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
                 WHERE 
-                    reg_periksa.kd_pj = 'BPJ' 
+                    (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                     AND reg_periksa.status_lanjut = 'ralan' 
                     AND reg_periksa.stts != 'batal' 
                     AND reg_periksa.tgl_registrasi 
