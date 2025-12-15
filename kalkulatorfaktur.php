@@ -353,10 +353,8 @@ if (!isset($_SESSION['username'])) {
     <script>
         let itemCount = 0;
 
-        // Add first item on page load
+        // Add only one item on page load
         window.onload = function() {
-            addItem();
-            addItem();
             addItem();
         };
 
@@ -400,8 +398,6 @@ if (!isset($_SESSION['username'])) {
                 document.getElementById('itemsList').innerHTML = '';
                 document.getElementById('resultsSection').style.display = 'none';
                 itemCount = 0;
-                addItem();
-                addItem();
                 addItem();
             }
         }
