@@ -501,11 +501,18 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <div class="title">Rencana Belanja Farmasi</div>
             </a>
 
-                        <a href="rencanabelanja.php" class="menu-card" title="Rencana Belanja">
+            <a href="rencanabelanja.php" class="menu-card" title="Rencana Belanja">
                 <div class="icon-wrapper">
                     <i class="fas fa-shopping-cart icon"></i>
                 </div>
                 <div class="title">Rencana Belanja</div>
+            </a>
+
+            <a href="laporanbelanjafarmasi.php" class="menu-card" title="Laporan Belanja Farmasi">
+                <div class="icon-wrapper">
+                    <i class="fas fa-shopping-cart icon"></i>
+                </div>
+                <div class="title">Laporan Belanja Farmasi</div>
             </a>
 
         </div>
