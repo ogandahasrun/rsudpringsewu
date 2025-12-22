@@ -348,7 +348,8 @@
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
                     LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat AND bridging_sep.jnspelayanan = '1'
                     LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
-                    LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
+                    LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat 
+                        AND (rspsw_umbal.no_sep = bridging_sep.no_sep OR rspsw_umbal.no_sep IS NULL)
                     LEFT JOIN (
                         SELECT no_rawat, MAX(tgl_keluar) AS tgl_keluar, MAX(stts_pulang) AS stts_pulang
                         FROM kamar_inap
@@ -359,7 +360,7 @@
                         AND reg_periksa.status_lanjut = 'ranap' 
                         AND ki.tgl_keluar BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
                     GROUP BY 
-                        reg_periksa.no_rawat
+                        reg_periksa.no_rawat, bridging_sep.no_sep
                     ";
         } else {
             // Default: filter berdasarkan tgl_registrasi
@@ -380,13 +381,14 @@
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis 
                     LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat AND bridging_sep.jnspelayanan = '1'
                     LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
-                    LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
+                    LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat 
+                        AND (rspsw_umbal.no_sep = bridging_sep.no_sep OR rspsw_umbal.no_sep IS NULL)
                     WHERE 
                         (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                         AND reg_periksa.status_lanjut = 'ranap' 
                         AND reg_periksa.tgl_registrasi BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
                     GROUP BY 
-                        reg_periksa.no_rawat
+                        reg_periksa.no_rawat, bridging_sep.no_sep
                     ";
         }
 
