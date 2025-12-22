@@ -86,6 +86,55 @@ if ($poli_result) {
             <div class="back-button">
                 <a href="index.php">← Kembali ke Menu Utama</a>
             </div>
+
+            <!-- Form tambah data hepatitis_c -->
+            <form method="POST" class="filter-form" style="margin-bottom:18px; background:#e8f5e8; border:1.5px solid #28a745;">
+                <div class="filter-title">➕ Tambah Data Hepatitis C</div>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="input_no_rkm_medis">No. RM (Rekam Medis)</label>
+                        <input type="text" id="input_no_rkm_medis" name="input_no_rkm_medis" maxlength="20" required placeholder="Masukkan No. RM">
+                    </div>
+                    <div class="filter-group">
+                        <label for="input_hepatitis_c">Status Hepatitis C</label>
+                        <select id="input_hepatitis_c" name="input_hepatitis_c" required>
+                            <option value="">-- Pilih Status --</option>
+                            <option value="ya">Ya</option>
+                            <option value="not detected">Not Detected</option>
+                            <option value="tidak">Tidak</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" name="tambah_hepatitisc" class="btn btn-primary">💾 Simpan/Daftarkan</button>
+                </div>
+            </form>
+
+            <?php
+            // Proses tambah data hepatitis_c
+            if (isset($_POST['tambah_hepatitisc'])) {
+                $input_no_rkm_medis = trim($_POST['input_no_rkm_medis']);
+                $input_hepatitis_c = isset($_POST['input_hepatitis_c']) ? trim($_POST['input_hepatitis_c']) : '';
+                if ($input_no_rkm_medis !== '' && $input_hepatitis_c !== '') {
+                    // Cek apakah sudah ada data
+                    $cek = mysqli_query($koneksi, "SELECT no_rkm_medis FROM pasien_detail_tambahan WHERE no_rkm_medis='".mysqli_real_escape_string($koneksi, $input_no_rkm_medis)."'");
+                    if ($cek && mysqli_num_rows($cek) > 0) {
+                        // Update hepatitis_c sesuai pilihan
+                        $q = "UPDATE pasien_detail_tambahan SET hepatitis_c='".mysqli_real_escape_string($koneksi, $input_hepatitis_c)."' WHERE no_rkm_medis='".mysqli_real_escape_string($koneksi, $input_no_rkm_medis)."'";
+                    } else {
+                        // Insert baru
+                        $q = "INSERT INTO pasien_detail_tambahan (no_rkm_medis, hepatitis_c) VALUES ('".mysqli_real_escape_string($koneksi, $input_no_rkm_medis)."', '".mysqli_real_escape_string($koneksi, $input_hepatitis_c)."')";
+                    }
+                    $ok = mysqli_query($koneksi, $q);
+                    if ($ok) {
+                        echo '<div style="background:#d4edda;color:#155724;padding:10px 18px;border-radius:7px;margin-bottom:15px;border:1.5px solid #28a745;">✅ Data berhasil disimpan/diupdate untuk No. RM <b>'.htmlspecialchars($input_no_rkm_medis).'</b> (Status: <b>'.htmlspecialchars($input_hepatitis_c).'</b>)</div>';
+                    } else {
+                        echo '<div style="background:#f8d7da;color:#721c24;padding:10px 18px;border-radius:7px;margin-bottom:15px;border:1.5px solid #dc3545;">❌ Gagal menyimpan data: '.htmlspecialchars(mysqli_error($koneksi)).'</div>';
+                    }
+                }
+            }
+            ?>
+
             <form method="GET" class="filter-form">
                 <div class="filter-title">🔍 Filter Data Hepatitis C</div>
                 <div class="filter-grid">
