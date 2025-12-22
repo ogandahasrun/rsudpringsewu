@@ -448,8 +448,7 @@ if ($result && mysqli_num_rows($result) > 0) {
                             <?php
                             $no_faktur = $row['no_faktur'];
                             $foto_count = isset($foto_status[$no_faktur]) ? $foto_status[$no_faktur] : 0;
-                            
-                            // Tentukan class CSS berdasarkan jumlah foto (2 status saja)
+                            // Tombol upload foto
                             if ($foto_count == 0) {
                                 $btn_class = 'no-photo';
                                 $btn_text = 'Upload Foto';
@@ -460,12 +459,28 @@ if ($result && mysqli_num_rows($result) > 0) {
                                 $btn_title = $foto_count . ' dari 10 foto sudah diupload';
                             }
                             ?>
-                            <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" 
-                               class="action-btn <?= $btn_class ?>" 
-                               title="<?= $btn_title ?>">
-                                <?= $btn_text ?>
-                                <span class="photo-badge"><?= $foto_count ?>/10</span>
-                            </a>
+                            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
+                                <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" 
+                                   class="action-btn <?= $btn_class ?>" 
+                                   title="<?= $btn_title ?>">
+                                    <?= $btn_text ?>
+                                    <span class="photo-badge"><?= $foto_count ?>/10</span>
+                                </a>
+                                <form class="cara-belanja-form" data-faktur="<?= htmlspecialchars($row['no_faktur']) ?>" onsubmit="return simpanCaraBelanja(this);" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+                                    <select name="jenis_barang" style="margin-bottom:2px;">
+                                        <option value="">Jenis Barang</option>
+                                        <option value="e-katalog">e-katalog</option>
+                                        <option value="non e-katalog">non e-katalog</option>
+                                    </select>
+                                    <select name="cara_belanja" style="margin-bottom:2px;">
+                                        <option value="">Cara Belanja</option>
+                                        <option value="e-purchasing">e-purchasing</option>
+                                        <option value="manual">manual</option>
+                                    </select>
+                                    <button type="submit" style="background:#ffc107;color:#333;border:none;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;">💾 Simpan</button>
+                                    <span class="cb-status" style="font-size:11px;color:#28a745;display:none;">Tersimpan!</span>
+                                </form>
+                            </div>
                         </td>
                     <?php endif; ?>
                 </tr>
@@ -477,6 +492,39 @@ if ($result && mysqli_num_rows($result) > 0) {
             </table>
         </div>
     </div>
+    <script>
+    // AJAX simpan cara belanja
+    function simpanCaraBelanja(form) {
+        var fd = new FormData(form);
+        fd.append('no_faktur', form.getAttribute('data-faktur'));
+        var statusSpan = form.querySelector('.cb-status');
+        statusSpan.style.display = 'none';
+        fetch('simpan_cara_belanja.php', {
+            method: 'POST',
+            body: fd
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                statusSpan.textContent = 'Tersimpan!';
+                statusSpan.style.color = '#28a745';
+                statusSpan.style.display = 'inline';
+            } else {
+                statusSpan.textContent = 'Gagal simpan!';
+                statusSpan.style.color = '#dc3545';
+                statusSpan.style.display = 'inline';
+            }
+            setTimeout(() => { statusSpan.style.display = 'none'; }, 2000);
+        })
+        .catch(() => {
+            statusSpan.textContent = 'Gagal simpan!';
+            statusSpan.style.color = '#dc3545';
+            statusSpan.style.display = 'inline';
+            setTimeout(() => { statusSpan.style.display = 'none'; }, 2000);
+        });
+        return false;
+    }
+    </script>
     <?php mysqli_close($koneksi); ?>
 </body>
 </html>
