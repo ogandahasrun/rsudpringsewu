@@ -480,6 +480,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <div class="title">Kontrol Pengeluaran Gudang</div>
             </a>
 
+            <a href="kontrol_resep.php" class="menu-card" title="Kontrol Resep Pasien">
+                <div class="icon-wrapper">
+                    <i class="fas fa-tasks icon"></i>
+                </div>
+                <div class="title">Kontrol Resep Pasien</div>
+            </a>
+
             <a href="laporanformularium.php" class="menu-card" title="Laporan Formularium">
                 <div class="icon-wrapper">
                     <i class="fas fa-notes-medical icon"></i>
