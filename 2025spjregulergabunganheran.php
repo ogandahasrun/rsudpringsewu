@@ -31,7 +31,7 @@
             <table class="no-border-table">
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Kuasa Pengguna Anggaran (KPA) RSUD Pringsewu</td></tr>
                 <tr><td>Dari</td><td>:</td><td>Pejabat Pelaksana Teknis Kegiatan</td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>1 September 2025</td></tr>
+                <tr><td>Tanggal</td><td>:</td><td>1 Oktober 2025</td></tr>
                 <tr><td>Nomor</td><td>:</td><td>445 / ..........01/ PPBJ / LL.04 /...../ 2025</td></tr>
                 <tr><td>Program</td><td>:</td><td>Peningkatan Mutu Pelayanan Kesehatan RSUD</td></tr>
                 <tr><td>Kegiatan</td><td>:</td><td>Belanja Operasional BLUD</td></tr>
@@ -198,7 +198,7 @@
             <table class="no-border-table">
                 <tr><td>Ditujukan kepada Yth</td><td>:</td><td>Pejabat Pengadaan Obat/BMHP E-Katalog/Non Katalog</td></tr>
                 <tr><td>Dari</td><td>:</td><td>Pejabat Pembuat Komitmen</td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>1 September 2025</td></tr>
+                <tr><td>Tanggal</td><td>:</td><td>1 Oktober 2025</td></tr>
                 <tr><td>Nomor</td><td>:</td><td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/ PPBJ / LL.04 /...../ 2025</td></tr>
                 <tr><td>Perihal</td><td>:</td><td>Pengadaan Langsung</td></tr>    
             </table>
@@ -211,7 +211,7 @@
                 <tr><td> </td><td>1. Peraturan Presiden Nomor 12 Tahun 2021 tentang Pengadaan Barang/Jasa Pemerintah</td></tr>
                 <tr><td> </td><td>2. Peraturan Bupati Nomor 17 Tahun 2018 tentang Jenjang Nilai Pengadaan Barang dan Jasa pada Unit Pelayanan Umum Daerah </td></tr>
                 <tr><td> </td><td>&nbsp;&nbsp;&nbsp;&nbsp;Rumah Sakit Umum Daerah Pringsewu.</td></tr>
-                <tr><td> </td><td>3. Surat permintaan Pengadaan Barang/Jasa Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/2025 tanggal 1 September 2025 </td></tr>
+                <tr><td> </td><td>3. Surat permintaan Pengadaan Barang/Jasa Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/LL.04/2025 tanggal 1 Oktober 2025 </td></tr>
             </table>
             <table class="no-border-table">
                 <tr><td>B.</td><td>Menugaskan</td><td>:</td><td></td></tr>
@@ -314,7 +314,7 @@
 
             <!-- Tanda Tangan -->
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, 1 September 2025</p>
+                <p>Pringsewu, 1 Oktober 2025</p>
                 <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>
                 <br>
                 <br>
@@ -682,7 +682,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SELASA, tanggal Tiga Puluh Bulan September Tahun Dua Ribu Dua Puluh Lima (30/09/2025),</td></tr>
+                <tr><td>Pada hari ini JUM'AT, tanggal Tiga Puluh Satu Satu Bulan Oktober Tahun Dua Ribu Dua Puluh Lima (31/10/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -772,7 +772,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SELASA, tanggal Tiga Puluh Bulan September Tahun Dua Ribu Dua Puluh Lima (30/09/2025),</td></tr>
+                <tr><td>Pada hari ini JUM'AT, tanggal Tiga Puluh Satu Satu Bulan Oktober Tahun Dua Ribu Dua Puluh Lima (31/10/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -856,7 +856,7 @@
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/SPPA.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SELASA, tanggal Tiga Puluh Bulan September Tahun Dua Ribu Dua Puluh Lima (30/09/2025),</td></tr>
+                <tr><td>Pada hari ini JUM'AT, tanggal Tiga Puluh Satu Satu Bulan Oktober Tahun Dua Ribu Dua Puluh Lima (31/10/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1001,7 +1001,7 @@
             </table>
 
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, 30 September 2025</p>
+                <p>Pringsewu, 30 Oktober 2025</p>
                 <p>Pejabat Pelaksana Teknis Kegiatan</p>
                 <p>Belanja bahan Habis Pakai (BAHP) Rumah Sakit</p>
                 <br>
@@ -1037,7 +1037,7 @@
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini SELASA, tanggal Tiga Puluh Bulan September Tahun Dua Ribu Dua Puluh Lima (30/09/2025),</td></tr>
+                <tr><td>Pada hari ini JUM'AT, tanggal Tiga Puluh Satu Satu Bulan Oktober Tahun Dua Ribu Dua Puluh Lima (31/10/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1116,7 +1116,7 @@
             <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/2025</h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SELASA, tanggal Tiga Puluh Bulan September Tahun Dua Ribu Dua Puluh Lima (30/09/2025),
+                <tr><td>Pada hari ini JUM'AT, tanggal Tiga Puluh Satu Bulan Oktober Tahun Dua Ribu Dua Puluh Lima (31/10/2025),
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
