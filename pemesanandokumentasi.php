@@ -35,6 +35,8 @@ if (empty($where)) {
 $where_sql = implode(' AND ', $where);
 
 // Query data
+
+// Query utama data faktur
 $sql = "SELECT
     pemesanan.tgl_pesan,
     pemesanan.tgl_faktur,
@@ -51,8 +53,20 @@ INNER JOIN detailpesan ON detailpesan.no_faktur = pemesanan.no_faktur
 INNER JOIN databarang ON detailpesan.kode_brng = databarang.kode_brng
 WHERE $where_sql
 ORDER BY pemesanan.tgl_pesan DESC, pemesanan.no_faktur DESC";
-
 $result = mysqli_query($koneksi, $sql);
+
+// Query status input jenis_barang & cara_belanja
+$cb_query = "SELECT no_faktur, jenis_barang, cara_belanja FROM pemesanan_cara_belanja";
+$cb_result = mysqli_query($koneksi, $cb_query);
+$cb_status = [];
+if ($cb_result) {
+    while ($cb_row = mysqli_fetch_assoc($cb_result)) {
+        $cb_status[$cb_row['no_faktur']] = [
+            'jenis_barang' => $cb_row['jenis_barang'],
+            'cara_belanja' => $cb_row['cara_belanja']
+        ];
+    }
+}
 
 // Query untuk mengecek status foto
 $foto_query = "SELECT no_faktur, foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8, foto9, foto10 FROM pemesanan_dokumentasi";
@@ -423,6 +437,7 @@ if ($result && mysqli_num_rows($result) > 0) {
             <th>Nama Barang</th>
             <th>Jumlah</th>
             <th>Kode Satuan</th>
+            <th>Status Input</th>
             <th>Aksi</th>
         </tr>
         <?php if (!empty($data)): ?>
@@ -434,9 +449,7 @@ if ($result && mysqli_num_rows($result) > 0) {
                     <?php if ($first): ?>
                         <td rowspan="<?= $rowspan ?>"><?php echo htmlspecialchars($row['tgl_pesan']); ?></td>
                         <td rowspan="<?= $rowspan ?>"><?php echo htmlspecialchars($row['tgl_faktur']); ?></td>
-                        <td rowspan="<?= $rowspan ?>">
-                            <?php echo htmlspecialchars($row['no_faktur']); ?>
-                        </td>
+                        <td rowspan="<?= $rowspan ?>"><?php echo htmlspecialchars($row['no_faktur']); ?></td>
                         <td rowspan="<?= $rowspan ?>"><?php echo htmlspecialchars($row['nama_suplier']); ?></td>
                     <?php endif; ?>
                     <td><?php echo htmlspecialchars($row['kode_brng']); ?></td>
@@ -444,9 +457,18 @@ if ($result && mysqli_num_rows($result) > 0) {
                     <td style="text-align:right;"><?php echo htmlspecialchars($row['jumlah']); ?></td>
                     <td><?php echo htmlspecialchars($row['kode_sat']); ?></td>
                     <?php if ($first): ?>
-                        <td rowspan="<?= $rowspan ?>">
+                        <td rowspan="<?= $rowspan ?>" style="text-align:center; font-weight:bold;">
                             <?php
                             $no_faktur = $row['no_faktur'];
+                            if (isset($cb_status[$no_faktur]) && $cb_status[$no_faktur]['jenis_barang'] && $cb_status[$no_faktur]['cara_belanja']) {
+                                echo '<span style="color:#28a745;">Lengkap</span>';
+                            } else {
+                                echo '<span style="color:#dc3545;">Belum</span>';
+                            }
+                            ?>
+                        </td>
+                        <td rowspan="<?= $rowspan ?>">
+                            <?php
                             $foto_count = isset($foto_status[$no_faktur]) ? $foto_status[$no_faktur] : 0;
                             // Tombol upload foto
                             if ($foto_count == 0) {
@@ -467,15 +489,19 @@ if ($result && mysqli_num_rows($result) > 0) {
                                     <span class="photo-badge"><?= $foto_count ?>/10</span>
                                 </a>
                                 <form class="cara-belanja-form" data-faktur="<?= htmlspecialchars($row['no_faktur']) ?>" onsubmit="return simpanCaraBelanja(this);" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+                                    <?php
+                                    $jenis_barang_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['jenis_barang'] : '';
+                                    $cara_belanja_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['cara_belanja'] : '';
+                                    ?>
                                     <select name="jenis_barang" style="margin-bottom:2px;">
-                                        <option value="">Jenis Barang</option>
-                                        <option value="e-katalog">e-katalog</option>
-                                        <option value="non e-katalog">non e-katalog</option>
+                                        <option value="" <?= $jenis_barang_val==''?'selected':'' ?>>Jenis Barang</option>
+                                        <option value="e-katalog" <?= $jenis_barang_val=='e-katalog'?'selected':'' ?>>e-katalog</option>
+                                        <option value="non e-katalog" <?= $jenis_barang_val=='non e-katalog'?'selected':'' ?>>non e-katalog</option>
                                     </select>
                                     <select name="cara_belanja" style="margin-bottom:2px;">
-                                        <option value="">Cara Belanja</option>
-                                        <option value="e-purchasing">e-purchasing</option>
-                                        <option value="manual">manual</option>
+                                        <option value="" <?= $cara_belanja_val==''?'selected':'' ?>>Cara Belanja</option>
+                                        <option value="e-purchasing" <?= $cara_belanja_val=='e-purchasing'?'selected':'' ?>>e-purchasing</option>
+                                        <option value="manual" <?= $cara_belanja_val=='manual'?'selected':'' ?>>manual</option>
                                     </select>
                                     <button type="submit" style="background:#ffc107;color:#333;border:none;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;">💾 Simpan</button>
                                     <span class="cb-status" style="font-size:11px;color:#28a745;display:none;">Tersimpan!</span>
