@@ -437,7 +437,7 @@ if ($result && mysqli_num_rows($result) > 0) {
             <th>Nama Barang</th>
             <th>Jumlah</th>
             <th>Kode Satuan</th>
-            <th>Status Input</th>
+            <!-- Kolom Status Input dihapus -->
             <th>Aksi</th>
         </tr>
         <?php if (!empty($data)): ?>
@@ -457,16 +457,6 @@ if ($result && mysqli_num_rows($result) > 0) {
                     <td style="text-align:right;"><?php echo htmlspecialchars($row['jumlah']); ?></td>
                     <td><?php echo htmlspecialchars($row['kode_sat']); ?></td>
                     <?php if ($first): ?>
-                        <td rowspan="<?= $rowspan ?>" style="text-align:center; font-weight:bold;">
-                            <?php
-                            $no_faktur = $row['no_faktur'];
-                            if (isset($cb_status[$no_faktur]) && $cb_status[$no_faktur]['jenis_barang'] && $cb_status[$no_faktur]['cara_belanja']) {
-                                echo '<span style="color:#28a745;">Lengkap</span>';
-                            } else {
-                                echo '<span style="color:#dc3545;">Belum</span>';
-                            }
-                            ?>
-                        </td>
                         <td rowspan="<?= $rowspan ?>">
                             <?php
                             $foto_count = isset($foto_status[$no_faktur]) ? $foto_status[$no_faktur] : 0;
@@ -492,6 +482,7 @@ if ($result && mysqli_num_rows($result) > 0) {
                                     <?php
                                     $jenis_barang_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['jenis_barang'] : '';
                                     $cara_belanja_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['cara_belanja'] : '';
+                                    $is_lengkap = ($jenis_barang_val && $cara_belanja_val);
                                     ?>
                                     <select name="jenis_barang" style="margin-bottom:2px;">
                                         <option value="" <?= $jenis_barang_val==''?'selected':'' ?>>Jenis Barang</option>
@@ -503,7 +494,7 @@ if ($result && mysqli_num_rows($result) > 0) {
                                         <option value="e-purchasing" <?= $cara_belanja_val=='e-purchasing'?'selected':'' ?>>e-purchasing</option>
                                         <option value="manual" <?= $cara_belanja_val=='manual'?'selected':'' ?>>manual</option>
                                     </select>
-                                    <button type="submit" style="background:#ffc107;color:#333;border:none;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;">💾 Simpan</button>
+                                    <button type="submit" style="background:<?= $is_lengkap ? '#28a745' : '#ffc107' ?>;color:<?= $is_lengkap ? '#fff' : '#333' ?>;border:none;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;">💾 Simpan</button>
                                     <span class="cb-status" style="font-size:11px;color:#28a745;display:none;">Tersimpan!</span>
                                 </form>
                             </div>
