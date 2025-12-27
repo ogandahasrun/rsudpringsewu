@@ -71,6 +71,7 @@ if ($cb_result) {
 // Query untuk mengecek status foto
 $foto_query = "SELECT no_faktur, foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8, foto9, foto10 FROM pemesanan_dokumentasi";
 $foto_result = mysqli_query($koneksi, $foto_query);
+
 $foto_status = [];
 if ($foto_result) {
     while ($foto_row = mysqli_fetch_assoc($foto_result)) {
@@ -81,7 +82,10 @@ if ($foto_result) {
                 $foto_count++;
             }
         }
-        $foto_status[$no_faktur] = $foto_count;
+        if ($foto_count > 0) {
+            $foto_status[$no_faktur] = $foto_count;
+        }
+        // Jika tidak ada foto, jangan isi $foto_status sama sekali
     }
 }
 
@@ -437,8 +441,8 @@ if ($result && mysqli_num_rows($result) > 0) {
             <th>Nama Barang</th>
             <th>Jumlah</th>
             <th>Kode Satuan</th>
-            <!-- Kolom Status Input dihapus -->
-            <th>Aksi</th>
+            <th>Upload/Lihat Foto</th>
+            <th>Jenis Barang & Cara Belanja</th>
         </tr>
         <?php if (!empty($data)): ?>
             <?php foreach ($data as $key => $rows): 
@@ -459,45 +463,46 @@ if ($result && mysqli_num_rows($result) > 0) {
                     <?php if ($first): ?>
                         <td rowspan="<?= $rowspan ?>">
                             <?php
-                            $foto_count = isset($foto_status[$no_faktur]) ? $foto_status[$no_faktur] : 0;
-                            // Tombol upload foto
-                            if ($foto_count == 0) {
-                                $btn_class = 'no-photo';
-                                $btn_text = 'Upload Foto';
-                                $btn_title = 'Belum ada foto yang diupload';
-                            } else {
+                            $no_faktur = $row['no_faktur'];
+                            if (isset($foto_status[$no_faktur])) {
+                                $foto_count = $foto_status[$no_faktur];
                                 $btn_class = 'has-photo';
                                 $btn_text = 'Lihat/Tambah Foto';
                                 $btn_title = $foto_count . ' dari 10 foto sudah diupload';
+                            } else {
+                                $foto_count = 0;
+                                $btn_class = 'no-photo';
+                                $btn_text = 'Upload Foto';
+                                $btn_title = 'Belum ada foto yang diupload';
                             }
                             ?>
-                            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
-                                <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" 
-                                   class="action-btn <?= $btn_class ?>" 
-                                   title="<?= $btn_title ?>">
-                                    <?= $btn_text ?>
-                                    <span class="photo-badge"><?= $foto_count ?>/10</span>
-                                </a>
-                                <form class="cara-belanja-form" data-faktur="<?= htmlspecialchars($row['no_faktur']) ?>" onsubmit="return simpanCaraBelanja(this);" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
-                                    <?php
-                                    $jenis_barang_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['jenis_barang'] : '';
-                                    $cara_belanja_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['cara_belanja'] : '';
-                                    $is_lengkap = ($jenis_barang_val && $cara_belanja_val);
-                                    ?>
-                                    <select name="jenis_barang" style="margin-bottom:2px;">
-                                        <option value="" <?= $jenis_barang_val==''?'selected':'' ?>>Jenis Barang</option>
-                                        <option value="e-katalog" <?= $jenis_barang_val=='e-katalog'?'selected':'' ?>>e-katalog</option>
-                                        <option value="non e-katalog" <?= $jenis_barang_val=='non e-katalog'?'selected':'' ?>>non e-katalog</option>
-                                    </select>
-                                    <select name="cara_belanja" style="margin-bottom:2px;">
-                                        <option value="" <?= $cara_belanja_val==''?'selected':'' ?>>Cara Belanja</option>
-                                        <option value="e-purchasing" <?= $cara_belanja_val=='e-purchasing'?'selected':'' ?>>e-purchasing</option>
-                                        <option value="manual" <?= $cara_belanja_val=='manual'?'selected':'' ?>>manual</option>
-                                    </select>
-                                    <button type="submit" style="background:<?= $is_lengkap ? '#28a745' : '#ffc107' ?>;color:<?= $is_lengkap ? '#fff' : '#333' ?>;border:none;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;">💾 Simpan</button>
-                                    <span class="cb-status" style="font-size:11px;color:#28a745;display:none;">Tersimpan!</span>
-                                </form>
-                            </div>
+                            <a href="dokumentasifaktur.php?no_faktur=<?=urlencode($row['no_faktur'])?>&tgl_pesan_awal=<?=urlencode($tgl_pesan_awal)?>&tgl_pesan_akhir=<?=urlencode($tgl_pesan_akhir)?>&tgl_faktur_awal=<?=urlencode($tgl_faktur_awal)?>&tgl_faktur_akhir=<?=urlencode($tgl_faktur_akhir)?>&nama_suplier=<?=urlencode($nama_suplier)?>" 
+                               class="action-btn <?= $btn_class ?>" 
+                               title="<?= $btn_title ?>">
+                                <?= $btn_text ?>
+                                <span class="photo-badge"><?= $foto_count ?>/10</span>
+                            </a>
+                        </td>
+                        <td rowspan="<?= $rowspan ?>">
+                            <form class="cara-belanja-form" data-faktur="<?= htmlspecialchars($row['no_faktur']) ?>" onsubmit="return simpanCaraBelanja(this);" style="display:flex; flex-direction:column; gap:4px;">
+                                <?php
+                                $jenis_barang_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['jenis_barang'] : '';
+                                $cara_belanja_val = isset($cb_status[$row['no_faktur']]) ? $cb_status[$row['no_faktur']]['cara_belanja'] : '';
+                                $is_lengkap = ($jenis_barang_val && $cara_belanja_val);
+                                ?>
+                                <select name="jenis_barang" style="margin-bottom:2px;">
+                                    <option value="" <?= $jenis_barang_val==''?'selected':'' ?>>Jenis Barang</option>
+                                    <option value="e-katalog" <?= $jenis_barang_val=='e-katalog'?'selected':'' ?>>e-katalog</option>
+                                    <option value="non e-katalog" <?= $jenis_barang_val=='non e-katalog'?'selected':'' ?>>non e-katalog</option>
+                                </select>
+                                <select name="cara_belanja" style="margin-bottom:2px;">
+                                    <option value="" <?= $cara_belanja_val==''?'selected':'' ?>>Cara Belanja</option>
+                                    <option value="e-purchasing" <?= $cara_belanja_val=='e-purchasing'?'selected':'' ?>>e-purchasing</option>
+                                    <option value="manual" <?= $cara_belanja_val=='manual'?'selected':'' ?>>manual</option>
+                                </select>
+                                <button type="submit" style="background:<?= $is_lengkap ? '#28a745' : '#ffc107' ?>;color:<?= $is_lengkap ? '#fff' : '#333' ?>;border:none;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;">💾 Simpan</button>
+                                <span class="cb-status" style="font-size:11px;color:#28a745;display:none;">Tersimpan!</span>
+                            </form>
                         </td>
                     <?php endif; ?>
                 </tr>
