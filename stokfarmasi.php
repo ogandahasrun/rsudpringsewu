@@ -415,6 +415,7 @@
                             <th class="sortable" onclick="sortTable(8)" style="text-align: right;">Stok DI</th>
                             <th class="sortable" onclick="sortTable(9)" style="text-align: right;">Stok DO</th>
                             <th class="sortable" onclick="sortTable(10)" style="text-align: right;">Total Stok</th>
+                            <th class="sortable" onclick="sortTable(11)" style="text-align: right;">Total Aset</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -450,15 +451,35 @@
         $result = mysqli_query($koneksi, $query);
         $no = 1;
 
+
+        // Inisialisasi penjumlahan kolom
+        $sum_stok_go = 0;
+        $sum_stok_dri = 0;
+        $sum_stok_ap = 0;
+        $sum_stok_di = 0;
+        $sum_stok_do = 0;
+        $sum_total_stok = 0;
+        $sum_total_aset = 0;
+
         while ($row = mysqli_fetch_assoc($result)) {
             $total_stok = $row['stok_go'] + $row['stok_dri'] + $row['stok_ap'] + $row['stok_di'] + $row['stok_do'];
-            
+            $total_aset = $row['dasar'] * $total_stok;
+
+            // Penjumlahan kolom
+            $sum_stok_go += $row['stok_go'];
+            $sum_stok_dri += $row['stok_dri'];
+            $sum_stok_ap += $row['stok_ap'];
+            $sum_stok_di += $row['stok_di'];
+            $sum_stok_do += $row['stok_do'];
+            $sum_total_stok += $total_stok;
+            $sum_total_aset += $total_aset;
+
             // Tentukan class untuk total stok
             $total_class = '';
             if ($total_stok == 0) $total_class = 'stock-zero';
             elseif ($total_stok <= 20) $total_class = 'stock-low';
             else $total_class = 'stock-good';
-            
+
             echo "<tr>
                 <td style='text-align: center; font-weight: bold;'>{$no}</td>
                 <td style='font-family: monospace; font-weight: bold;'>" . htmlspecialchars($row['kode_brng']) . "</td>
@@ -471,9 +492,22 @@
                 <td class='stock-cell " . ($row['stok_di'] == 0 ? 'stock-zero' : ($row['stok_di'] <= 10 ? 'stock-low' : 'stock-good')) . "'>" . number_format($row['stok_di']) . "</td>
                 <td class='stock-cell " . ($row['stok_do'] == 0 ? 'stock-zero' : ($row['stok_do'] <= 10 ? 'stock-low' : 'stock-good')) . "'>" . number_format($row['stok_do']) . "</td>
                 <td class='stock-cell $total_class' style='font-size: 14px; font-weight: bold;'>" . number_format($total_stok) . "</td>
+                <td class='stock-cell' style='font-size: 14px; font-weight: bold; text-align: right;'>Rp " . number_format($total_aset, 0, ',', '.') . "</td>
             </tr>";
             $no++;
         }
+
+        // Baris jumlah
+        echo "<tr style='background: #e9ecef; font-weight: bold;'>
+            <td colspan='5' style='text-align: center;'>JUMLAH</td>
+            <td class='stock-cell'>" . number_format($sum_stok_go) . "</td>
+            <td class='stock-cell'>" . number_format($sum_stok_dri) . "</td>
+            <td class='stock-cell'>" . number_format($sum_stok_ap) . "</td>
+            <td class='stock-cell'>" . number_format($sum_stok_di) . "</td>
+            <td class='stock-cell'>" . number_format($sum_stok_do) . "</td>
+            <td class='stock-cell' style='font-size: 14px;'>" . number_format($sum_total_stok) . "</td>
+            <td class='stock-cell' style='font-size: 14px; text-align: right;'>Rp " . number_format($sum_total_aset, 0, ',', '.') . "</td>
+        </tr>";
 
         mysqli_close($koneksi);
         ?>

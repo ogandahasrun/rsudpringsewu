@@ -1,4 +1,5 @@
 <?php
+set_time_limit(10000); // Batas waktu eksekusi 10000 detik (sekitar 2 jam 46 menit)
 include 'koneksi.php';
 ?>
 
