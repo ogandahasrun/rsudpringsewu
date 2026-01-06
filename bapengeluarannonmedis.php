@@ -78,9 +78,10 @@
             }
 
             // Ambil $no_keluar dari POST jika ada
-            $no_keluar = isset($_POST['no_keluar']) ? $_POST['no_keluar'] : '';
+            // Ambil no_keluar dari GET atau POST
+            $no_keluar = isset($_GET['no_keluar']) ? $_GET['no_keluar'] : (isset($_POST['no_keluar']) ? $_POST['no_keluar'] : '');
             $tanggal_lengkap = '';
-            if (isset($_POST['filter']) && !empty($no_keluar)) {
+            if (!empty($no_keluar)) {
                 include 'koneksi.php';
                 $query_tgl = "SELECT tanggal FROM ipsrspengeluaran WHERE no_keluar = ? LIMIT 1";
                 $stmt_tgl = mysqli_prepare($koneksi, $query_tgl);
@@ -131,36 +132,38 @@
 
             <?php
             include 'koneksi.php';
+
             $no_keluar = "";
             $result = null;
-
-            if (isset($_POST['filter'])) {
+            if (isset($_GET['no_keluar'])) {
+                $no_keluar = $_GET['no_keluar'];
+            } elseif (isset($_POST['filter'])) {
                 $no_keluar = $_POST['no_keluar'];
+            }
 
-                if (!empty($no_keluar)) {
-                    $query = "SELECT
-                                ipsrspengeluaran.no_keluar,
-                                ipsrspengeluaran.tanggal,
-                                ipsrsbarang.nama_brng,
-                                ipsrsdetailpengeluaran.jumlah,
-                                kodesatuan.satuan
-                            FROM
-                                ipsrspengeluaran
-                            INNER JOIN ipsrsdetailpengeluaran ON ipsrsdetailpengeluaran.no_keluar = ipsrspengeluaran.no_keluar
-                            INNER JOIN ipsrsbarang ON ipsrsdetailpengeluaran.kode_brng = ipsrsbarang.kode_brng
-                            INNER JOIN kodesatuan ON ipsrsdetailpengeluaran.kode_sat = kodesatuan.kode_sat
-                            WHERE
-                                ipsrspengeluaran.no_keluar = ?
-                            ORDER BY
-                                ipsrsbarang.nama_brng ASC";
+            if (!empty($no_keluar)) {
+                $query = "SELECT
+                            ipsrspengeluaran.no_keluar,
+                            ipsrspengeluaran.tanggal,
+                            ipsrsbarang.nama_brng,
+                            ipsrsdetailpengeluaran.jumlah,
+                            kodesatuan.satuan
+                        FROM
+                            ipsrspengeluaran
+                        INNER JOIN ipsrsdetailpengeluaran ON ipsrsdetailpengeluaran.no_keluar = ipsrspengeluaran.no_keluar
+                        INNER JOIN ipsrsbarang ON ipsrsdetailpengeluaran.kode_brng = ipsrsbarang.kode_brng
+                        INNER JOIN kodesatuan ON ipsrsdetailpengeluaran.kode_sat = kodesatuan.kode_sat
+                        WHERE
+                            ipsrspengeluaran.no_keluar = ?
+                        ORDER BY
+                            ipsrsbarang.nama_brng ASC";
 
-                    $stmt = mysqli_prepare($koneksi, $query);
-                    mysqli_stmt_bind_param($stmt, "s", $no_keluar);
-                    mysqli_stmt_execute($stmt);
-                    $result = mysqli_stmt_get_result($stmt);
-                } else {
-                    echo "<p style='color: red;'>Masukkan nomor keluar</p>";
-                }
+                $stmt = mysqli_prepare($koneksi, $query);
+                mysqli_stmt_bind_param($stmt, "s", $no_keluar);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+            } elseif (isset($_POST['filter'])) {
+                echo "<p style='color: red;'>Masukkan nomor keluar</p>";
             }
             ?>
 

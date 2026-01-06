@@ -327,6 +327,7 @@
                                 <input type='hidden' name='no_rawat' value='$no_rawat_escaped'>
                                 <input type='hidden' name='tanggal_awal' value='$tanggal_awal'>
                                 <input type='hidden' name='tanggal_akhir' value='$tanggal_akhir'>
+                                <input type='hidden' name='filter' value='1'>
                                 <button type='button' class='delete-button' name='hapus' onclick='confirmDelete(\"$no_rawat_escaped\")'>Hapus</button>
                                 <input type='hidden' name='hapus' value='1'>
                             </form>
