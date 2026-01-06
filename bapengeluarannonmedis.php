@@ -12,7 +12,7 @@
 
         <div class="search-form">
             <form method="POST">
-                Cari Berdasarkan Nomor Pengeluaran: 
+                Cari Berdasarkan Nomor Pengeluaran : 
                 <input type="text" name="no_keluar" required value="<?php echo isset($_POST['no_keluar']) ? htmlspecialchars($_POST['no_keluar']) : ''; ?>">
                 <button type="submit" name="filter">Cari</button>
             </form>
@@ -23,12 +23,87 @@
         </div>
 
         <div class="content">
+
             <h4 class="center-text">BERITA ACARA SERAH TERIMA BARANG</h4>
+            <?php
+            // Fungsi untuk mengubah angka ke teks Indonesia
+            function terbilang($angka) {
+                $angka = (int)$angka;
+                $bilangan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+                if ($angka < 12) {
+                    return $bilangan[$angka];
+                } elseif ($angka < 20) {
+                    return terbilang($angka - 10) . " Belas";
+                } elseif ($angka < 100) {
+                    return terbilang($angka / 10) . " Puluh " . terbilang($angka % 10);
+                } elseif ($angka < 200) {
+                    return "Seratus " . terbilang($angka - 100);
+                } elseif ($angka < 1000) {
+                    return terbilang($angka / 100) . " Ratus " . terbilang($angka % 100);
+                } elseif ($angka < 2000) {
+                    return "Seribu " . terbilang($angka - 1000);
+                } elseif ($angka < 1000000) {
+                    return terbilang($angka / 1000) . " Ribu " . terbilang($angka % 1000);
+                } elseif ($angka < 1000000000) {
+                    return terbilang($angka / 1000000) . " Juta " . terbilang($angka % 1000000);
+                } else {
+                    return "Angka terlalu besar";
+                }
+            }
+
+            function hariIndo($tanggal) {
+                $hari = [
+                    'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
+                ];
+                $dayIndex = date('w', strtotime($tanggal));
+                return $hari[$dayIndex];
+            }
+
+            function bulanIndo($bulan) {
+                $bulanList = [
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember'
+                ];
+                return $bulanList[(int)$bulan];
+            }
+
+            // Ambil $no_keluar dari POST jika ada
+            $no_keluar = isset($_POST['no_keluar']) ? $_POST['no_keluar'] : '';
+            $tanggal_lengkap = '';
+            if (isset($_POST['filter']) && !empty($no_keluar)) {
+                include 'koneksi.php';
+                $query_tgl = "SELECT tanggal FROM ipsrspengeluaran WHERE no_keluar = ? LIMIT 1";
+                $stmt_tgl = mysqli_prepare($koneksi, $query_tgl);
+                mysqli_stmt_bind_param($stmt_tgl, "s", $no_keluar);
+                mysqli_stmt_execute($stmt_tgl);
+                $result_tgl = mysqli_stmt_get_result($stmt_tgl);
+                if ($row_tgl = mysqli_fetch_assoc($result_tgl)) {
+                    $tanggal_db = $row_tgl['tanggal'];
+                    $hari = hariIndo($tanggal_db);
+                    $tgl = date('j', strtotime($tanggal_db));
+                    $tgl_angka = date('d', strtotime($tanggal_db));
+                    $bulan = date('n', strtotime($tanggal_db));
+                    $tahun = date('Y', strtotime($tanggal_db));
+                    $tahun_angka = date('Y', strtotime($tanggal_db));
+                    $tahun_terbilang = strtolower(terbilang($tahun));
+                    $tanggal_lengkap = "Pada hari ini, $hari tanggal " . terbilang($tgl) . " Bulan " . bulanIndo($bulan) . " Tahun " . ucfirst($tahun_terbilang) . " ($tgl_angka-" . str_pad($bulan,2,'0',STR_PAD_LEFT) . "-$tahun_angka), Kami yang bertanda tangan di bawah ini :";
+                }
+            }
+            ?>
 
             <table class="no-border-table">
-                <tr><td>Pada hari ini. .............. Tanggal ................. 
-                    bulan ..................... tahun Dua Ribu Dua Puluh Lima, 
-                    Kami yang bertanda tangan di bawah ini :</td></tr>
+                <tr><td>
+                    <?php echo $tanggal_lengkap ? $tanggal_lengkap : 'Pada hari ini. .............. Tanggal ................. bulan ..................... tahun Dua Ribu Dua Puluh Lima, Kami yang bertanda tangan di bawah ini :'; ?>
                 </td></tr>
             </table>
 
