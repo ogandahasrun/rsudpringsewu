@@ -327,6 +327,7 @@
                     pasien.no_rkm_medis, 
                     pasien.nm_pasien, 
                     pasien.no_peserta,
+                    pasien.alamat,
                     bridging_sep.no_sep, 
                     bridging_sep.nmdpdjp, 
                     MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
@@ -363,6 +364,7 @@
                     <th>NOMOR RAWAT</th>
                     <th>NOMOR REKAM MEDIS</th>
                     <th>NAMA PASIEN</th>
+                    <th>ALAMAT</th>
                     <th>NOMOR PESERTA</th>
                     <th>NOMOR SEP</th>
                     <th>DIAGNOSA</th>                    
@@ -381,6 +383,7 @@
                         <td>{$row['no_rawat']}</td>
                         <td>{$row['no_rkm_medis']}</td>
                         <td>{$row['nm_pasien']}</td>
+                        <td>{$row['alamat']}</td>
                         <td>{$row['no_peserta']}</td>
                         <td>{$row['no_sep']}</td>
                         <td>{$row['kd_penyakit']}</td>                        
