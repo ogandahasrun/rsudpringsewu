@@ -1,102 +1,50 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MORFOLOGI DARAH TEPI</title>
+    <title>Morfologi Darah Tepi</title>
     <style>
-        h1 {
-            font-family: Arial, sans-serif;
-            color: green;
-            text-align: center;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            font-family: Arial, sans-serif;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            border-right: 1px solid #ddd;
-        }
-        th:last-child, td:last-child {
-            border-right: none;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-        .back-button {
-            margin-bottom: 15px;
-        }
-        .filter-form {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 5px;
-        }
-        .filter-form input {
-            padding: 8px;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .filter-form button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .filter-form button:hover {
-            background-color: #45a049;
-        }
-        .no-data {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            margin: 20px 0;
-        }
-        .patient-info {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #e9f7ef;
-            border-radius: 5px;
-            border-left: 5px solid #4CAF50;
-            font-family: Arial, sans-serif;
-        }
-        .patient-info p {
-            margin: 5px 0;
-            font-size: 16px;
-        }
-
-        .col-uraian {
-            width: 20%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .col-hasil {
-            width: 80%;
-        }
-
-        .input-hasil {
-            width: 100%;
-            padding: 6px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
+        body, table, th, td, input, select, button { font-family: Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+        .header { background: linear-gradient(45deg, #28a745, #20c997); color: white; padding: 25px; text-align: center; }
+        .header h1 { margin: 0; font-size: 1.8em; font-weight: bold; letter-spacing: 1px; }
+        .content { padding: 25px; }
+        .back-button { margin-bottom: 20px; }
+        .back-button a { display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: all 0.3s ease; }
+        .back-button a:hover { background: #5a6268; transform: translateY(-2px); }
+        .filter-form { background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
+        .filter-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .filter-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-weight: bold; color: #495057; font-size: 14px; }
+        .filter-group input { padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .filter-group input:focus { outline: none; border-color: #28a745; }
+        .filter-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { transform: translateY(-2px); }
+        .table-container { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; cursor: pointer; user-select: none; position: relative; transition: background 0.3s ease; }
+        th:hover { background: linear-gradient(45deg, #495057, #5a6268); }
+        td { padding: 12px; border-bottom: 1px solid #e9ecef; font-size: 13px; }
+        tr:nth-child(even) td { background: #f8f9fa; }
+        tr:hover td { background: #e8f5e8; }
+        .no-data { text-align: center; color: #666; font-style: italic; padding: 40px; background: #f8f9fa; }
+        .patient-info { margin: 20px 0; padding: 15px; background-color: #e9f7ef; border-radius: 8px; border-left: 5px solid #28a745; font-family: Tahoma, Geneva, Verdana, sans-serif; }
+        .patient-info p { margin: 5px 0; font-size: 16px; }
+        .col-uraian { width: 30%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .col-hasil { width: 70%; }
+        .input-hasil { width: 100%; padding: 10px; font-size: 15px; border-radius: 7px; border: 1.5px solid #e9ecef; transition: border 0.3s; }
+        .input-hasil:focus { border: 1.5px solid #28a745; outline: none; }
+        .save-btn { margin-top: 18px; }
+        @media (max-width: 900px) { .container { max-width: 100%; } .content { padding: 10px; } .header { padding: 18px 8px; } }
+        @media (max-width: 600px) { th, td { padding: 8px 4px; font-size: 12px; } .header h1 { font-size: 1.2em; } }
     </style>
 
 <script>
@@ -136,13 +84,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </head>
 <body>
-    <header>
-        <h1>MORFOLOGI DARAH TEPI</h1>
-    </header>
-
-    <div class="back-button">
-        <a href="laboratorium.php">Kembali ke Menu Laboratorium</a>
+<div class="container">
+    <div class="header">
+        <h1>🧬 MORFOLOGI DARAH TEPI</h1>
     </div>
+    <div class="content">
+        <div class="back-button">
+            <a href="laboratorium.php">← Kembali ke Menu Laboratorium</a>
+        </div>
 
     <?php
     include 'koneksi.php';
@@ -208,13 +157,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     ?>
 
-    <div class="filter-form">
-        <form method="POST">
-            No. Rawat :
-            <input type="text" name="no_rawat" required value="<?php echo htmlspecialchars($no_rawat); ?>">
-            <button type="submit" name="filter">Filter</button>
-        </form>
-    </div>
+    <form method="POST" class="filter-form">
+        <div class="filter-title">🔍 Filter Data Morfologi Darah Tepi</div>
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label for="no_rawat">No. Rawat</label>
+                <input type="text" id="no_rawat" name="no_rawat" required value="<?php echo htmlspecialchars($no_rawat); ?>">
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" name="filter" class="btn btn-primary">🔍 Tampilkan Data</button>
+        </div>
+    </form>
 
     <?php
     if (!empty($no_rkm_medis) && !empty($nm_pasien)) {
@@ -225,35 +179,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     ?>
 
+
     <?php if (!empty($data_lab)) { ?>
         <form method="POST">
             <input type="hidden" name="no_rawat" value="<?= htmlspecialchars($no_rawat) ?>">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-uraian">URAIAN</th>
-                        <th class="col-hasil">HASIL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($data_lab as $index => $row): ?>
-                    <tr>
-                        <td class="col-uraian">
-                            <?= htmlspecialchars($row['Pemeriksaan']) ?>
-                            <input type="hidden" name="id_template[]" value="<?= $row['id_template'] ?>">
-                            <input type="hidden" name="pemeriksaan[]" value="<?= htmlspecialchars($row['Pemeriksaan']) ?>">
-                        </td>
-                        <td class="col-hasil">
-                            <input type="text" name="nilai[]" class="input-hasil" value="<?= htmlspecialchars($row['nilai']) ?>">
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-            <button type="submit" name="simpan_semua">Simpan Semua Perubahan</button>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-uraian">URAIAN</th>
+                            <th class="col-hasil">HASIL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($data_lab as $index => $row): ?>
+                        <tr>
+                            <td class="col-uraian">
+                                <?= htmlspecialchars($row['Pemeriksaan']) ?>
+                                <input type="hidden" name="id_template[]" value="<?= $row['id_template'] ?>">
+                                <input type="hidden" name="pemeriksaan[]" value="<?= htmlspecialchars($row['Pemeriksaan']) ?>">
+                            </td>
+                            <td class="col-hasil">
+                                <input type="text" name="nilai[]" class="input-hasil" value="<?= htmlspecialchars($row['nilai']) ?>">
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="save-btn">
+                <button type="submit" name="simpan_semua" class="btn btn-primary">💾 Simpan Semua Perubahan</button>
+            </div>
         </form>
     <?php } elseif (isset($_POST['filter'])) { ?>
-        <p class='no-data'><em>Data tidak ditemukan untuk nomor rawat yang dipilih.</em></p>
+        <div class="no-data"><em>Data tidak ditemukan untuk nomor rawat yang dipilih.</em></div>
     <?php } ?>
+    </div>
+</div>
 </body>
 </html>
