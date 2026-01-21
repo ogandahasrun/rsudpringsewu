@@ -1116,7 +1116,7 @@
             <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/2025</h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Tiga Puluh Satu Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),
+                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
