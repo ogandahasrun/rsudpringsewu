@@ -682,7 +682,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),</td></tr>
+                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (29/11/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -772,7 +772,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),</td></tr>
+                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (29/11/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -856,7 +856,7 @@
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/SPPA.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),</td></tr>
+                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (29/11/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1037,7 +1037,7 @@
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/2025</h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),</td></tr>
+                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (29/11/2025),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1116,7 +1116,7 @@
             <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/2025</h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (31/11/2025),
+                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Sembilan Bulan November Tahun Dua Ribu Dua Puluh Lima (29/11/2025),
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
