@@ -205,13 +205,36 @@ $result = mysqli_query($koneksi, $query);
         </thead>
         <tbody>
             <?php
+            $rows = [];
+            $total_jumlah = 0;
+            $total_subtotal = 0;
+            $total_total2 = 0;
+            $total_ppn = 0;
+            $total_tagihan = 0;
+            $last_faktur_total = '';
             if ($result && mysqli_num_rows($result) > 0) {
-                $no = 1;
-                $last_faktur = '';
                 while ($row = mysqli_fetch_assoc($result)) {
-                    // Jika faktur baru, tampilkan header + detail barang pertama dalam satu baris
-                    if ($row['no_faktur'] !== $last_faktur) {
-                        $last_faktur = $row['no_faktur'];
+                    $rows[] = $row;
+                    $total_jumlah += $row['jumlah'];
+                    $total_subtotal += $row['subtotal'];
+                    if ($row['no_faktur'] !== $last_faktur_total) {
+                        $last_faktur_total = $row['no_faktur'];
+                        $total_total2 += $row['total2'];
+                        $total_ppn += $row['ppn'];
+                        $total_tagihan += $row['tagihan'];
+                    }
+                }
+            }
+            if (!isset($rows) || !is_array($rows)) {
+                $rows = [];
+            }
+            ?>
+            <?php
+            if (count($rows) > 0) {
+                $no = 1;
+                foreach ($rows as $row) {
+                    if ($row['no_faktur'] !== $last_faktur_total) {
+                        $last_faktur_total = $row['no_faktur'];
                         ?>
                         <tr style="background:#e8f5e8;font-weight:bold;">
                             <td class="center"><?php echo $no++; ?></td>
@@ -235,7 +258,6 @@ $result = mysqli_query($koneksi, $query);
                         </tr>
                         <?php
                     } else {
-                        // Tampilkan detail barang berikutnya
                         ?>
                         <tr>
                             <td></td>
@@ -262,6 +284,22 @@ $result = mysqli_query($koneksi, $query);
             }
             ?>
         </tbody>
+        <tfoot>
+            <?php if (count($rows) > 0) { ?>
+                <tr style="background:#d4edda;font-weight:bold;">
+                    <td colspan="7" style="text-align:right;">TOTAL</td>
+                    <td class="center"><?php echo $total_jumlah; ?></td>
+                    <td></td>
+                    <td class="money"><?php echo $total_subtotal; ?></td>
+                    <td></td>
+                    <td></td>
+                    <td class="money"><?php echo $total_total2; ?></td>
+                    <td class="money"><?php echo $total_ppn; ?></td>
+                    <td class="money"><?php echo $total_tagihan; ?></td>
+                    <td colspan="3"></td>
+                </tr>
+            <?php } ?>
+        </tfoot>
             </table>
         </div>
         
