@@ -1,5 +1,43 @@
+
 <?php
 include 'koneksi.php';
+// Handler AJAX untuk tambah kunjungan
+if (isset($_POST['ajax_tambah_kunjungan']) && isset($_POST['no_rawat']) && isset($_POST['kunjungan_ke'])) {
+    header('Content-Type: application/json');
+    $no_rawat = mysqli_real_escape_string($koneksi, $_POST['no_rawat']);
+    $kunjungan_ke = intval($_POST['kunjungan_ke']);
+    if ($no_rawat && $kunjungan_ke > 0) {
+        $cek = mysqli_query($koneksi, "SELECT 1 FROM hepatitis_kunjungan WHERE no_rawat='$no_rawat' AND kunjungan_ke='$kunjungan_ke'");
+        if ($cek && mysqli_num_rows($cek) > 0) {
+            echo json_encode(['status'=>false,'pesan'=>'Kunjungan ke-'.$kunjungan_ke.' sudah ada untuk No. Rawat ini.']);
+        } else {
+            $q = "INSERT INTO hepatitis_kunjungan (no_rawat, kunjungan_ke) VALUES ('$no_rawat', '$kunjungan_ke')";
+            if (mysqli_query($koneksi, $q)) {
+                echo json_encode(['status'=>true,'pesan'=>'Kunjungan berhasil ditambahkan.']);
+            } else {
+                echo json_encode(['status'=>false,'pesan'=>'Gagal menambah kunjungan: '.mysqli_error($koneksi)]);
+            }
+        }
+    } else {
+        echo json_encode(['status'=>false,'pesan'=>'Data tidak valid.']);
+    }
+    exit;
+}
+// Handler AJAX untuk tampilkan kunjungan
+if (isset($_POST['ajax_kunjungan']) && isset($_POST['no_rkm_medis'])) {
+    header('Content-Type: application/json');
+    $no_rkm_medis = mysqli_real_escape_string($koneksi, $_POST['no_rkm_medis']);
+    $q = "SELECT reg_periksa.tgl_registrasi, hepatitis_kunjungan.kunjungan_ke FROM hepatitis_kunjungan INNER JOIN reg_periksa ON hepatitis_kunjungan.no_rawat = reg_periksa.no_rawat WHERE reg_periksa.no_rkm_medis = '$no_rkm_medis' ORDER BY reg_periksa.tgl_registrasi DESC";
+    $res = mysqli_query($koneksi, $q);
+    $data = [];
+    if ($res) {
+        while ($row = mysqli_fetch_assoc($res)) {
+            $data[] = $row;
+        }
+    }
+    echo json_encode($data);
+    exit;
+}
 
 // Set default values
 $tanggal_awal = isset($_GET['tanggal_awal']) ? $_GET['tanggal_awal'] : date('Y-m-d');
@@ -214,6 +252,7 @@ if ($poli_result) {
                                 <th>Hepatitis C</th>
                                 <th>Nama Dokter</th>
                                 <th>Poliklinik</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -227,6 +266,95 @@ if ($poli_result) {
                                     <td style="text-align: center;"><span class="prb-badge prb-ya">Ya</span></td>
                                     <td><?php echo htmlspecialchars($row['nm_dokter']); ?></td>
                                     <td><?php echo htmlspecialchars($row['nm_poli']); ?></td>
+                                    <td>
+                                        <button type="button" class="btn btn-info btn-sm" onclick="tampilkanKunjungan('<?php echo htmlspecialchars($row['no_rkm_medis']); ?>')">Tampilkan Kunjungan</button>
+                                        <button type="button" class="btn btn-success btn-sm" onclick="tambahKunjungan('<?php echo htmlspecialchars($row['no_rawat']); ?>')">Tambahkan Kunjungan</button>
+                                    </td>
+                                <script>
+
+                                // Modal popup untuk menampilkan kunjungan
+                                function tampilkanKunjungan(no_rkm_medis) {
+                                    // Buat overlay dan modal jika belum ada
+                                    let overlay = document.getElementById('kunjunganOverlay');
+                                    if (!overlay) {
+                                        overlay = document.createElement('div');
+                                        overlay.id = 'kunjunganOverlay';
+                                        overlay.style.position = 'fixed';
+                                        overlay.style.top = 0;
+                                        overlay.style.left = 0;
+                                        overlay.style.width = '100vw';
+                                        overlay.style.height = '100vh';
+                                        overlay.style.background = 'rgba(0,0,0,0.4)';
+                                        overlay.style.zIndex = 9999;
+                                        overlay.style.display = 'flex';
+                                        overlay.style.alignItems = 'center';
+                                        overlay.style.justifyContent = 'center';
+                                        document.body.appendChild(overlay);
+                                    }
+                                    let modal = document.getElementById('kunjunganModal');
+                                    if (!modal) {
+                                        modal = document.createElement('div');
+                                        modal.id = 'kunjunganModal';
+                                        modal.style.background = '#fff';
+                                        modal.style.borderRadius = '10px';
+                                        modal.style.padding = '24px 20px 18px 20px';
+                                        modal.style.minWidth = '320px';
+                                        modal.style.maxWidth = '90vw';
+                                        modal.style.boxShadow = '0 8px 32px rgba(0,0,0,0.25)';
+                                        modal.style.position = 'relative';
+                                        overlay.appendChild(modal);
+                                    }
+                                    modal.innerHTML = '<div style="font-weight:bold;font-size:1.1em;margin-bottom:10px;">Kunjungan Pasien</div><div id="kunjunganModalContent">Memuat data...</div><button onclick="tutupKunjunganModal()" style="margin-top:18px;padding:8px 18px;border:none;background:#28a745;color:#fff;border-radius:6px;font-weight:bold;cursor:pointer;">Tutup</button>';
+                                    overlay.style.display = 'flex';
+                                    // Ambil data kunjungan via fetch
+                                    fetch('', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                        body: 'ajax_kunjungan=1&no_rkm_medis=' + encodeURIComponent(no_rkm_medis)
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        let html = '';
+                                        if (data && data.length > 0) {
+                                            html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+                                            html += '<tr><th style="border-bottom:1px solid #ccc;padding:6px 4px;">Tgl Registrasi</th><th style="border-bottom:1px solid #ccc;padding:6px 4px;">Kunjungan Ke</th></tr>';
+                                            data.forEach(row => {
+                                                html += '<tr><td style="padding:6px 4px;">' + row.tgl_registrasi + '</td><td style="padding:6px 4px;text-align:center;">' + row.kunjungan_ke + '</td></tr>';
+                                            });
+                                            html += '</table>';
+                                        } else {
+                                            html = '<div style="color:#dc3545;">Tidak ada data kunjungan.</div>';
+                                        }
+                                        document.getElementById('kunjunganModalContent').innerHTML = html;
+                                    })
+                                    .catch(() => {
+                                        document.getElementById('kunjunganModalContent').innerHTML = '<span style="color:#dc3545;">Gagal mengambil data kunjungan.</span>';
+                                    });
+                                }
+                                function tutupKunjunganModal() {
+                                    let overlay = document.getElementById('kunjunganOverlay');
+                                    if (overlay) overlay.style.display = 'none';
+                                }
+
+                                // Fungsi untuk menambah kunjungan via AJAX
+                                function tambahKunjungan(no_rawat) {
+                                    const kunjungan_ke = prompt('Masukkan kunjungan ke-berapa untuk No. Rawat: ' + no_rawat);
+                                    if (kunjungan_ke && !isNaN(kunjungan_ke)) {
+                                        fetch('', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                            body: 'ajax_tambah_kunjungan=1&no_rawat=' + encodeURIComponent(no_rawat) + '&kunjungan_ke=' + encodeURIComponent(kunjungan_ke)
+                                        })
+                                        .then(r => r.json())
+                                        .then(data => {
+                                            alert(data.status ? '✅ ' + data.pesan : '❌ ' + data.pesan);
+                                        })
+                                        .catch(() => alert('Gagal menambah kunjungan.'));
+                                    } else if (kunjungan_ke !== null) {
+                                        alert('Input tidak valid!');
+                                    }
+                                }
+                                </script>
                                 </tr>
                             <?php $no++; endwhile; ?>
                         </tbody>
