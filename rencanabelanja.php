@@ -6,32 +6,32 @@ $tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y
 $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
 
 $query = "SELECT
-            pemesanan.no_faktur AS no_faktur,
-            pemesanan.no_order AS no_order,
-            datasuplier.nama_suplier AS nama_suplier,
-            detailpesan.kode_brng AS kode_brng,
-            databarang.nama_brng AS nama_brng,
-            kodesatuan.satuan AS satuan,
-            detailpesan.jumlah AS jumlah,
-            detailpesan.h_pesan AS h_pesan,
-            detailpesan.subtotal AS subtotal,
-            pemesanan.tgl_faktur AS tgl_faktur,
-            pemesanan.tgl_pesan AS tgl_pesan,
-            pemesanan.total2 AS total2,
-            pemesanan.ppn AS ppn,
-            pemesanan.tagihan AS tagihan,
-            datasuplier.direktur AS direktur,
-            datasuplier.NPWP AS NPWP,
-            datasuplier.jabatan AS jabatan
-            FROM
-            ((((pemesanan
-            JOIN detailpesan ON (detailpesan.no_faktur = pemesanan.no_faktur))
-            JOIN datasuplier ON (pemesanan.kode_suplier = datasuplier.kode_suplier))
-            JOIN databarang ON (detailpesan.kode_brng = databarang.kode_brng))
-            JOIN kodesatuan ON (detailpesan.kode_sat = kodesatuan.kode_sat AND databarang.kode_sat = kodesatuan.kode_sat AND databarang.kode_satbesar = kodesatuan.kode_sat))
-            WHERE
-            pemesanan.tgl_faktur BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
-            ";
+    pemesanan.no_faktur AS no_faktur,
+    pemesanan.no_order AS no_order,
+    datasuplier.nama_suplier AS nama_suplier,
+    detailpesan.kode_brng AS kode_brng,
+    databarang.nama_brng AS nama_brng,
+    kodesatuan.satuan AS satuan,
+    detailpesan.jumlah AS jumlah,
+    detailpesan.h_pesan AS h_pesan,
+    (detailpesan.jumlah * detailpesan.h_pesan) AS subtotal,
+    pemesanan.tgl_faktur AS tgl_faktur,
+    pemesanan.tgl_pesan AS tgl_pesan,
+    pemesanan.total2 AS total2,
+    pemesanan.ppn AS ppn,
+    pemesanan.tagihan AS tagihan,
+    datasuplier.direktur AS direktur,
+    datasuplier.NPWP AS NPWP,
+    datasuplier.jabatan AS jabatan
+    FROM
+    ((((pemesanan
+    JOIN detailpesan ON (detailpesan.no_faktur = pemesanan.no_faktur))
+    JOIN datasuplier ON (pemesanan.kode_suplier = datasuplier.kode_suplier))
+    JOIN databarang ON (detailpesan.kode_brng = databarang.kode_brng))
+    JOIN kodesatuan ON (detailpesan.kode_sat = kodesatuan.kode_sat AND databarang.kode_sat = kodesatuan.kode_sat AND databarang.kode_satbesar = kodesatuan.kode_sat))
+    WHERE
+    pemesanan.tgl_faktur BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+    ORDER BY pemesanan.no_faktur ASC";
 
 // Eksekusi query
 $result = mysqli_query($koneksi, $query);
@@ -176,11 +176,7 @@ $result = mysqli_query($koneksi, $query);
         <?php } ?>
         
         <?php if ($result && mysqli_num_rows($result) > 0): ?>
-            <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                <button type="button" class="btn btn-info" id="copyTableBtn2">📋 Copy Data</button>
-                <button type="button" class="btn btn-success" id="copySelectedBtn">📋 Copy Terseleksi</button>
-                <button type="button" class="btn btn-warning" id="printTableBtn">🖨️ Print</button>
-            </div>
+            <!-- Tombol copy data, copy terseleksi, dan print dihilangkan -->
         <?php endif; ?>
         
         <div class="table-container">
@@ -196,6 +192,7 @@ $result = mysqli_query($koneksi, $query);
                 <th>Satuan</th>
                 <th>Jumlah</th>
                 <th>Harga</th>
+                <th>Subtotal</th>
                 <th>Tanggal Faktur</th>
                 <th>Tanggal Pesan</th>
                 <th>Total</th>
@@ -210,33 +207,56 @@ $result = mysqli_query($koneksi, $query);
             <?php
             if ($result && mysqli_num_rows($result) > 0) {
                 $no = 1;
+                $last_faktur = '';
                 while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <tr>
-                    <td class="center"><?php echo $no++; ?></td>
-                    <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_faktur']); ?></td>
-                    <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_order']); ?></td>
-                    <td><?php echo htmlspecialchars($row['nama_suplier']); ?></td>
-                    <td style="font-family: monospace;"><?php echo htmlspecialchars($row['kode_brng']); ?></td>
-                    <td><?php echo htmlspecialchars($row['nama_brng']); ?></td>
-                    <td class="center"><?php echo htmlspecialchars($row['satuan']); ?></td>
-                    <td class="center"><?php echo number_format($row['jumlah']); ?></td>
-                    <td class="money">Rp <?php echo number_format($row['h_pesan'], 0, ',', '.'); ?></td>
-                    <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_faktur'])); ?></td>
-                    <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_pesan'])); ?></td>
-                    <td class="money">Rp <?php echo number_format($row['total2'], 0, ',', '.'); ?></td>
-                    <td class="money">Rp <?php echo number_format($row['ppn'], 0, ',', '.'); ?></td>
-                    <td class="money">Rp <?php echo number_format($row['tagihan'], 0, ',', '.'); ?></td>
-                    <td><?php echo htmlspecialchars($row['direktur']); ?></td>
-                    <td style="font-family: monospace;"><?php echo htmlspecialchars($row['NPWP']); ?></td>
-                    <td><?php echo htmlspecialchars($row['jabatan']); ?></td>
-                </tr>
-                <?php
+                    // Jika faktur baru, tampilkan header + detail barang pertama dalam satu baris
+                    if ($row['no_faktur'] !== $last_faktur) {
+                        $last_faktur = $row['no_faktur'];
+                        ?>
+                        <tr style="background:#e8f5e8;font-weight:bold;">
+                            <td class="center"><?php echo $no++; ?></td>
+                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_faktur']); ?></td>
+                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_order']); ?></td>
+                            <td><?php echo htmlspecialchars($row['nama_suplier']); ?></td>
+                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['kode_brng']); ?></td>
+                            <td><?php echo htmlspecialchars($row['nama_brng']); ?></td>
+                            <td class="center"><?php echo htmlspecialchars($row['satuan']); ?></td>
+                            <td class="center"><?php echo htmlspecialchars($row['jumlah']); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['h_pesan']); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['subtotal']); ?></td>
+                            <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_faktur'])); ?></td>
+                            <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_pesan'])); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['total2']); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['ppn']); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['tagihan']); ?></td>
+                            <td><?php echo htmlspecialchars($row['direktur']); ?></td>
+                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['NPWP']); ?></td>
+                            <td><?php echo htmlspecialchars($row['jabatan']); ?></td>
+                        </tr>
+                        <?php
+                    } else {
+                        // Tampilkan detail barang berikutnya
+                        ?>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['kode_brng']); ?></td>
+                            <td><?php echo htmlspecialchars($row['nama_brng']); ?></td>
+                            <td class="center"><?php echo htmlspecialchars($row['satuan']); ?></td>
+                            <td class="center"><?php echo htmlspecialchars($row['jumlah']); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['h_pesan']); ?></td>
+                            <td class="money"><?php echo htmlspecialchars($row['subtotal']); ?></td>
+                            <td colspan="8"></td>
+                        </tr>
+                        <?php
+                    }
                 }
             } else {
                 ?>
                 <tr>
-                    <td colspan="17" class="no-data">Tidak ada data untuk periode yang dipilih</td>
+                    <td colspan="18" class="no-data">Tidak ada data untuk periode yang dipilih</td>
                 </tr>
                 <?php
             }
@@ -329,102 +349,6 @@ function fallbackCopyTextToClipboard(text) {
 }
 
 // Tampilkan pesan sukses
-function showCopySuccess() {
-    const btn = document.getElementById('copyTableBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '✅ Berhasil Disalin!';
-    btn.style.background = '#28a745';
-    
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '#17a2b8';
-    }, 2000);
-}
-
-// Tampilkan pesan error
-function showCopyError() {
-    const btn = document.getElementById('copyTableBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '❌ Gagal Copy';
-    btn.style.background = '#dc3545';
-    
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '#17a2b8';
-    }, 2000);
-    
-    alert('❌ Gagal menyalin data. Silahkan coba lagi atau gunakan browser yang lebih baru.');
-}
-
-// Fungsi export ke Excel
-function exportToExcel() {
-    const table = document.getElementById('dataTable');
-    if (!table) {
-        alert('❌ Tidak ada data untuk di-export');
-        return;
-    }
-    
-    // Buat workbook baru
-    let htmlTable = table.outerHTML;
-    
-    // Buat data URI untuk download
-    const uri = 'data:application/vnd.ms-excel;base64,';
-    const template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Rencana Belanja</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta charset="UTF-8"></head><body><h2>Rencana Belanja Farmasi</h2><p>Periode: <?php echo date('d/m/Y', strtotime($tanggal_awal)) . ' s/d ' . date('d/m/Y', strtotime($tanggal_akhir)); ?></p><p>Tanggal Export: ' + new Date().toLocaleDateString('id-ID') + '</p>' + htmlTable + '</body></html>';
-    
-    // Buat link download
-    const link = document.createElement('a');
-    link.href = uri + btoa(unescape(encodeURIComponent(template)));
-    link.download = 'Rencana_Belanja_Farmasi_' + new Date().toISOString().slice(0,10) + '.xls';
-    
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Update tombol
-    const btn = document.getElementById('exportExcelBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '✅ File Diunduh!';
-    btn.style.background = '#28a745';
-    
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '#17a2b8';
-    }, 2000);
-}
-
-// Fungsi show notification
-function showNotification(message, isError = false) {
-    // Hapus notification lama jika ada
-    const oldNotification = document.querySelector('.copy-notification');
-    if (oldNotification) {
-        oldNotification.remove();
-    }
-    
-    // Buat notification baru
-    const notification = document.createElement('div');
-    notification.className = 'copy-notification' + (isError ? ' error' : '');
-    notification.innerHTML = message;
-    
-    document.body.appendChild(notification);
-    
-    // Show notification
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-    
-    // Hide notification
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-
-// Update fungsi showCopySuccess dan showCopyError
 function showCopySuccess() {
     const btn = document.getElementById('copyTableBtn');
     const originalText = btn.innerHTML;
