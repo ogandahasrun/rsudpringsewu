@@ -142,6 +142,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-calendar-alt"></i>
                 <span>Update Jadwal Dokter</span>
             </a>            
+            <a href="referensipasienmjkn.php" title="Referensi Pasien Mobile JKN">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Referensi Pasien Mobile JKN</span>
+            </a>                        
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
