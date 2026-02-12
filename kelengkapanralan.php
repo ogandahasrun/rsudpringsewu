@@ -261,6 +261,8 @@
         function resetForm() {
             document.getElementById('tanggal_awal').value = '<?php echo date('Y-m-d'); ?>';
             document.getElementById('tanggal_akhir').value = '<?php echo date('Y-m-d'); ?>';
+            document.getElementById('nm_poli').value = '';
+            document.getElementById('nmdpdjp').value = '';
         }
     </script>
 </head>
@@ -278,9 +280,28 @@
     <?php
     include 'koneksi.php';
 
+    // Ambil data untuk dropdown filter
+    function getOptions($koneksi, $field, $table, $join = "", $where = "") {
+        $options = [];
+        $query = "SELECT DISTINCT $field FROM $table $join $where ORDER BY $field";
+        $result = mysqli_query($koneksi, $query);
+        while ($row = mysqli_fetch_assoc($result)) {
+            if (!empty($row[$field])) {
+                $options[] = $row[$field];
+            }
+        }
+        return $options;
+    }
+
     // Default value
     $tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y-m-d');
     $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
+    $nm_poli = isset($_POST['nm_poli']) ? $_POST['nm_poli'] : '';
+    $nmdpdjp = isset($_POST['nmdpdjp']) ? $_POST['nmdpdjp'] : '';
+
+    // Dropdown options
+    $nm_poli_options = getOptions($koneksi, 'nm_poli', 'poliklinik');
+    $nmdpdjp_options = getOptions($koneksi, 'nmdpdjp', 'bridging_sep', '', 'WHERE nmdpdjp IS NOT NULL AND nmdpdjp != ""');
     ?>
 
             <form method="POST" class="filter-form">
@@ -306,6 +327,32 @@
                                required 
                                value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
                     </div>
+                    
+                    <div class="filter-group">
+                        <label for="nm_poli">🏥 Poliklinik</label>
+                        <select id="nm_poli" name="nm_poli">
+                            <option value="">-- Semua Poliklinik --</option>
+                            <?php foreach ($nm_poli_options as $opt) { ?>
+                                <option value="<?php echo htmlspecialchars($opt); ?>" 
+                                        <?php if ($nm_poli == $opt) echo "selected"; ?>>
+                                    <?php echo htmlspecialchars($opt); ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="nmdpdjp">👨‍⚕️ Nama DPJP</label>
+                        <select id="nmdpdjp" name="nmdpdjp">
+                            <option value="">-- Semua DPJP --</option>
+                            <?php foreach ($nmdpdjp_options as $opt) { ?>
+                                <option value="<?php echo htmlspecialchars($opt); ?>" 
+                                        <?php if ($nmdpdjp == $opt) echo "selected"; ?>>
+                                    <?php echo htmlspecialchars($opt); ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
@@ -322,6 +369,26 @@
     if (isset($_POST['filter'])) {
         $tanggal_awal = $_POST['tanggal_awal'];
         $tanggal_akhir = $_POST['tanggal_akhir'];
+        $nm_poli = isset($_POST['nm_poli']) ? $_POST['nm_poli'] : '';
+        $nmdpdjp = isset($_POST['nmdpdjp']) ? $_POST['nmdpdjp'] : '';
+        
+        // Build WHERE conditions
+        $where_conditions = [
+            "(reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))",
+            "reg_periksa.status_lanjut = 'ralan'",
+            "reg_periksa.stts != 'batal'",
+            "reg_periksa.tgl_registrasi BETWEEN '$tanggal_awal' AND '$tanggal_akhir'"
+        ];
+        
+        if ($nm_poli != '') {
+            $where_conditions[] = "poliklinik.nm_poli = '" . mysqli_real_escape_string($koneksi, $nm_poli) . "'";
+        }
+        if ($nmdpdjp != '') {
+            $where_conditions[] = "bridging_sep.nmdpdjp = '" . mysqli_real_escape_string($koneksi, $nmdpdjp) . "'";
+        }
+        
+        $where_clause = "WHERE " . implode(" AND ", $where_conditions);
+        
         $query = "SELECT 
                     reg_periksa.no_rawat, 
                     pasien.no_rkm_medis, 
@@ -329,6 +396,7 @@
                     pasien.no_peserta,
                     pasien.alamat,
                     bridging_sep.no_sep, 
+                    poliklinik.nm_poli,
                     bridging_sep.nmdpdjp, 
                     MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
                     rspsw_umbal.diajukan,
@@ -339,13 +407,9 @@
                 LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat AND bridging_sep.jnspelayanan = '2'
                 LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
                 LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat 
+                INNER JOIN poliklinik ON reg_periksa.kd_poli = poliklinik.kd_poli
                     AND (rspsw_umbal.no_sep = bridging_sep.no_sep OR rspsw_umbal.no_sep IS NULL)
-                WHERE 
-                    (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
-                    AND reg_periksa.status_lanjut = 'ralan' 
-                    AND reg_periksa.stts != 'batal' 
-                    AND reg_periksa.tgl_registrasi 
-                BETWEEN '$tanggal_awal' AND '$tanggal_akhir' 
+                $where_clause 
                 GROUP BY 
                     reg_periksa.no_rawat, bridging_sep.no_sep
                 ";
@@ -367,6 +431,7 @@
                     <th>ALAMAT</th>
                     <th>NOMOR PESERTA</th>
                     <th>NOMOR SEP</th>
+                    <th>POLIKLINIK</th>
                     <th>DIAGNOSA</th>                    
                     <th>NAMA DPJP</th>
                     <th>DIAJUKAN</th>
@@ -386,7 +451,8 @@
                         <td>{$row['alamat']}</td>
                         <td>{$row['no_peserta']}</td>
                         <td>{$row['no_sep']}</td>
-                        <td>{$row['kd_penyakit']}</td>                        
+                        <td>{$row['nm_poli']}</td>                        
+                        <td>{$row['kd_penyakit']}</td>                    
                         <td>{$row['nmdpdjp']}</td>
                         <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
