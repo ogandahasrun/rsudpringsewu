@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_jadwal'])) {
     // Loop untuk mengambil semua jadwal yang diinput
     for ($i = 1; $i <= 7; $i++) {
         if (isset($_POST['hari_' . $i])) {
-            // Jika jam buka dan tutup kosong, kirim sebagai jadwal libur
+            // Jika jam buka dan tutup kosong, kirim sebagai jadwal libur dengan empty string
             $buka = isset($_POST['buka_' . $i]) ? trim($_POST['buka_' . $i]) : '';
             $tutup = isset($_POST['tutup_' . $i]) ? trim($_POST['tutup_' . $i]) : '';
             
@@ -36,16 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_jadwal'])) {
         $data = array(
             'kodepoli' => $kodepoli,
             'kodesubspesialis' => $kodesubspesialis,
-            'kodedokter' => intval($kodedokter),
+            'kodedokter' => $kodedokter, // Don't convert to int - BPJS codes can contain characters
             'jadwal' => $jadwal_data
         );
         
         // Convert to JSON
         $json_data = json_encode($data);
         
-        // Get headers
+        // Get headers (Content-Type already included in getBPJSHeaders)
         $headers = getBPJSHeaders();
-        $headers[] = 'Content-Type: application/json';
         
         // API endpoint untuk update jadwal dokter
         $url = $URLAPIMOBILEJKN . "/jadwaldokter/updatejadwaldokter";
@@ -75,9 +74,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_jadwal'])) {
             if ($http_code == 200 && isset($response_data['metadata']) && $response_data['metadata']['code'] == 200) {
                 $success_message = "Jadwal dokter berhasil diupdate!";
             } else {
-                $error_message = isset($response_data['metadata']['message']) 
-                    ? $response_data['metadata']['message'] 
-                    : "Gagal update jadwal dokter. HTTP Code: " . $http_code;
+                // More detailed error message for debugging
+                $detailed_message = "Gagal update jadwal dokter. HTTP Code: " . $http_code;
+                if (isset($response_data['metadata']['message'])) {
+                    $detailed_message = $response_data['metadata']['message'];
+                }
+                if (isset($response_data['message'])) {
+                    $detailed_message .= " | " . $response_data['message'];
+                }
+                $error_message = $detailed_message;
             }
         }
     } else {
@@ -294,6 +299,15 @@ $nama_hari = [
                     <div class="response-title">📡 Response dari BPJS:</div>
                     <div class="response-content">
                         <?php echo json_encode($response_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_jadwal']) && isset($json_data)): ?>
+                <div class="response-box">
+                    <div class="response-title">📤 Data yang dikirim ke BPJS:</div>
+                    <div class="response-content">
+                        <?php echo htmlspecialchars($json_data); ?>
                     </div>
                 </div>
             <?php endif; ?>
