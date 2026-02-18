@@ -1001,7 +1001,7 @@
             </table>
 
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, 29 Desember 2025</p>
+                <p>Pringsewu, 31 Desember 2025</p>
                 <p>Pejabat Pelaksana Teknis Kegiatan</p>
                 <p>Belanja bahan Habis Pakai (BAHP) Rumah Sakit</p>
                 <br>
