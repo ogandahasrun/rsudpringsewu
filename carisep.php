@@ -193,6 +193,46 @@
             font-weight: bold;
             color: #495057;
         }
+        .copy-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 8px;
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+        .sep-cell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .copy-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 8px;
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+        .sep-cell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
         
         /* Mobile Styles */
         @media (max-width: 768px) {
@@ -260,6 +300,96 @@
 
         function resetForm() {
             document.getElementById('nomr').value = '';
+        }
+
+        function copyToClipboard(text, button) {
+            // Coba gunakan navigator.clipboard dulu (modern browsers)
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showCopySuccess(button);
+                }).catch(function() {
+                    fallbackCopyTextToClipboard(text, button);
+                });
+            } else {
+                // Fallback untuk browser lama
+                fallbackCopyTextToClipboard(text, button);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text, button) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess(button);
+            } catch (err) {
+                alert('❌ Gagal menyalin: ' + text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess(button) {
+            var originalText = button.innerHTML;
+            button.innerHTML = '✓';
+            button.style.background = '#28a745';
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.style.background = '#17a2b8';
+            }, 1000);
+        }
+
+        function copyToClipboard(text, button) {
+            // Coba gunakan navigator.clipboard dulu (modern browsers)
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showCopySuccess(button);
+                }).catch(function() {
+                    fallbackCopyTextToClipboard(text, button);
+                });
+            } else {
+                // Fallback untuk browser lama
+                fallbackCopyTextToClipboard(text, button);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text, button) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess(button);
+            } catch (err) {
+                alert('❌ Gagal menyalin: ' + text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess(button) {
+            var originalText = button.innerHTML;
+            button.innerHTML = '✓';
+            button.style.background = '#28a745';
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.style.background = '#17a2b8';
+            }, 1000);
         }
     </script>
 </head>
@@ -351,12 +481,16 @@
                 
                 $no = 1; 
                 while ($row = mysqli_fetch_assoc($result)) {
+                    $no_sep = htmlspecialchars($row['no_sep']);
                     echo "<tr>
                             <td>{$no}</td>
                             <td>{$row['tglsep']}</td>
                             <td>{$row['nomr']}</td>
                             <td>{$row['no_rawat']}</td>
-                            <td>{$row['no_sep']}</td>
+                            <td class='sep-cell'>
+                                <span>{$no_sep}</span>
+                                <button class='copy-btn' onclick=\"copyToClipboard('{$no_sep}', this)\" title='Copy Nomor SEP'>📋</button>
+                            </td>
                             <td>{$row['nama_pasien']}</td>
                             <td>{$row['no_kartu']}</td>
                         </tr>";
