@@ -135,10 +135,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-list-ol"></i>
                 <span>Dashboard Antrian 3 Poli</span>
             </a>
-            <a href="dashboardantrianfarmasi.php" title="dashboardantrianfarmasi">
+            <a href="displayantrianfarmasi.php" title="displayantrianfarmasi">
                 <i class="fas fa-pills"></i>
-                <span>Dashboard Antrian Farmasi</span>
+                <span>Display Antrian Farmasi</span>
             </a>
+            <a href="konsolantrianfarmasi.php" title="konsolantrianfarmasi">
+                <i class="fas fa-pills"></i>
+                <span>Konsol Antrian Farmasi</span>
+            </a>            
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
