@@ -539,3 +539,6 @@ if ($filter_poli !== '' && $filter_dokter !== '') {
     </script>
 </body>
 </html>
+
+//contoh untuk poli tertentu
+// http://localhost/rsudpringsewu/displayantrianpoliklinik.php?poli=hemodialisa
