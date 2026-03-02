@@ -127,22 +127,22 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <div class="container">
         <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
         <div class="icon-menu">
-            <a href="dashboardantrianpoli.php" title="dashboardantrianpoli">
+            <a href="konsolantrianpoliklinik.php" title="konsolantrianpoliklinik">
                 <i class="fas fa-users"></i>
-                <span>Dashboard Antrian Poli</span>
+                <span>Konsol Antrian Poliklinik</span>
             </a>
-            <a href="dashboardantrianpoli3.php" title="dashboardantrianpoli3">
+            <a href="displayantrianpoliklinik.php" title="displayantrianpoliklinik">
                 <i class="fas fa-list-ol"></i>
-                <span>Dashboard Antrian 3 Poli</span>
-            </a>
-            <a href="displayantrianfarmasi.php" title="displayantrianfarmasi">
-                <i class="fas fa-pills"></i>
-                <span>Display Antrian Farmasi</span>
+                <span>Display Antrian Poliklinik</span>
             </a>
             <a href="konsolantrianfarmasi.php" title="konsolantrianfarmasi">
                 <i class="fas fa-pills"></i>
                 <span>Konsol Antrian Farmasi</span>
             </a>            
+            <a href="displayantrianfarmasi.php" title="displayantrianfarmasi">
+                <i class="fas fa-pills"></i>
+                <span>Display Antrian Farmasi</span>
+            </a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
