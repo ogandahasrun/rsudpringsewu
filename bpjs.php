@@ -145,7 +145,11 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="referensipasienmjkn.php" title="Referensi Pasien Mobile JKN">
                 <i class="fas fa-mobile-alt"></i>
                 <span>Referensi Pasien Mobile JKN</span>
-            </a>                        
+            </a>     
+            <a href="referensipasienkontrol.php" title="Referensi Pasien Kontrol">
+                <i class="fas fa-procedures"></i>
+                <span>Referensi Pasien Kontrol</span>
+            </a>                                
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
