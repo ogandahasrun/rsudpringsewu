@@ -14,18 +14,24 @@ $pj_result = mysqli_query($koneksi, "SELECT kd_pj, png_jawab FROM penjab ORDER B
 $status_options = ['Ralan', 'Ranap'];
 
 // Handle input pengurangan biaya
-if (isset($_POST['input_pengurangan']) && isset($_POST['no_rawat'])) {
+// Handle input pengurangan biaya (insert/update)
+if ((isset($_POST['input_pengurangan']) || isset($_POST['edit_pengurangan'])) && isset($_POST['no_rawat'])) {
     $no_rawat = mysqli_real_escape_string($koneksi, $_POST['no_rawat']);
     $nama_pengurangan = mysqli_real_escape_string($koneksi, $_POST['nama_pengurangan']);
     $besar_pengurangan = mysqli_real_escape_string($koneksi, $_POST['besar_pengurangan']);
-    // cek apakah data sudah ada
-    $cek = mysqli_query($koneksi, "SELECT no_rawat FROM pengurangan_biaya WHERE no_rawat='$no_rawat' LIMIT 1");
-    if ($cek && mysqli_num_rows($cek) > 0) {
+    if (isset($_POST['edit_pengurangan'])) {
         // update
         $q = "UPDATE pengurangan_biaya SET nama_pengurangan='$nama_pengurangan', besar_pengurangan='$besar_pengurangan' WHERE no_rawat='$no_rawat'";
     } else {
-        // insert
-        $q = "INSERT INTO pengurangan_biaya (no_rawat, nama_pengurangan, besar_pengurangan) VALUES ('$no_rawat', '$nama_pengurangan', '$besar_pengurangan')";
+        // cek apakah data sudah ada
+        $cek = mysqli_query($koneksi, "SELECT no_rawat FROM pengurangan_biaya WHERE no_rawat='$no_rawat' LIMIT 1");
+        if ($cek && mysqli_num_rows($cek) > 0) {
+            // update
+            $q = "UPDATE pengurangan_biaya SET nama_pengurangan='$nama_pengurangan', besar_pengurangan='$besar_pengurangan' WHERE no_rawat='$no_rawat'";
+        } else {
+            // insert
+            $q = "INSERT INTO pengurangan_biaya (no_rawat, nama_pengurangan, besar_pengurangan) VALUES ('$no_rawat', '$nama_pengurangan', '$besar_pengurangan')";
+        }
     }
     $ok = mysqli_query($koneksi, $q);
     if ($ok) {
@@ -160,7 +166,12 @@ $result = mysqli_query($koneksi, $query);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $no = 1; while ($row = mysqli_fetch_assoc($result)): ?>
+                            <?php 
+                            $no = 1; 
+                            // Untuk mode edit baris
+                            $edit_no_rawat = isset($_GET['edit_no_rawat']) ? $_GET['edit_no_rawat'] : '';
+                            while ($row = mysqli_fetch_assoc($result)): 
+                            ?>
                                 <tr>
                                     <td style="text-align: center; font-weight: bold;"><?php echo $no; ?></td>
                                     <td><?php echo htmlspecialchars($row['tgl_registrasi']); ?></td>
@@ -171,8 +182,22 @@ $result = mysqli_query($koneksi, $query);
                                     <td><?php echo htmlspecialchars($row['kd_pj']); ?></td>
                                     <td><?php echo htmlspecialchars($row['status_lanjut']); ?></td>
                                     <td><?php echo number_format($row['biaya_obat'] ?? 0, 0, ',', '.'); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_pengurangan']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['besar_pengurangan']); ?></td>
+                                    <td>
+                                        <?php if ($edit_no_rawat === $row['no_rawat']): ?>
+                                            <form method="POST" style="display:inline-block;">
+                                                <input type="hidden" name="no_rawat" value="<?php echo htmlspecialchars($row['no_rawat']); ?>">
+                                                <input type="text" name="nama_pengurangan" value="<?php echo htmlspecialchars($row['nama_pengurangan']); ?>" required style="width:120px;">
+                                        <?php else: ?>
+                                            <?php echo htmlspecialchars($row['nama_pengurangan']); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($edit_no_rawat === $row['no_rawat']): ?>
+                                                <input type="number" name="besar_pengurangan" value="<?php echo htmlspecialchars($row['besar_pengurangan']); ?>" required style="width:80px;">
+                                        <?php else: ?>
+                                            <?php echo htmlspecialchars($row['besar_pengurangan']); ?>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php if (empty($row['nama_pengurangan']) || empty($row['besar_pengurangan'])): ?>
                                             <form method="POST" style="display:inline-block;">
@@ -181,8 +206,13 @@ $result = mysqli_query($koneksi, $query);
                                                 <input type="number" name="besar_pengurangan" placeholder="Besar" required style="width:80px;">
                                                 <button type="submit" name="input_pengurangan" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Simpan</button>
                                             </form>
+                                        <?php elseif ($edit_no_rawat === $row['no_rawat']): ?>
+                                                <button type="submit" name="edit_pengurangan" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Simpan</button>
+                                                <a href="penguranganbiayafarmasi.php?<?php echo http_build_query(array_merge($_GET, ['edit_no_rawat'=>null])); ?>" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Batal</a>
+                                            </form>
                                         <?php else: ?>
                                             <span style="color:#28a745;font-weight:bold;">✔</span>
+                                            <a href="penguranganbiayafarmasi.php?<?php echo http_build_query(array_merge($_GET, ['edit_no_rawat'=>$row['no_rawat']])); ?>" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;">Ubah</a>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
