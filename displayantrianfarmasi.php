@@ -135,12 +135,7 @@ if ($org_result && mysqli_num_rows($org_result) > 0) {
             text-align: center;
             animation: slideInUp 0.5s ease-out;
         }
-        
-        .calling-icon {
-            font-size: 150px;
-            margin-bottom: 30px;
-            animation: ring 1s ease-in-out infinite;
-        }
+        /* .calling-icon dihilangkan */
         
         .patient-info {
             background: rgba(255,255,255,0.1);
@@ -153,7 +148,7 @@ if ($org_result && mysqli_num_rows($org_result) > 0) {
         }
         
         .patient-name {
-            font-size: 42px;
+            font-size: 180px;
             font-weight: bold;
             margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -254,7 +249,7 @@ if ($org_result && mysqli_num_rows($org_result) > 0) {
         
         <!-- Calling State -->
         <div class="calling-state" id="calling-state">
-            <div class="calling-icon">🔊</div>
+            <!-- <div class="calling-icon">🔊</div> -->
             <div class="patient-info">
                 <div class="patient-name" id="patient-name"></div>
                 <div class="patient-details">
@@ -295,84 +290,85 @@ if ($org_result && mysqli_num_rows($org_result) > 0) {
         
         // Panggil pasien dengan suara
         function panggilPasien(kalimat) {
-            console.log('Trying to play speech:', kalimat); // Debug log
-            
+            // Deteksi jika kalimat hanya berupa nama (1-3 kata, tanpa kata lain)
+            let kata = kalimat.trim().split(/\s+/);
+            let isNamaSaja = kata.length <= 3 && !/pasien|menuju|loket|silakan|nomor|no\.?|resep|rawat|ruang|ruangan|dipanggil|ke|antrian|farmasi|bpjs|atas|nama|dengan|mr|rekam|medis/i.test(kalimat);
+            // Fungsi ubah ke title case
+            function toTitleCase(str) {
+                return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+            }
+            // Fungsi hapus TN/NY di akhir nama
+            function hapusTnNy(nama) {
+                // Hapus TN/NY di akhir nama, dengan atau tanpa spasi/titik di antara nama dan TN/NY
+                return nama
+                    .replace(/[.\s]*(TN|NY)[.\s]*$/i, '')
+                    .replace(/[.\s]+$/g, '')
+                    .trim();
+            }
+            let kalimatFinal = kalimat;
+            if (isNamaSaja) {
+                let namaBersih = hapusTnNy(kalimat);
+                let namaTitle = toTitleCase(namaBersih);
+                kalimatFinal = `Pasien atas nama ${namaTitle}, silakan menuju loket farmasi.`;
+            }
+            console.log('Trying to play speech:', kalimatFinal); // Debug log
             if ('speechSynthesis' in window) {
-                // Hentikan semua suara yang sedang berjalan
                 window.speechSynthesis.cancel();
-                
-                // Test apakah ada voices tersedia
                 let voices = window.speechSynthesis.getVoices();
                 console.log('Available voices:', voices.length); // Debug log
-                
-                // Jika voices belum loaded, tunggu event onvoiceschanged
                 if (voices.length === 0) {
                     window.speechSynthesis.onvoiceschanged = function() {
-                        panggilPasien(kalimat); // Retry setelah voices loaded
+                        panggilPasien(kalimatFinal); // Retry setelah voices loaded
                     };
                     return;
                 }
-                
                 setTimeout(function() {
                     try {
                         var msg = new SpeechSynthesisUtterance();
-                        msg.text = kalimat;
+                        msg.text = kalimatFinal;
                         msg.lang = 'id-ID';
                         msg.rate = 0.8;
                         msg.pitch = 1;
                         msg.volume = 1;
-                        
-                        // Cari voice Indonesia atau gunakan default
                         let indonesianVoice = voices.find(voice => 
                             voice.lang.includes('id') || 
                             voice.lang.includes('ID') ||
                             voice.name.toLowerCase().includes('indonesia')
                         );
-                        
                         if (indonesianVoice) {
                             msg.voice = indonesianVoice;
                             console.log('Using Indonesian voice:', indonesianVoice.name);
                         } else {
                             console.log('Using default voice');
                         }
-                        
                         msg.onstart = function() {
                             console.log('Speech started');
                         };
-                        
                         msg.onend = function() {
                             console.log('Speech ended, playing second time');
-                            // Panggil kedua kalinya setelah 1 detik
                             setTimeout(function() {
                                 var msg2 = new SpeechSynthesisUtterance();
-                                msg2.text = kalimat;
+                                msg2.text = kalimatFinal;
                                 msg2.lang = 'id-ID';
                                 msg2.rate = 0.8;
                                 msg2.pitch = 1;
                                 msg2.volume = 1;
                                 if (indonesianVoice) msg2.voice = indonesianVoice;
-                                
                                 msg2.onend = function() {
                                     console.log('Second speech completed');
                                 };
-                                
                                 msg2.onerror = function(e) {
                                     console.error('Second speech error:', e);
                                 };
-                                
                                 window.speechSynthesis.speak(msg2);
                             }, 1000);
                         };
-                        
                         msg.onerror = function(e) {
                             console.error('Speech error:', e);
                             alert('Error playing speech: ' + e.error);
                         };
-                        
-                        // Panggil pertama kali
                         window.speechSynthesis.speak(msg);
                         console.log('Speech initiated');
-                        
                     } catch (error) {
                         console.error('Speech function error:', error);
                         alert('Speech error: ' + error.message);
