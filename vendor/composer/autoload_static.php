@@ -27,6 +27,10 @@ class ComposerStaticInit5ce13f389270716aa74fac6c4293dda4
             'Mpdf\\PsrHttpMessageShim\\' => 24,
             'Mpdf\\' => 5,
         ),
+        'L' => 
+        array (
+            'LZCompressor\\' => 13,
+        ),
         'D' => 
         array (
             'DeepCopy\\' => 9,
@@ -57,6 +61,10 @@ class ComposerStaticInit5ce13f389270716aa74fac6c4293dda4
         'Mpdf\\' => 
         array (
             0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
+        ),
+        'LZCompressor\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nullpunkt/lz-string-php/src/LZCompressor',
         ),
         'DeepCopy\\' => 
         array (

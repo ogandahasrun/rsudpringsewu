@@ -150,6 +150,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-procedures"></i>
                 <span>Referensi Pasien Kontrol</span>
             </a>                                
+            <a href="cek_nik_pasien_jkn.php" title="Cek NIK Pasien JKN">
+                <i class="fas fa-id-card"></i>
+                <span>Cek NIK Pasien JKN</span>
+            </a>                                
+            <a href="cek_nokartu_pasien_jkn.php" title="Cek No Kartu Pasien JKN">
+                <i class="fas fa-address-card"></i>
+                <span>Cek No Kartu Pasien JKN</span>
+            </a>                                
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>

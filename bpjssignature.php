@@ -4,6 +4,9 @@
  * Fungsi untuk generate signature BPJS Mobile JKN
  */
 
+// Include composer autoload untuk LZString
+require_once 'vendor/autoload.php';
+
 // Include koneksi untuk mendapatkan konfigurasi BPJS
 require_once 'koneksi.php';
 
@@ -63,13 +66,103 @@ function getBPJSHeaders($userkey = null) {
 }
 
 /**
+ * Generate VClaim Signature
+ * 
+ * @param string $consid - Consumer ID (default dari config)
+ * @param string $secretkey - Secret Key (default dari config)
+ * @return array - Array berisi X-cons-id, X-timestamp, dan X-signature
+ */
+function generateVClaimSignature($consid = null, $secretkey = null) {
+    global $CONSIDVCLAIM, $SECRETKEYVCLAIM;
+    
+    // Gunakan nilai dari parameter jika ada, jika tidak gunakan dari config
+    $data = $consid ?? $CONSIDVCLAIM;
+    $secretKey = $secretkey ?? $SECRETKEYVCLAIM;
+    
+    // Set timezone ke UTC
+    date_default_timezone_set('UTC');
+    
+    // Hitung timestamp
+    $tStamp = strval(time() - strtotime('1970-01-01 00:00:00'));
+    
+    // Hitung signature dengan hash HMAC SHA256
+    $signature = hash_hmac('sha256', $data . "&" . $tStamp, $secretKey, true);
+    
+    // Base64 encode
+    $encodedSignature = base64_encode($signature);
+    
+    // Return array
+    return array(
+        'x-cons-id' => $data,
+        'x-timestamp' => $tStamp,
+        'x-signature' => $encodedSignature
+    );
+}
+
+/**
+ * Generate VClaim Headers untuk cURL
+ * 
+ * @param string $userkey - User Key (default dari config)
+ * @return array - Array header siap pakai untuk cURL
+ */
+function getVClaimHeaders($userkey = null) {
+    global $USERKEYVCLAIM;
+    
+    $signature = generateVClaimSignature();
+    $user_key = $userkey ?? $USERKEYVCLAIM;
+    
+    return array(
+        'X-cons-id: ' . $signature['x-cons-id'],
+        'X-timestamp: ' . $signature['x-timestamp'],
+        'X-signature: ' . $signature['x-signature'],
+        'user_key: ' . $user_key,
+        'Content-Type: application/json'
+    );
+}
+
+/**
+ * Decrypt VClaim API Response
+ * 
+ * @param string $encryptedResponse - The encrypted response string from API
+ * @param string $timestamp - Timestamp used for the request
+ * @param string $consid - Consumer ID (default from config)
+ * @param string $secretKey - Secret key (default from config)
+ * @return string - Decrypted and decompressed JSON string
+ */
+function decryptVClaimResponse($encryptedResponse, $timestamp, $consid = null, $secretKey = null) {
+    global $CONSIDVCLAIM, $SECRETKEYVCLAIM;
+    
+    $consid = $consid ?? $CONSIDVCLAIM;
+    $secretKey = $secretKey ?? $SECRETKEYVCLAIM;
+    
+    // Generate key: consid + secretKey + timestamp (concatenate)
+    $key = $consid . $secretKey . $timestamp;
+    
+    // AES Decrypt
+    $encrypt_method = 'AES-256-CBC';
+    $key_hash = hex2bin(hash('sha256', $key));
+    $iv = substr(hex2bin(hash('sha256', $key)), 0, 16);
+    
+    $decrypted = openssl_decrypt(base64_decode($encryptedResponse), $encrypt_method, $key_hash, OPENSSL_RAW_DATA, $iv);
+    
+    // LZ-string Decompress
+    $decompressed = \LZCompressor\LZString::decompressFromEncodedURIComponent($decrypted);
+    
+    return $decompressed;
+}
+
+/**
  * Debug - Tampilkan signature (untuk testing)
  */
 function displayBPJSSignature() {
     global $URLAPIMOBILEJKN, $CONSIDAPIMOBILEJKN, $SECRETKEYAPIMOBILEJKN, $USERKEYAPIMOBILEJKN;
+    global $URLVCLAIM, $CONSIDVCLAIM, $SECRETKEYVCLAIM, $USERKEYVCLAIM;
     
     $signature = generateBPJSSignature();
     $headers = getBPJSHeaders();
+    
+    $signature_vclaim = generateVClaimSignature();
+    $headers_vclaim = getVClaimHeaders();
     
     ?>
     <!DOCTYPE html>
@@ -110,22 +203,22 @@ function displayBPJSSignature() {
         <div class="container">
             <div class="header">
                 <h1>🔐 BPJS Signature Generator</h1>
-                <p>Testing & Debugging Tool - RSUD Pringsewu</p>
+                <p>Testing & Debugging Tool - MJKN & VClaim - RSUD Pringsewu</p>
             </div>
             
             <div class="content">
                 <div class="status success">
-                    <strong>✅ Status:</strong> Signature berhasil di-generate! File berfungsi dengan baik.
+                    <strong>✅ Status:</strong> Signature MJKN & VClaim berhasil di-generate! File berfungsi dengan baik.
                 </div>
                 
-                <?php if ($CONSIDAPIMOBILEJKN == 'your_consumer_id_here' || $SECRETKEYAPIMOBILEJKN == 'your_secret_key_here'): ?>
+                <?php if ($CONSIDAPIMOBILEJKN == 'your_consumer_id_here' || $SECRETKEYAPIMOBILEJKN == 'your_secret_key_here' || $CONSIDVCLAIM == 'your_consumer_id_here' || $SECRETKEYVCLAIM == 'your_secret_key_here'): ?>
                 <div class="status warning">
                     <strong>⚠️ Perhatian:</strong> Anda masih menggunakan konfigurasi default. Silakan update kredensial BPJS di file <code>koneksi.php</code>
                 </div>
                 <?php endif; ?>
                 
                 <div class="section">
-                    <div class="section-title">📋 Konfigurasi BPJS dari koneksi.php</div>
+                    <div class="section-title">📋 Konfigurasi MJKN dari koneksi.php</div>
                     <div class="config-grid">
                         <div class="config-label">URL API:</div>
                         <div class="config-value"><?php echo htmlspecialchars($URLAPIMOBILEJKN); ?></div>
@@ -142,7 +235,24 @@ function displayBPJSSignature() {
                 </div>
                 
                 <div class="section">
-                    <div class="section-title">🔑 Generated Signature</div>
+                    <div class="section-title">📋 Konfigurasi VClaim dari koneksi.php</div>
+                    <div class="config-grid">
+                        <div class="config-label">URL API:</div>
+                        <div class="config-value"><?php echo htmlspecialchars($URLVCLAIM); ?></div>
+                        
+                        <div class="config-label">Consumer ID:</div>
+                        <div class="config-value"><?php echo htmlspecialchars($CONSIDVCLAIM); ?></div>
+                        
+                        <div class="config-label">Secret Key:</div>
+                        <div class="config-value"><?php echo str_repeat('*', strlen($SECRETKEYVCLAIM) - 4) . substr($SECRETKEYVCLAIM, -4); ?></div>
+                        
+                        <div class="config-label">User Key:</div>
+                        <div class="config-value"><?php echo str_repeat('*', strlen($USERKEYVCLAIM) - 4) . substr($USERKEYVCLAIM, -4); ?></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">🔑 Generated Signature MJKN</div>
                     <div class="signature-box">
                         <div class="signature-item">
                             <div class="signature-label">X-cons-id:</div>
@@ -165,17 +275,50 @@ function displayBPJSSignature() {
                 </div>
                 
                 <div class="section">
-                    <div class="section-title">📤 Complete Headers untuk cURL Request</div>
-                    <div class="headers-box">
-                        <?php foreach ($headers as $header): ?>
-                            <div class="header-item"><?php echo htmlspecialchars($header); ?></div>
-                        <?php endforeach; ?>
-                        <button class="copy-btn" onclick="copyHeaders()">📋 Copy All Headers</button>
+                    <div class="section-title">🔑 Generated Signature VClaim</div>
+                    <div class="signature-box">
+                        <div class="signature-item">
+                            <div class="signature-label">X-cons-id:</div>
+                            <div class="signature-value" id="consid_vclaim"><?php echo htmlspecialchars($signature_vclaim['x-cons-id']); ?></div>
+                            <button class="copy-btn" onclick="copyToClipboard('consid_vclaim')">📋 Copy</button>
+                        </div>
+                        
+                        <div class="signature-item">
+                            <div class="signature-label">X-timestamp:</div>
+                            <div class="signature-value" id="timestamp_vclaim"><?php echo htmlspecialchars($signature_vclaim['x-timestamp']); ?></div>
+                            <button class="copy-btn" onclick="copyToClipboard('timestamp_vclaim')">📋 Copy</button>
+                        </div>
+                        
+                        <div class="signature-item">
+                            <div class="signature-label">X-signature:</div>
+                            <div class="signature-value" id="signature_vclaim"><?php echo htmlspecialchars($signature_vclaim['x-signature']); ?></div>
+                            <button class="copy-btn" onclick="copyToClipboard('signature_vclaim')">📋 Copy</button>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="section">
-                    <div class="section-title">💡 Cara Penggunaan</div>
+                    <div class="section-title">📤 Complete Headers MJKN untuk cURL Request</div>
+                    <div class="headers-box">
+                        <?php foreach ($headers as $header): ?>
+                            <div class="header-item"><?php echo htmlspecialchars($header); ?></div>
+                        <?php endforeach; ?>
+                        <button class="copy-btn" onclick="copyHeaders('mjkn')">📋 Copy All MJKN Headers</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">📤 Complete Headers VClaim untuk cURL Request</div>
+                    <div class="headers-box">
+                        <?php foreach ($headers_vclaim as $header): ?>
+                            <div class="header-item"><?php echo htmlspecialchars($header); ?></div>
+                        <?php endforeach; ?>
+                        <button class="copy-btn" onclick="copyHeaders('vclaim')">📋 Copy All VClaim Headers</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">💡 Cara Penggunaan MJKN</div>
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
                         <p style="margin-bottom: 15px;"><strong>Di file PHP Anda:</strong></p>
                         <pre style="background: #2d2d2d; color: #fff; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px;">
@@ -183,12 +326,37 @@ function displayBPJSSignature() {
 <span style="color: #6272a4;">// Include file signature</span>
 <span style="color: #8be9fd;">require_once</span> <span style="color: #f1fa8c;">'bpjssignature.php'</span>;
 
-<span style="color: #6272a4;">// Get headers untuk request</span>
+<span style="color: #6272a4;">// Get headers untuk request MJKN</span>
 <span style="color: #ff79c6;">$</span>headers = <span style="color: #50fa7b;">getBPJSHeaders</span>();
 
-<span style="color: #6272a4;">// Contoh request ke BPJS</span>
+<span style="color: #6272a4;">// Contoh request ke BPJS MJKN</span>
 <span style="color: #ff79c6;">$</span>ch = <span style="color: #50fa7b;">curl_init</span>();
 <span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_URL, <span style="color: #ff79c6;">$</span>URLAPIMOBILEJKN . <span style="color: #f1fa8c;">"/Peserta/nik/1234567890"</span>);
+<span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_HTTPHEADER, <span style="color: #ff79c6;">$</span>headers);
+<span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_RETURNTRANSFER, <span style="color: #bd93f9;">true</span>);
+<span style="color: #ff79c6;">$</span>response = <span style="color: #50fa7b;">curl_exec</span>(<span style="color: #ff79c6;">$</span>ch);
+<span style="color: #50fa7b;">curl_close</span>(<span style="color: #ff79c6;">$</span>ch);
+
+<span style="color: #ff79c6;">echo</span> <span style="color: #ff79c6;">$</span>response;
+<span style="color: #ff79c6;">?&gt;</span></pre>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">💡 Cara Penggunaan VClaim</div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <p style="margin-bottom: 15px;"><strong>Di file PHP Anda:</strong></p>
+                        <pre style="background: #2d2d2d; color: #fff; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px;">
+<span style="color: #ff79c6;">&lt;?php</span>
+<span style="color: #6272a4;">// Include file signature</span>
+<span style="color: #8be9fd;">require_once</span> <span style="color: #f1fa8c;">'bpjssignature.php'</span>;
+
+<span style="color: #6272a4;">// Get headers untuk request VClaim</span>
+<span style="color: #ff79c6;">$</span>headers = <span style="color: #50fa7b;">getVClaimHeaders</span>();
+
+<span style="color: #6272a4;">// Contoh request ke BPJS VClaim</span>
+<span style="color: #ff79c6;">$</span>ch = <span style="color: #50fa7b;">curl_init</span>();
+<span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_URL, <span style="color: #ff79c6;">$</span>URLVCLAIM . <span style="color: #f1fa8c;">"/Peserta/nokartu/0001234567890"</span>);
 <span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_HTTPHEADER, <span style="color: #ff79c6;">$</span>headers);
 <span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_RETURNTRANSFER, <span style="color: #bd93f9;">true</span>);
 <span style="color: #ff79c6;">$</span>response = <span style="color: #50fa7b;">curl_exec</span>(<span style="color: #ff79c6;">$</span>ch);
@@ -223,8 +391,68 @@ function displayBPJSSignature() {
                 });
             }
             
-            function copyHeaders() {
-                const headers = document.querySelectorAll('.header-item');
+            function copyHeaders(type) {
+                let selector = '.header-item';
+                if (type === 'mjkn') {
+                    // Copy only MJKN headers (first headers section)
+                    const sections = document.querySelectorAll('.section');
+                    const mjknSection = Array.from(sections).find(section => 
+                        section.querySelector('.section-title') && 
+                        section.querySelector('.section-title').textContent.includes('MJKN')
+                    );
+                    if (mjknSection) {
+                        selector = '.header-item';
+                        const headers = mjknSection.querySelectorAll(selector);
+                        let text = '';
+                        headers.forEach(header => {
+                            text += header.textContent + '\n';
+                        });
+                        
+                        navigator.clipboard.writeText(text).then(() => {
+                            const btn = event.target;
+                            const originalText = btn.textContent;
+                            btn.textContent = '✅ MJKN Headers Copied!';
+                            btn.style.background = '#28a745';
+                            
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.style.background = '#007bff';
+                            }, 2000);
+                        });
+                        return;
+                    }
+                } else if (type === 'vclaim') {
+                    // Copy only VClaim headers (second headers section)
+                    const sections = document.querySelectorAll('.section');
+                    const vclaimSection = Array.from(sections).find(section => 
+                        section.querySelector('.section-title') && 
+                        section.querySelector('.section-title').textContent.includes('VClaim')
+                    );
+                    if (vclaimSection) {
+                        selector = '.header-item';
+                        const headers = vclaimSection.querySelectorAll(selector);
+                        let text = '';
+                        headers.forEach(header => {
+                            text += header.textContent + '\n';
+                        });
+                        
+                        navigator.clipboard.writeText(text).then(() => {
+                            const btn = event.target;
+                            const originalText = btn.textContent;
+                            btn.textContent = '✅ VClaim Headers Copied!';
+                            btn.style.background = '#28a745';
+                            
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.style.background = '#007bff';
+                            }, 2000);
+                        });
+                        return;
+                    }
+                }
+                
+                // Default behavior - copy all headers
+                const headers = document.querySelectorAll(selector);
                 let text = '';
                 headers.forEach(header => {
                     text += header.textContent + '\n';
