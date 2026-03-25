@@ -256,12 +256,23 @@
                 <p style="margin-bottom: 15px; color: #666; line-height: 1.6;">
                     <strong>Langkah 1:</strong> Siapkan file Excel dengan 2 kolom:<br/>
                     &nbsp;&nbsp;&nbsp;&nbsp;• Kolom A: Nama file lama (RESEP2-2026010001.pdf)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;• Kolom B: Nama file baru (001_UMI_0807R006V0126000001.pdf)<br/><br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;• Kolom B: Nama file baru (001_UMI_0807R006V0126000001.pdf)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<em>→ <a href="generate_excel_contoh.php" style="color: #667eea; text-decoration: underline;">Generate file Excel contoh di sini</a></em><br/><br/>
                     <strong>Langkah 2:</strong> Upload file Excel/CSV dan masukkan path folder sumber<br/>
                     <strong>Langkah 3:</strong> Review preview dan pastikan semua mapping benar<br/>
                     <strong>Langkah 4:</strong> Klik tombol "Rename Sekarang" untuk melakukan rename<br/>
                     <strong>Langkah 5:</strong> Download laporan hasil rename
                 </p>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                    <h4 style="margin-bottom: 10px; color: #333;">🔧 Troubleshooting "File Tidak Ditemukan":</h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; line-height: 1.6;">
+                        <li><strong>Case sensitivity:</strong> RESEP2-2026010001.pdf ≠ resep2-2026010001.pdf</li>
+                        <li><strong>Spasi tersembunyi:</strong> Copy nama file dari File Explorer, jangan ketik manual</li>
+                        <li><strong>Karakter tersembunyi:</strong> Paste ulang nama file di Excel</li>
+                        <li><strong>Path folder:</strong> Pastikan path benar (D:\APOL)</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

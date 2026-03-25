@@ -161,6 +161,76 @@ try {
 
 // ============ VALIDASI MAPPING ============
 
+function validateFileExists($folderPath, $fileName) {
+    $fullPath = $folderPath . DIRECTORY_SEPARATOR . $fileName;
+
+    // Cek eksistensi file
+    if (file_exists($fullPath)) {
+        return ['exists' => true, 'message' => ''];
+    }
+
+    // Jika tidak ditemukan, coba analisis lebih detail
+    $issues = [];
+
+    // 1. Cek case sensitivity - list semua file di folder
+    $filesInFolder = scandir($folderPath);
+    $filesInFolder = array_diff($filesInFolder, ['.', '..']);
+
+    // Cari file dengan case insensitive
+    $fileNameLower = strtolower($fileName);
+    $similarFiles = [];
+    foreach ($filesInFolder as $existingFile) {
+        if (strtolower($existingFile) === $fileNameLower) {
+            $similarFiles[] = $existingFile;
+        }
+    }
+
+    if (!empty($similarFiles)) {
+        $issues[] = 'Case mismatch. File ditemukan: "' . implode('", "', $similarFiles) . '"';
+    }
+
+    // 2. Cek karakter tersembunyi (non-printable characters)
+    $cleanFileName = preg_replace('/[\x00-\x1F\x7F-\x9F]/u', '', $fileName);
+    if ($cleanFileName !== $fileName) {
+        $issues[] = 'Ada karakter tersembunyi/non-printable di nama file';
+    }
+
+    // 3. Cek spasi di awal/akhir
+    $trimmedFileName = trim($fileName);
+    if ($trimmedFileName !== $fileName) {
+        $issues[] = 'Ada spasi di awal/akhir nama file';
+    }
+
+    // 4. Cek encoding issues
+    if (!mb_check_encoding($fileName, 'UTF-8')) {
+        $issues[] = 'Encoding karakter tidak valid (bukan UTF-8)';
+    }
+
+    // 5. Cek ekstensi file
+    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    if (empty($ext)) {
+        $issues[] = 'Nama file tidak memiliki ekstensi';
+    }
+
+    // 6. Cari file dengan ekstensi berbeda
+    $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+    $possibleFiles = [];
+    foreach ($filesInFolder as $existingFile) {
+        $existingNameWithoutExt = pathinfo($existingFile, PATHINFO_FILENAME);
+        if (strtolower($existingNameWithoutExt) === strtolower($nameWithoutExt)) {
+            $possibleFiles[] = $existingFile;
+        }
+    }
+
+    if (!empty($possibleFiles) && empty($similarFiles)) {
+        $issues[] = 'File dengan nama mirip ditemukan: "' . implode('", "', $possibleFiles) . '"';
+    }
+
+    $message = empty($issues) ? 'File tidak ditemukan di folder' : implode('; ', $issues);
+
+    return ['exists' => false, 'message' => $message];
+}
+
 $validationResults = [];
 $totalFiles = count($mappingData);
 $existingFiles = 0;
@@ -168,19 +238,19 @@ $missingFiles = 0;
 $duplicateNewNames = [];
 
 foreach ($mappingData as $idx => $mapping) {
-    $oldPath = $sourceFolder . DIRECTORY_SEPARATOR . $mapping['old_name'];
+    $oldName = $mapping['old_name'];
     $newName = $mapping['new_name'];
-    $status = 'valid';
-    $message = '';
-    
-    // Cek file lama ada atau tidak
-    if (!file_exists($oldPath)) {
-        $status = 'error';
-        $message = 'File tidak ditemukan';
-        $missingFiles++;
-    } else {
+
+    // Validasi file lama
+    $fileCheck = validateFileExists($sourceFolder, $oldName);
+    $oldPath = $sourceFolder . DIRECTORY_SEPARATOR . $oldName;
+
+    $status = $fileCheck['exists'] ? 'valid' : 'error';
+    $message = $fileCheck['message'];
+
+    if ($fileCheck['exists']) {
         $existingFiles++;
-        
+
         // Cek nama baru tidak ada duplikat dalam list
         if (isset($duplicateNewNames[$newName])) {
             $status = 'warning';
@@ -188,14 +258,16 @@ foreach ($mappingData as $idx => $mapping) {
         } else {
             $duplicateNewNames[$newName] = ($idx + 1);
         }
+    } else {
+        $missingFiles++;
     }
-    
+
     $validationResults[] = [
         'row' => $idx + 1,
-        'old_name' => $mapping['old_name'],
+        'old_name' => $oldName,
         'new_name' => $newName,
         'old_path' => $oldPath,
-        'exists' => file_exists($oldPath),
+        'exists' => $fileCheck['exists'],
         'status' => $status,
         'message' => $message
     ];
@@ -426,9 +498,26 @@ foreach ($mappingData as $idx => $mapping) {
             <!-- Alerts -->
             <?php if ($missingFiles > 0): ?>
             <div class="alert alert-error">
-                ⚠️ <strong><?php echo $missingFiles; ?> file tidak ditemukan</strong> di folder "<strong><?php echo htmlspecialchars($sourceFolder); ?></strong>". 
-                Halaman ini masih akan menampilkan data, tetapi file yang hilang tidak akan direname. 
-                Pastikan path folder sudah benar sebelum melanjutkan.
+                <h4>⚠️ <strong><?php echo $missingFiles; ?> file tidak ditemukan</strong> di folder "<strong><?php echo htmlspecialchars($sourceFolder); ?></strong>"</h4>
+                <p>Halaman ini masih akan menampilkan data, tetapi file yang hilang tidak akan direname.</p>
+
+                <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                    <strong>🔍 Kemungkinan Penyebab & Solusi:</strong>
+                    <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.6;">
+                        <li><strong>Case Sensitivity:</strong> RESEP2-2026010001.pdf ≠ resep2-2026010001.pdf<br/>
+                            → <em>Solusi: Copy nama file langsung dari File Explorer (klik kanan file → Properties → nama file)</em></li>
+                        <li><strong>Spasi tersembunyi:</strong> Ada spasi di awal/akhir nama file<br/>
+                            → <em>Solusi: Gunakan TRIM() di Excel atau paste ulang nama file</em></li>
+                        <li><strong>Karakter tersembunyi:</strong> Copy-paste dari sumber lain<br/>
+                            → <em>Solusi: Ketik ulang nama file manual di Excel</em></li>
+                        <li><strong>Encoding karakter:</strong> Karakter non-ASCII<br/>
+                            → <em>Solusi: Pastikan Excel menggunakan UTF-8 encoding</em></li>
+                        <li><strong>Path folder salah:</strong> Folder tidak sesuai<br/>
+                            → <em>Solusi: Double-check path folder (contoh: D:\APOL bukan D:\APOL\)</em></li>
+                    </ul>
+
+                    <p style="margin-top: 10px;"><strong>💡 Tips:</strong> Buka folder di File Explorer, copy nama file dari situ, paste ke Excel. Jangan ketik manual!</p>
+                </div>
             </div>
             <?php endif; ?>
 
