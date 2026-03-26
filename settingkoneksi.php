@@ -15,6 +15,12 @@ $CONSIDAPIMOBILEJKN = "your_consumer_id_here"; // Consumer ID dari BPJS
 $SECRETKEYAPIMOBILEJKN = "your_secret_key_here"; // Secret Key dari BPJS
 $USERKEYAPIMOBILEJKN = "your_user_key_here"; // User Key dari BPJS
 
+// KONFIGURASI BPJS VCLAIM API
+$URLVCLAIM = "https://apijkn.bpjs-kesehatan.go.id/vclaim-rest"; // URL API BPJS (ganti dengan production jika sudah live)
+$CONSIDVCLAIM = "your_consumer_id_here"; // Consumer ID dari BPJS
+$SECRETKEYVCLAIM = "your_secret_key_here"; // Secret Key dari BPJS
+$USERKEYVCLAIM = "your_user_key_here"; // User Key dari BPJS
+
 // ========================================
 // KONFIGURASI MOBILE JKN AUTH
 // ========================================
