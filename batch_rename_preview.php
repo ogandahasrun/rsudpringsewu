@@ -3,15 +3,8 @@
  * Script Preview Mapping dari Excel/CSV
  */
 
-function readExcelOrCsv($filePath, $sheetName = null) {
-    $fileExt = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-    
-    if ($fileExt === 'csv') {
-        return readCsvFile($filePath);
-    } else {
-        // Try to read as XLSX/XLS
-        return readXlsxFile($filePath, $sheetName);
-    }
+function readCsvOnly($filePath) {
+    return readCsvFile($filePath);
 }
 
 function readCsvFile($filePath) {
@@ -122,7 +115,7 @@ try {
         throw new Exception("Invalid request");
     }
     
-    if (!isset($_FILES['excel_file']) || $_FILES['excel_file']['error'] !== UPLOAD_ERR_OK) {
+    if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
         throw new Exception("File tidak berhasil diupload");
     }
     
@@ -137,19 +130,18 @@ try {
         throw new Exception("Folder sumber tidak ditemukan: " . htmlspecialchars($sourceFolder));
     }
     
-    $file = $_FILES['excel_file'];
+    $file = $_FILES['csv_file'];
     $fileSize = $file['size'];
     $fileTmp = $file['tmp_name'];
-    
+
     // Validasi ukuran
     if ($fileSize > 10 * 1024 * 1024) { // 10MB
         throw new Exception("File terlalu besar (maksimal 10MB)");
     }
-    
-    // Baca file
-    $sheetName = isset($_POST['sheet_name']) && !empty($_POST['sheet_name']) ? $_POST['sheet_name'] : null;
-    $mappingData = readExcelOrCsv($fileTmp, $sheetName);
-    
+
+    // Baca file CSV
+    $mappingData = readCsvOnly($fileTmp);
+
     if (empty($mappingData)) {
         throw new Exception("Tidak ada data ditemukan di file");
     }
@@ -273,67 +265,82 @@ foreach ($mappingData as $idx => $mapping) {
     ];
 }
 
+// Fungsi untuk menampilkan karakter tersembunyi secara visual
+function visualizeHiddenChars($str) {
+    $out = '';
+    $len = mb_strlen($str, 'UTF-8');
+    for ($i = 0; $i < $len; $i++) {
+        $char = mb_substr($str, $i, 1, 'UTF-8');
+        $ord = ord($char);
+        if ($char === ' ') {
+            $out .= '<span style="background:#ffe082;color:#333;">␣</span>';
+        } elseif ($ord < 32 || ($ord >= 127 && $ord <= 159)) {
+            $out .= '<span style="background:#ffcccb;color:#721c24;">␀</span>';
+        } else {
+            $out .= htmlspecialchars($char);
+        }
+    }
+    return $out;
+}
+
 // ============ RENDER HTML ============
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview Batch Rename - APOL Manager</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-        }
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-        .content {
-            padding: 30px;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .stat-box {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #667eea;
+        <div class="container">
+            <div class="header">
+                <h1>📋 Preview Mapping Rename</h1>
+                <p>Review hasil mapping sebelum melakukan proses rename file.</p>
+            </div>
+            <div class="content" style="padding:30px;">
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number"><?php echo $totalFiles; ?></div>
+                        <div class="stat-label">Total Mapping</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number"><?php echo $existingFiles; ?></div>
+                        <div class="stat-label">File Ditemukan</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number"><?php echo $missingFiles; ?></div>
+                        <div class="stat-label">File Tidak Ditemukan</div>
+                    </div>
+                </div>
+                <div class="table-wrapper" style="margin-top:30px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nama File Lama</th>
+                                <th>Visual Karakter Tersembunyi</th>
+                                <th>Nama File Baru</th>
+                                <th>Status</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($validationResults as $row): ?>
+                            <tr>
+                                <td><?php echo $row['row']; ?></td>
+                                <td><?php echo htmlspecialchars($row['old_name']); ?></td>
+                                <td><?php echo visualizeHiddenChars($row['old_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['new_name']); ?></td>
+                                <td>
+                                    <?php if ($row['status'] === 'valid'): ?>
+                                        <span class="badge badge-success">OK</span>
+                                    <?php elseif ($row['status'] === 'warning'): ?>
+                                        <span class="badge badge-warning">Warning</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-error">Error</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($row['message']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         }
         .stat-label {
             font-size: 12px;

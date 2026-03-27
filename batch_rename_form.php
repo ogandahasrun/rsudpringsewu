@@ -211,7 +211,7 @@
     <div class="container">
         <div class="header">
             <h1>📁 Batch Rename File</h1>
-            <p>Rename hingga 2000 file sekaligus dari Excel/CSV</p>
+            <p>Rename hingga 2000 file sekaligus dari file CSV</p>
         </div>
         
         <div class="content">
@@ -226,23 +226,18 @@
             }
             ?>
 
+
             <form method="POST" action="batch_rename_preview.php" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label>📋 File Excel/CSV (Mapping Rename)</label>
-                    <input type="file" name="excel_file" accept=".xlsx,.xls,.csv" required>
-                    <div class="help-text">Format: Kolom A = Nama Lama, Kolom B = Nama Baru | File maksimal 10MB</div>
+                    <label>📋 File CSV (Mapping Rename)</label>
+                    <input type="file" name="csv_file" accept=".csv" required>
+                    <div class="help-text">Format CSV: Kolom 1 = Nama Lama, Kolom 2 = Nama Baru | File maksimal 10MB</div>
                 </div>
 
                 <div class="form-group">
                     <label>📂 Folder Sumber File PDF</label>
                     <input type="text" name="source_folder" placeholder="Contoh: D:\APOL atau C:\xampp\htdocs\rsudpringsewu\files" required>
                     <div class="help-text">Path lengkap folder yang berisi file yang akan direname</div>
-                </div>
-
-                <div class="form-group">
-                    <label>📊 Sheet Name (untuk Excel)</label>
-                    <input type="text" name="sheet_name" placeholder="Biarkan kosong untuk sheet pertama" value="">
-                    <div class="help-text">Opsional - jika file Excel punya multiple sheets, sebutkan sheet mana yang digunakan</div>
                 </div>
 
                 <div class="button-group">
@@ -252,13 +247,14 @@
             </form>
 
             <div class="preview-section">
+
                 <h3>📌 Panduan Penggunaan</h3>
                 <p style="margin-bottom: 15px; color: #666; line-height: 1.6;">
-                    <strong>Langkah 1:</strong> Siapkan file Excel dengan 2 kolom:<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;• Kolom A: Nama file lama (RESEP2-2026010001.pdf)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;• Kolom B: Nama file baru (001_UMI_0807R006V0126000001.pdf)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<em>→ <a href="generate_excel_contoh.php" style="color: #667eea; text-decoration: underline;">Generate file Excel contoh di sini</a></em><br/><br/>
-                    <strong>Langkah 2:</strong> Upload file Excel/CSV dan masukkan path folder sumber<br/>
+                    <strong>Langkah 1:</strong> Siapkan file <b>CSV</b> dengan 2 kolom:<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;• Kolom 1: Nama file lama (RESEP2-2026010001.pdf)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;• Kolom 2: Nama file baru (001_UMI_0807R006V0126000001.pdf)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<em>→ Contoh: <a href="contoh_mapping_rename.csv" style="color: #667eea; text-decoration: underline;">Download contoh file CSV di sini</a></em><br/><br/>
+                    <strong>Langkah 2:</strong> Upload file CSV dan masukkan path folder sumber<br/>
                     <strong>Langkah 3:</strong> Review preview dan pastikan semua mapping benar<br/>
                     <strong>Langkah 4:</strong> Klik tombol "Rename Sekarang" untuk melakukan rename<br/>
                     <strong>Langkah 5:</strong> Download laporan hasil rename
