@@ -369,6 +369,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 </div>
                 <div class="title">Stok Farmasi</div>
             </a>
+
+            <a href="stokperlokasi.php" class="menu-card" title="Stok Barang Per Lokasi">
+                <div class="icon-wrapper">
+                    <i class="fas fa-pills icon"></i>
+                </div>
+                <div class="title">Stok Per Lokasi</div>
+            </a>            
             
             <a href="hutangmedis.php" class="menu-card" title="Hutang Barang Medis">
                 <div class="icon-wrapper">
