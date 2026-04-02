@@ -299,7 +299,29 @@ if (!isset($_SESSION['username'])) {
         <h1>🧮 Kalkulator Harga</h1>
         <p class="subtitle">Sistem Perhitungan Harga dengan Berbagai Skenario PPN, Diskon, dan Ongkir</p>
 
-        <form id="calculatorForm">
+
+        <!-- Pilih Skenario -->
+        <div class="section no-print" id="scenarioSection">
+            <div class="section-title">Pilih Skenario Perhitungan</div>
+            <div class="input-group">
+                <div class="form-field">
+                    <label for="scenarioSelect">Skenario</label>
+                    <select id="scenarioSelect" required>
+                        <option value="">-- Pilih Skenario --</option>
+                        <option value="1">1️⃣ Harga Belum PPN</option>
+                        <option value="2">2️⃣ Harga Termasuk PPN</option>
+                        <option value="3">3️⃣ Harga Belum PPN + Diskon</option>
+                        <option value="4">4️⃣ Harga Termasuk PPN + Diskon</option>
+                        <option value="5">5️⃣ Harga Belum PPN + Ongkir</option>
+                        <option value="6">6️⃣ Harga Termasuk PPN + Ongkir</option>
+                        <option value="7">7️⃣ Harga Belum PPN + Diskon + Ongkir</option>
+                        <option value="8">8️⃣ Harga Termasuk PPN + Diskon + Ongkir</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <form id="calculatorForm" style="display:none;">
             <!-- Data Umum -->
             <div class="section no-print">
                 <div class="section-title">Data Umum</div>
@@ -338,7 +360,7 @@ if (!isset($_SESSION['username'])) {
             </div>
 
             <div class="action-buttons no-print">
-                <button type="submit" class="btn btn-primary">🔍 Hitung Semua Skenario</button>
+                <button type="submit" class="btn btn-primary">🔍 Hitung Skenario</button>
                 <button type="button" class="btn btn-success" onclick="window.print()">🖨️ Cetak Hasil</button>
                 <button type="button" class="btn btn-danger" onclick="resetForm()">🔄 Reset</button>
             </div>
@@ -353,10 +375,25 @@ if (!isset($_SESSION['username'])) {
     <script>
         let itemCount = 0;
 
-        // Add only one item on page load
+
+        // Sembunyikan form input sampai skenario dipilih
         window.onload = function() {
-            addItem();
+            document.getElementById('calculatorForm').style.display = 'none';
+            document.getElementById('scenarioSelect').value = '';
         };
+
+        document.getElementById('scenarioSelect').addEventListener('change', function() {
+            if (this.value !== '') {
+                document.getElementById('calculatorForm').style.display = '';
+                document.getElementById('itemsList').innerHTML = '';
+                itemCount = 0;
+                addItem();
+            } else {
+                document.getElementById('calculatorForm').style.display = 'none';
+                document.getElementById('itemsList').innerHTML = '';
+                itemCount = 0;
+            }
+        });
 
         function addItem() {
             itemCount++;
@@ -402,10 +439,52 @@ if (!isset($_SESSION['username'])) {
             }
         }
 
+
         document.getElementById('calculatorForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            calculateAll();
+            calculateScenarioSelected();
         });
+
+        function calculateScenarioSelected() {
+            const scenario = document.getElementById('scenarioSelect').value;
+            const hargaTotal = parseFloat(document.getElementById('hargaTotal').value) || 0;
+            const hargaDiskon = parseFloat(document.getElementById('hargaDiskon').value) || 0;
+            const ongkir = parseFloat(document.getElementById('ongkir').value) || 0;
+
+            const items = [];
+            const itemRows = document.querySelectorAll('#itemsList .item-row');
+            itemRows.forEach((row, index) => {
+                const name = row.querySelector('.item-name').value;
+                const value = parseFloat(row.querySelector('.item-value').value) || 0;
+                const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+                if (name && value > 0 && qty > 0) {
+                    items.push({
+                        no: index + 1,
+                        name: name,
+                        value: value,
+                        qty: qty
+                    });
+                }
+            });
+            if (items.length === 0) {
+                alert('Harap masukkan minimal 1 item!');
+                return;
+            }
+
+            let results = {};
+            switch (scenario) {
+                case '1': results.scenario1 = calculateScenario1(items); break;
+                case '2': results.scenario2 = calculateScenario2(items); break;
+                case '3': results.scenario3 = calculateScenario3(items, hargaDiskon); break;
+                case '4': results.scenario4 = calculateScenario4(items, hargaDiskon); break;
+                case '5': results.scenario5 = calculateScenario5(items, ongkir); break;
+                case '6': results.scenario6 = calculateScenario6(items, ongkir); break;
+                case '7': results.scenario7 = calculateScenario7(items, hargaDiskon, ongkir); break;
+                case '8': results.scenario8 = calculateScenario8(items, hargaDiskon, ongkir); break;
+                default: return;
+            }
+            displayResults(results, hargaTotal, hargaDiskon, ongkir, scenario);
+        }
 
         function calculateAll() {
             const hargaTotal = parseFloat(document.getElementById('hargaTotal').value) || 0;
@@ -460,17 +539,13 @@ if (!isset($_SESSION['username'])) {
             }));
         }
 
-        // Skenario 2: Harga Termasuk PPN
+        // Skenario 2: Harga Termasuk PPN (nilai hitung sudah termasuk PPN, harga satuan = nilai hitung / jumlah item)
         function calculateScenario2(items) {
-            return items.map(item => {
-                const hargaTermasukPPN = item.value * 1.11;
-                const hargaPerItem = hargaTermasukPPN / item.qty;
-                return {
-                    ...item,
-                    hargaPerItem: hargaPerItem,
-                    totalHarga: hargaTermasukPPN
-                };
-            });
+            return items.map(item => ({
+                ...item,
+                hargaPerItem: item.value / item.qty,
+                totalHarga: item.value
+            }));
         }
 
         // Skenario 3: Harga Belum PPN dengan Diskon
@@ -585,7 +660,6 @@ if (!isset($_SESSION['username'])) {
 
         function createTable(title, data, color) {
             const totalHarga = data.reduce((sum, item) => sum + item.totalHarga, 0);
-            
             let html = `
                 <div class="result-card">
                     <h3>${title}</h3>
@@ -601,19 +675,15 @@ if (!isset($_SESSION['username'])) {
                         </thead>
                         <tbody>
             `;
-
             data.forEach(item => {
-                html += `
-                    <tr>
-                        <td class="number">${item.no}</td>
-                        <td>${item.name}</td>
-                        <td class="number">${item.qty}</td>
-                        <td class="price">${formatRupiah(item.hargaPerItem)}</td>
-                        <td class="price">${formatRupiah(item.totalHarga)}</td>
-                    </tr>
-                `;
+                html += `<tr>`;
+                html += `<td class="number">${item.no}</td>`;
+                html += `<td>${item.name}</td>`;
+                html += `<td class="number">${item.qty}</td>`;
+                html += `<td class="price">${formatRupiah(item.hargaPerItem)}</td>`;
+                html += `<td class="price">${formatRupiah(item.totalHarga)}</td>`;
+                html += `</tr>`;
             });
-
             html += `
                         </tbody>
                     </table>
@@ -625,13 +695,11 @@ if (!isset($_SESSION['username'])) {
                     </div>
                 </div>
             `;
-
             return html;
         }
 
-        function displayResults(results, hargaTotal, hargaDiskon, ongkir) {
+        function displayResults(results, hargaTotal, hargaDiskon, ongkir, scenario) {
             let html = '<h2 style="text-align: center; margin-bottom: 20px; color: #333;">📊 Hasil Perhitungan</h2>';
-            
             html += `
                 <div class="result-card">
                     <h3>📋 Ringkasan Input</h3>
@@ -651,20 +719,19 @@ if (!isset($_SESSION['username'])) {
                     </div>
                 </div>
             `;
-
-            html += createTable('1️⃣ Harga Belum PPN', results.scenario1);
-            html += createTable('2️⃣ Harga Termasuk PPN', results.scenario2);
-            html += createTable('3️⃣ Harga Belum PPN dengan Diskon', results.scenario3);
-            html += createTable('4️⃣ Harga Termasuk PPN dengan Diskon', results.scenario4);
-            html += createTable('5️⃣ Harga Belum PPN termasuk Ongkir', results.scenario5);
-            html += createTable('6️⃣ Harga Termasuk PPN termasuk Ongkir', results.scenario6);
-            html += createTable('7️⃣ Harga Belum PPN dengan Diskon dan Ongkir', results.scenario7);
-            html += createTable('8️⃣ Harga Termasuk PPN dengan Diskon dan Ongkir', results.scenario8);
-
+            // Tampilkan hanya tabel skenario yang dipilih
+            switch (scenario) {
+                case '1': html += createTable('1️⃣ Harga Belum PPN', results.scenario1); break;
+                case '2': html += createTable('2️⃣ Harga Termasuk PPN', results.scenario2); break;
+                case '3': html += createTable('3️⃣ Harga Belum PPN dengan Diskon', results.scenario3); break;
+                case '4': html += createTable('4️⃣ Harga Termasuk PPN dengan Diskon', results.scenario4); break;
+                case '5': html += createTable('5️⃣ Harga Belum PPN termasuk Ongkir', results.scenario5); break;
+                case '6': html += createTable('6️⃣ Harga Termasuk PPN termasuk Ongkir', results.scenario6); break;
+                case '7': html += createTable('7️⃣ Harga Belum PPN dengan Diskon dan Ongkir', results.scenario7); break;
+                case '8': html += createTable('8️⃣ Harga Termasuk PPN dengan Diskon dan Ongkir', results.scenario8); break;
+            }
             document.getElementById('resultsSection').innerHTML = html;
             document.getElementById('resultsSection').style.display = 'block';
-
-            // Scroll to results
             document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
