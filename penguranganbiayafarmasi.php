@@ -202,9 +202,9 @@ $result = mysqli_query($koneksi, $query);
                                         <?php if (empty($row['nama_pengurangan']) || empty($row['besar_pengurangan'])): ?>
                                             <form method="POST" style="display:inline-block;">
                                                 <input type="hidden" name="no_rawat" value="<?php echo htmlspecialchars($row['no_rawat']); ?>">
-                                                <input type="text" name="nama_pengurangan" placeholder="Nama Pengurangan" required style="width:120px;">
-                                                <input type="number" name="besar_pengurangan" placeholder="Besar" required style="width:80px;">
-                                                <button type="submit" name="input_pengurangan" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Simpan</button>
+                                                   <input type="text" name="nama_pengurangan" placeholder="Nama Pengurangan" required style="width:120px;" value="Potongan Biaya Farmasi">
+                                                   <input type="number" name="besar_pengurangan" placeholder="Besar" required style="width:80px;" value="<?php echo isset($row['biaya_obat']) ? preg_replace('/[^0-9]/', '', (string)$row['biaya_obat']) : ''; ?>">
+                                                   <button type="submit" name="input_pengurangan" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Simpan</button>
                                             </form>
                                         <?php elseif ($edit_no_rawat === $row['no_rawat']): ?>
                                                 <button type="submit" name="edit_pengurangan" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Simpan</button>
