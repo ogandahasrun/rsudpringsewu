@@ -341,6 +341,15 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <div class="title">Payment Point</div>
                 <div class="description">Sistem pembayaran dan transaksi keuangan rumah sakit</div>
             </a>
+
+            <a href="ppnobatpasienralan.php" class="menu-card" title="PPN Obat Pasien Ralan">
+                <div class="icon-wrapper">
+                    <i class="fas fa-cash-register icon"></i>
+                </div>
+                <div class="title">PPN Obat Pasien Ralan</div>
+                <div class="description">Laporan detail obat pasien rawat jalan beserta perhitungan PPN</div>
+            </a>
+
         </div>
     </div>
     
