@@ -558,8 +558,8 @@ if (!isset($_SESSION['username'])) {
                 const hargaPerItem = nilaiSetelahDiskon / item.qty;
                 return {
                     ...item,
-                    hargaPerItem: hargaPerItem,
-                    totalHarga: nilaiSetelahDiskon
+                    hargaPerItem: Math.round(hargaPerItem * 100) / 100,
+                    totalHarga: Math.round(nilaiSetelahDiskon * 100) / 100
                 };
             });
         }
