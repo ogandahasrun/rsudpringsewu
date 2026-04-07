@@ -421,6 +421,8 @@
                     pasien.nm_pasien,
                     penjab.png_jawab,
                     poliklinik.nm_poli,
+                    -- PPN Obat dari billing
+                    (SELECT totalbiaya FROM billing WHERE billing.no_rawat = reg_periksa.no_rawat AND billing.nm_perawatan = 'PPN Obat' LIMIT 1) as ppn_obat,
                     COALESCE(
                         (SELECT SUM(detail_nota_inap.besar_bayar) FROM detail_nota_inap WHERE detail_nota_inap.no_rawat = reg_periksa.no_rawat),
                         (SELECT SUM(detail_nota_jalan.besar_bayar) FROM detail_nota_jalan WHERE detail_nota_jalan.no_rawat = reg_periksa.no_rawat),
@@ -498,7 +500,9 @@
                     <th>NOMOR RM</th>
                     <th>NAMA PASIEN</th>
                     <th>PENJAB</th>
-                    <th>POLIKLINIK</th>";
+                    <th>POLIKLINIK</th>
+                    <th>PPN OBAT</th>
+                    <th>BIAYA SEBELUM PPN</th>";
             if ($show_column == 'all' || $show_column == 'total_bayar') echo "<th>TOTAL BAYAR</th>";
             if ($show_column == 'all' || $show_column == 'sisapiutang') echo "<th>SISA PIUTANG</th>";
             echo "</tr>";
@@ -508,6 +512,11 @@
                 $jenis_class = '';
                 if ($row['jenis_rawat'] == 'RAWAT INAP') $jenis_class = 'stts-sudah';
                 elseif ($row['jenis_rawat'] == 'RAWAT JALAN') $jenis_class = 'stts-belum';
+
+                $ppn_obat = isset($row['ppn_obat']) ? $row['ppn_obat'] : 0;
+                $total_bayar = isset($row['total_bayar']) ? $row['total_bayar'] : 0;
+                $sisapiutang = isset($row['sisapiutang']) ? $row['sisapiutang'] : 0;
+                $biaya_sebelum_ppn = $total_bayar + $sisapiutang - $ppn_obat;
 
                 echo "<tr>
                         <td>{$no}</td>
@@ -519,12 +528,13 @@
                         <td>{$row['nm_pasien']}</td>
                         <td>{$row['png_jawab']}</td>
                         <td>{$row['nm_poli']}</td>
-                        ";
+                        <td style='text-align: right;'>Rp " . number_format($ppn_obat, 0, ',', '.') . "</td>
+                        <td style='text-align: right;'>Rp " . number_format($biaya_sebelum_ppn, 0, ',', '.') . "</td>";
                 if ($show_column == 'all' || $show_column == 'total_bayar') {
-                    echo "<td style='text-align: right; font-weight: bold;'>Rp " . number_format($row['total_bayar'], 0, ',', '.') . "</td>";
+                    echo "<td style='text-align: right; font-weight: bold;'>Rp " . number_format($total_bayar, 0, ',', '.') . "</td>";
                 }
                 if ($show_column == 'all' || $show_column == 'sisapiutang') {
-                    echo "<td style='text-align: right; font-weight: bold; color: #dc3545;'>Rp " . number_format(isset($row['sisapiutang']) ? $row['sisapiutang'] : 0, 0, ',', '.') . "</td>";
+                    echo "<td style='text-align: right; font-weight: bold; color: #dc3545;'>Rp " . number_format($sisapiutang, 0, ',', '.') . "</td>";
                 }
                 echo "</tr>";
                 $no++;    
