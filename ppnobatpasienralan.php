@@ -127,7 +127,11 @@ while ($row = mysqli_fetch_assoc($result)) {
         <label>Sampai: <input type="date" name="tgl_akhir" value="<?php echo $tgl_akhir; ?>"></label>
         <button type="submit">Tampilkan</button>
     </form>
-    <table>
+    <div style="display:flex; gap:10px; margin-bottom:18px;">
+        <button onclick="copyTableToClipboard()" style="background:#667eea;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:15px;cursor:pointer;transition:background 0.2s;">Copy to Clipboard</button>
+        <a href="keuangan.php" style="background:#aaa;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:15px;text-decoration:none;display:inline-block;line-height:28px;">Kembali ke Keuangan</a>
+    </div>
+    <table id="tabelppn">
         <thead>
             <tr>
                 <th>No</th>
@@ -175,5 +179,26 @@ while ($row = mysqli_fetch_assoc($result)) {
         </tbody>
     </table>
 </div>
+<script>
+function copyTableToClipboard() {
+    var table = document.getElementById('tabelppn');
+    var range, sel;
+    if (document.createRange && window.getSelection) {
+        var body = document.body, html = document.documentElement;
+        var prevActive = document.activeElement;
+        range = document.createRange();
+        range.selectNode(table);
+        sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try {
+            document.execCommand('copy');
+        } catch (e) {}
+        sel.removeAllRanges();
+        if (prevActive) prevActive.focus();
+        alert('Tabel berhasil disalin ke clipboard!');
+    }
+}
+</script>
 </body>
 </html>

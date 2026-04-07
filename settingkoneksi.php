@@ -7,9 +7,7 @@ if (mysqli_connect_errno()){
 echo "";
 }
 
-// ========================================
 // KONFIGURASI BPJS MOBILE JKN API
-// ========================================
 $URLAPIMOBILEJKN = "https://apijkn-dev.bpjs-kesehatan.go.id/vclaim-rest-dev"; // URL API BPJS (ganti dengan production jika sudah live)
 $CONSIDAPIMOBILEJKN = "your_consumer_id_here"; // Consumer ID dari BPJS
 $SECRETKEYAPIMOBILEJKN = "your_secret_key_here"; // Secret Key dari BPJS
@@ -21,9 +19,7 @@ $CONSIDVCLAIM = "your_consumer_id_here"; // Consumer ID dari BPJS
 $SECRETKEYVCLAIM = "your_secret_key_here"; // Secret Key dari BPJS
 $USERKEYVCLAIM = "your_user_key_here"; // User Key dari BPJS
 
-// ========================================
 // KONFIGURASI MOBILE JKN AUTH
-// ========================================
 $URLAUTHMJKN = "https://localhost/auth"; // URL Auth Mobile JKN
 $USERNAMEAUTHMJKN = "usermjkn"; // Username untuk Auth
 $PASSWORDAUTHMJKN = "passwordmjkn"; // Password untuk Auth
