@@ -94,17 +94,17 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <h1>Menu Keuangan - <?php echo htmlspecialchars($nama_instansi); ?></h1>
 
     <div class="menu-grid">
-        <a href="laporan_keuangan.php" class="menu-item">
+        <a href="paymentpoint.php" class="menu-item">
             <i class="fas fa-file-invoice-dollar fa-2x" style="color:#059669;"></i>
-            <span style="color:#222;font-weight:bold;">Laporan Keuangan</span>
+            <span style="color:#222;font-weight:bold;">Payment Point</span>
         </a>
-        <a href="hutangmedis.php" class="menu-item">
+        <a href="Penagihanfaktur.php" class="menu-item">
             <i class="fas fa-hand-holding-usd fa-2x" style="color:#e11d48;"></i>
-            <span style="color:#222;font-weight:bold;">Hutang Medis</span>
+            <span style="color:#222;font-weight:bold;">Penagihan Faktur</span>
         </a>
-        <a href="rencanabelanja.php" class="menu-item">
+        <a href="detailtindakan.php" class="menu-item">
             <i class="fas fa-shopping-cart fa-2x" style="color:#4f46e5;"></i>
-            <span style="color:#222;font-weight:bold;">Rencana Belanja</span>
+            <span style="color:#222;font-weight:bold;">Detail Tindakan</span>
         </a>
             <a href="ppnobatpasienralan.php" class="menu-item" title="PPN Obat Pasien Ralan">
                 <i class="fas fa-cash-register fa-2x" style="color:#f59e0b;"></i>

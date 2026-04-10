@@ -158,6 +158,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-address-card"></i>
                 <span>Cek No Kartu Pasien JKN</span>
             </a>                                
+            <a href="cek_rujukan_jkn.php" title="Cek Rujukan JKN">
+                <i class="fas fa-address-card"></i>
+                <span>Cek Rujukan JKN</span>
+            </a>             
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
