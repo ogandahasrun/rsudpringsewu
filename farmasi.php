@@ -236,74 +236,94 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                     <i class="fas fa-box fa-2x" style="margin-bottom:10px;color:#4f46e5;"></i>
                     <span style="color:#222;font-weight:bold;">Data Barang</span>
                 </a>
+                <a href="skpfarmasi.php" class="menu-item">
+                    <i class="fas fa-capsules fa-2x" style="margin-bottom:10px;color:#059669;"></i>
+                    <span style="color:#222;font-weight:bold;">SKP Farmasi</span>
+                </a> 
                 <a href="stokfarmasi.php" class="menu-item">
-                    <i class="fas fa-pills fa-2x" style="margin-bottom:10px;color:#059669;"></i>
+                    <i class="fas fa-warehouse fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
                     <span style="color:#222;font-weight:bold;">Stok Farmasi</span>
+                </a>
+                <a href="hutangmedis.php" class="menu-item">
+                    <i class="fas fa-money-bill-wave fa-2x" style="margin-bottom:10px;color:#e11d48;"></i>
+                    <span style="color:#222;font-weight:bold;">Hutang Barang Medis</span>
+                </a>                
+                <a href="reseppasienralan.php" class="menu-item">
+                    <i class="fas fa-file-prescription fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
+                    <span style="color:#222;font-weight:bold;">Resep Pasien Ralan</span>
                 </a>
                 <a href="riwayatbarangfarmasi.php" class="menu-item">
                     <i class="fas fa-history fa-2x" style="margin-bottom:10px;color:#f59e42;"></i>
                     <span style="color:#222;font-weight:bold;">Riwayat Barang</span>
                 </a>
                 <a href="mutasibarangmedis.php" class="menu-item">
-                    <i class="fas fa-exchange-alt fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
+                    <i class="fas fa-random fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
                     <span style="color:#222;font-weight:bold;">Mutasi Medis</span>
                 </a>
+                <a href="suratpesanan.php" class="menu-item">
+                    <i class="fas fa-envelope-open-text fa-2x" style="margin-bottom:10px;color:#ea580c;"></i>
+                    <span style="color:#222;font-weight:bold;">Surat Pesanan</span>
+                </a>
+                <a href="stokpertanggal.php" class="menu-item">
+                    <i class="fas fa-calendar-alt fa-2x" style="margin-bottom:10px;color:#16a34a;"></i>
+                    <span style="color:#222;font-weight:bold;">Stok per Tanggal</span>
+                </a>
+                <a href="sipnap.php" class="menu-item">
+                    <i class="fas fa-clipboard-list fa-2x" style="margin-bottom:10px;color:#2563eb;"></i>
+                    <span style="color:#222;font-weight:bold;">Laporan Sipnap</span>
+                </a>
+                <a href="kontrolpengeluarangudang.php" class="menu-item">
+                    <i class="fas fa-truck-loading fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
+                    <span style="color:#222;font-weight:bold;">Kontrol Pengeluaran Gudang</span>
+                </a>
+                <a href="kontrolpermintaanmutasi.php" class="menu-item">
+                    <i class="fas fa-exchange-alt fa-2x" style="margin-bottom:10px;color:#fbbf24;"></i>
+                    <span style="color:#222;font-weight:bold;">Kontrol Permintaan & Mutasi</span>
+                </a>
                 <a href="laporanbelanjafarmasi.php" class="menu-item">
-                    <i class="fas fa-file-invoice-dollar fa-2x" style="margin-bottom:10px;color:#e11d48;"></i>
+                    <i class="fas fa-receipt fa-2x" style="margin-bottom:10px;color:#e11d48;"></i>
                     <span style="color:#222;font-weight:bold;">Laporan Belanja</span>
                 </a>
                 <a href="laporanformularium.php" class="menu-item">
-                    <i class="fas fa-notes-medical fa-2x" style="margin-bottom:10px;color:#a21caf;"></i>
+                    <i class="fas fa-book-medical fa-2x" style="margin-bottom:10px;color:#a21caf;"></i>
                     <span style="color:#222;font-weight:bold;">Formularium</span>
                 </a>
                 <a href="kalkulatorfaktur.php" class="menu-item">
-                    <i class="fas fa-calculator fa-2x" style="margin-bottom:10px;color:#fbbf24;"></i>
+                    <i class="fas fa-square-root-alt fa-2x" style="margin-bottom:10px;color:#fbbf24;"></i>
                     <span style="color:#222;font-weight:bold;">Kalkulator Faktur</span>
                 </a>
-                <a href="kontrol_resep.php" class="menu-item">
-                    <i class="fas fa-file-prescription fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
-                    <span style="color:#222;font-weight:bold;">Kontrol Resep</span>
-                </a>
-                <a href="suratpesanan.php" class="menu-item">
-                    <i class="fas fa-box-open fa-2x" style="margin-bottom:10px;color:#ea580c;"></i>
-                    <span style="color:#222;font-weight:bold;">Surat Pesanan</span>
+                <a href="dokumentasifaktur.php" class="menu-item">
+                    <i class="fas fa-images fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
+                    <span style="color:#222;font-weight:bold;">Dokumentasi Faktur</span>
                 </a>
                 <a href="lokasibarangmedis.php" class="menu-item">
                     <i class="fas fa-warehouse fa-2x" style="margin-bottom:10px;color:#7c3aed;"></i>
                     <span style="color:#222;font-weight:bold;">Lokasi Barang</span>
-                </a>
-                <a href="stokpertanggal.php" class="menu-item">
-                    <i class="fas fa-calendar-day fa-2x" style="margin-bottom:10px;color:#16a34a;"></i>
-                    <span style="color:#222;font-weight:bold;">Stok per Tanggal</span>
                 </a>
                 <a href="stok_depo_rawat_inap.php" class="menu-item">
                     <i class="fas fa-hospital-user fa-2x" style="margin-bottom:10px;color:#be185d;"></i>
                     <span style="color:#222;font-weight:bold;">Stok Depo RI</span>
                 </a>
                 <a href="stok_minimal_gudang.php" class="menu-item">
-                    <i class="fas fa-sort-amount-down fa-2x" style="margin-bottom:10px;color:#f43f5e;"></i>
+                    <i class="fas fa-balance-scale fa-2x" style="margin-bottom:10px;color:#f43f5e;"></i>
                     <span style="color:#222;font-weight:bold;">Stok Min Gudang</span>
                 </a>
                 <a href="stok_minimal_depo_rawat_jalan.php" class="menu-item">
-                    <i class="fas fa-clinic-medical fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
+                    <i class="fas fa-user-md fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
                     <span style="color:#222;font-weight:bold;">Stok Min Depo RJ</span>
                 </a>
                 <a href="stok_minimal_depo_rawat_inap.php" class="menu-item">
-                    <i class="fas fa-clinic-medical fa-2x" style="margin-bottom:10px;color:#f59e42;"></i>
+                    <i class="fas fa-procedures fa-2x" style="margin-bottom:10px;color:#f59e42;"></i>
                     <span style="color:#222;font-weight:bold;">Stok Min Depo RI</span>
                 </a>
-                <a href="sipnap.php" class="menu-item">
-                    <i class="fas fa-capsules fa-2x" style="margin-bottom:10px;color:#2563eb;"></i>
-                    <span style="color:#222;font-weight:bold;">Laporan Sipnap</span>
+                <a href="rencanabelanja.php" class="menu-item">
+                    <i class="fas fa-clipboard-check fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
+                    <span style="color:#222;font-weight:bold;">Rencana Belanja</span>
                 </a>
-                <a href="kontrolpermintaanmutasi.php" class="menu-item">
-                    <i class="fas fa-tasks fa-2x" style="margin-bottom:10px;color:#fbbf24;"></i>
-                    <span style="color:#222;font-weight:bold;">Kontrol Permintaan & Mutasi</span>
-                </a>
-                <a href="kontrolpengeluarangudang.php" class="menu-item">
-                    <i class="fas fa-dolly-flatbed fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
-                    <span style="color:#222;font-weight:bold;">Kontrol Pengeluaran Gudang</span>
-                </a>
+                <a href="rencanabelanjafarmasi.php" class="menu-item">
+                    <i class="fas fa-notes-medical fa-2x" style="margin-bottom:10px;color:#a21caf;"></i>
+                    <span style="color:#222;font-weight:bold;">Rencana Belanja Farmasi</span>
+                </a>                                
             </div>
 
             <a href="logout.php" class="logout">Logout</a>
