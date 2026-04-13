@@ -224,12 +224,56 @@ Contoh: <?php echo htmlspecialchars($URLVCLAIM); ?>/Rujukan/List/Peserta/0001234
             <?php if ($result): ?>
                 <div class="result-section">
                     <h4>✅ Hasil Pencarian</h4>
-                    <?php if (isset($result['response']) && is_array($result['response'])): ?>
+                    <?php
+                    // Tampilkan tabel jika response rujukan tersedia
+                    $rujukan = null;
+                    if (isset($result['response']['rujukan'])) {
+                        $rujukan = $result['response']['rujukan'];
+                    } elseif (isset($result['response'][0]['rujukan'])) {
+                        $rujukan = $result['response'][0]['rujukan'];
+                    } elseif (isset($result['response']) && is_array($result['response'])) {
+                        $rujukan = $result['response'];
+                    }
+                    ?>
+                    <?php if ($rujukan && is_array($rujukan)): ?>
                         <p><strong>Status Dekripsi:</strong> ✅ Berhasil didekripsi</p>
+                        <?php
+                        // Fungsi untuk menampilkan array/objek sebagai tabel (rekursif)
+                        function renderTable($data, $parentKey = '') {
+                            echo '<table style="width:100%;border-collapse:collapse;margin:10px 0;background:#fff">';
+                            echo '<tr style="background:#f0f9ff"><th style="padding:8px 12px;border:1px solid #e2e8f0;text-align:left;">Field</th><th style="padding:8px 12px;border:1px solid #e2e8f0;text-align:left;">Data</th></tr>';
+                            foreach ($data as $key => $val) {
+                                $label = $parentKey ? $parentKey . ' → ' . ucwords(str_replace('_',' ',$key)) : ucwords(str_replace('_',' ',$key));
+                                echo '<tr>';
+                                echo '<td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;background:#f8fafc;">' . htmlspecialchars($label) . '</td>';
+                                echo '<td style="padding:8px 12px;border:1px solid #e2e8f0;">';
+                                if (is_array($val)) {
+                                    renderTable($val, $label);
+                                } else {
+                                    echo htmlspecialchars($val);
+                                }
+                                echo '</td>';
+                                echo '</tr>';
+                            }
+                            echo '</table>';
+                        }
+                        // Jika rujukan berupa array numerik (beberapa rujukan), tampilkan semua
+                        if (array_keys($rujukan) === range(0, count($rujukan) - 1)) {
+                            foreach ($rujukan as $idx => $item) {
+                                echo '<div style="margin-bottom:24px;"><b>Rujukan #' . ($idx+1) . '</b>';
+                                renderTable($item);
+                                echo '</div>';
+                            }
+                        } else {
+                            renderTable($rujukan);
+                        }
+                        ?>
                     <?php elseif (isset($result['raw_encrypted_response'])): ?>
                         <p><strong>Status Dekripsi:</strong> ❌ Gagal didekripsi - menampilkan data terenkripsi</p>
+                        <div class="json-output"><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></div>
+                    <?php else: ?>
+                        <div class="json-output"><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></div>
                     <?php endif; ?>
-                    <div class="json-output"><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></div>
                 </div>
             <?php endif; ?>
         </div>
