@@ -339,7 +339,7 @@
                            </select>
                        </div>
                     <div class="filter-group">
-                        <label for="tanggal_awal">📅 Tanggal Bayar Awal</label>
+                        <label for="tanggal_awal">📅 Tanggal Awal</label>
                         <input type="date" 
                                id="tanggal_awal" 
                                name="tanggal_awal" 
@@ -348,7 +348,7 @@
                     </div>
                     
                     <div class="filter-group">
-                        <label for="tanggal_akhir">📅 Tanggal Bayar Akhir</label>
+                        <label for="tanggal_akhir">📅 Tanggal Akhir</label>
                         <input type="date" 
                                id="tanggal_akhir" 
                                name="tanggal_akhir" 
@@ -543,7 +543,7 @@
                 <tr>
                     <th>No</th>
                     <th>JENIS RAWAT</th>
-                    <th>TANGGAL BAYAR</th>
+                    <th>TANGGAL</th>
                     <th>JAM BAYAR</th>
                     <th>NOMOR RAWAT</th>
                     <th>NO NOTA</th>
