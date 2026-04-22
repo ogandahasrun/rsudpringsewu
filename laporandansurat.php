@@ -131,6 +131,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-file-medical"></i>
                 <span>Surat Keterangan Pasien Hemodialisa</span>
             </a>
+            <a href="suratketerangansehat.php" title="Surat Keterangan Sehat">
+                <i class="fas fa-file-medical"></i>
+                <span>Surat Keterangan Sehat</span>
+            </a>
             <a href="suratketeranganumum.php" title="Surat Keterangan Umum">
                 <i class="fas fa-file-signature"></i>
                 <span>Surat Keterangan Umum</span>
@@ -148,3 +152,4 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <footer>by IT rsudpringsewu</footer>
 </body>
 </html>
+
