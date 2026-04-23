@@ -131,7 +131,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-file-medical"></i>
                 <span>Surat Keterangan Pasien Hemodialisa</span>
             </a>
-            <a href="suratketerangansehat.php" title="Surat Keterangan Sehat">
+            <a href="surat_keterangan_sehat.php" title="Surat Keterangan Sehat">
                 <i class="fas fa-notes-medical"></i>
                 <span>Surat Keterangan Sehat</span>
             </a>
