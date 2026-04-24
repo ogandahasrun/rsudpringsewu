@@ -98,6 +98,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <i class="fas fa-file-invoice-dollar fa-2x" style="color:#059669;"></i>
             <span style="color:#222;font-weight:bold;">Payment Point</span>
         </a>
+        <a href="pendapatan_ralan.php" class="menu-item">
+            <i class="fas fa-file-invoice-dollar fa-2x" style="color:#059669;"></i>
+            <span style="color:#222;font-weight:bold;">Pendapatan Ralan</span>
+        </a>        
         <a href="Penagihanfaktur.php" class="menu-item">
             <i class="fas fa-hand-holding-usd fa-2x" style="color:#e11d48;"></i>
             <span style="color:#222;font-weight:bold;">Penagihan Faktur</span>
