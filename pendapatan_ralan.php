@@ -234,6 +234,46 @@ if ($tgl_awal && $tgl_akhir) {
     $filter_png_jawab = $png_jawab ? "AND penjab.png_jawab = '" . mysqli_real_escape_string($koneksi, $png_jawab) . "'" : '';
     $sql = "SELECT reg_periksa.no_rawat, pasien.no_rkm_medis, pasien.nm_pasien, reg_periksa.tgl_registrasi, reg_periksa.jam_reg, nota_jalan.no_nota, nota_jalan.tanggal, detail_nota_jalan.besar_bayar, penjab.png_jawab, piutang_pasien.sisapiutang FROM reg_periksa INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis INNER JOIN nota_jalan ON nota_jalan.no_rawat = reg_periksa.no_rawat LEFT JOIN detail_nota_jalan ON detail_nota_jalan.no_rawat = reg_periksa.no_rawat INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj LEFT JOIN piutang_pasien ON piutang_pasien.no_rawat = reg_periksa.no_rawat WHERE ((reg_periksa.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir') OR (nota_jalan.tanggal BETWEEN '$tgl_awal' AND '$tgl_akhir')) $filter_png_jawab ORDER BY reg_periksa.tgl_registrasi, reg_periksa.jam_reg";
     $result = mysqli_query($koneksi, $sql);
+
+    // Kelompokkan data per pasien
+    $pasien_data = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $no_rkm_medis = $row['no_rkm_medis'];
+        if (!isset($pasien_data[$no_rkm_medis])) {
+            $pasien_data[$no_rkm_medis] = [
+                'no_rawat' => $row['no_rawat'],
+                'nm_pasien' => $row['nm_pasien'],
+                'tgl_registrasi' => $row['tgl_registrasi'],
+                'jam_reg' => $row['jam_reg'],
+                'no_nota' => $row['no_nota'],
+                'tanggal' => $row['tanggal'],
+                'png_jawab' => $row['png_jawab'],
+                'besar_bayar' => 0,
+                'sisapiutang' => 0,
+                'obat' => 0,
+                'ppn' => 0,
+                'tanpa_obat' => 0,
+                'total' => 0
+            ];
+        }
+        $pasien_data[$no_rkm_medis]['besar_bayar'] += (float)($row['besar_bayar'] ?: 0);
+        $pasien_data[$no_rkm_medis]['sisapiutang'] += (float)($row['sisapiutang'] ?: 0);
+        // Ambil data billing untuk semua no_rawat pasien ini
+        $no_rawat = $row['no_rawat'];
+        $q_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan <> 'PPN Obat'");
+        $obat = mysqli_fetch_assoc($q_obat)['total'] ?: 0;
+        $pasien_data[$no_rkm_medis]['obat'] += $obat;
+        $q_ppn = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan = 'PPN Obat'");
+        $ppn = mysqli_fetch_assoc($q_ppn)['total'] ?: 0;
+        $pasien_data[$no_rkm_medis]['ppn'] += $ppn;
+        $q_tanpa_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status <> 'obat'");
+        $tanpa_obat = mysqli_fetch_assoc($q_tanpa_obat)['total'] ?: 0;
+        $pasien_data[$no_rkm_medis]['tanpa_obat'] += $tanpa_obat;
+        $q_total = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat'");
+        $total = mysqli_fetch_assoc($q_total)['total'] ?: 0;
+        $pasien_data[$no_rkm_medis]['total'] += $total;
+    }
+
     echo '<div style="margin-bottom: 15px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 10px;">';
     echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
     echo '</div>';
@@ -247,47 +287,32 @@ if ($tgl_awal && $tgl_akhir) {
     $total_ppn = 0;
     $total_tanpa_obat = 0;
     $total_semua = 0;
-    while ($row = mysqli_fetch_assoc($result)) {
-        $no_rawat = $row['no_rawat'];
-        // Obat
-        $q_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan <> 'PPN Obat'");
-        $obat = mysqli_fetch_assoc($q_obat)['total'] ?: 0;
-        // PPN Obat
-        $q_ppn = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan = 'PPN Obat'");
-        $ppn = mysqli_fetch_assoc($q_ppn)['total'] ?: 0;
-        // Total Tanpa Obat
-        $q_tanpa_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status <> 'obat'");
-        $tanpa_obat = mysqli_fetch_assoc($q_tanpa_obat)['total'] ?: 0;
-        // Total
-        $q_total = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat'");
-        $total = mysqli_fetch_assoc($q_total)['total'] ?: 0;
-        // Penjumlahan total
-        $total_besar_bayar += $row['besar_bayar'];
-        $total_sisapiutang += $row['sisapiutang'];
-        $total_obat += $obat;
-        $total_ppn += $ppn;
-        $total_tanpa_obat += $tanpa_obat;
-        $total_semua += $total;
-        // Status (contoh: Lunas/Belum Lunas)
-        $status = ($row['besar_bayar'] >= $total) ? 'Lunas' : 'Belum Lunas';
+    foreach ($pasien_data as $no_rkm_medis => $data) {
+        $status = ($data['besar_bayar'] >= $data['total']) ? 'Lunas' : 'Belum Lunas';
         echo '<tr>';
         echo '<td>' . $no++ . '</td>';
-        echo '<td>' . htmlspecialchars($row['no_rawat']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['no_rkm_medis']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['nm_pasien']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['tgl_registrasi']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['jam_reg']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['no_nota']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['tanggal']) . '</td>';
-        echo '<td>' . number_format($row['besar_bayar'], 0, ',', '.') . '</td>';
-        echo '<td>' . number_format($row['sisapiutang'], 0, ',', '.') . '</td>';
-        echo '<td>' . htmlspecialchars($row['png_jawab']) . '</td>';
-        echo '<td>' . number_format($obat, 0, ',', '.') . '</td>';
-        echo '<td>' . number_format($ppn, 0, ',', '.') . '</td>';
-        echo '<td>' . number_format($tanpa_obat, 0, ',', '.') . '</td>';
-        echo '<td>' . number_format($total, 0, ',', '.') . '</td>';
+        echo '<td>' . htmlspecialchars($data['no_rawat']) . '</td>';
+        echo '<td>' . htmlspecialchars($no_rkm_medis) . '</td>';
+        echo '<td>' . htmlspecialchars($data['nm_pasien']) . '</td>';
+        echo '<td>' . htmlspecialchars($data['tgl_registrasi']) . '</td>';
+        echo '<td>' . htmlspecialchars($data['jam_reg']) . '</td>';
+        echo '<td>' . htmlspecialchars($data['no_nota']) . '</td>';
+        echo '<td>' . htmlspecialchars($data['tanggal']) . '</td>';
+        echo '<td>' . number_format($data['besar_bayar'], 0, ',', '.') . '</td>';
+        echo '<td>' . number_format($data['sisapiutang'], 0, ',', '.') . '</td>';
+        echo '<td>' . htmlspecialchars($data['png_jawab']) . '</td>';
+        echo '<td>' . number_format($data['obat'], 0, ',', '.') . '</td>';
+        echo '<td>' . number_format($data['ppn'], 0, ',', '.') . '</td>';
+        echo '<td>' . number_format($data['tanpa_obat'], 0, ',', '.') . '</td>';
+        echo '<td>' . number_format($data['total'], 0, ',', '.') . '</td>';
         echo '<td>' . $status . '</td>';
         echo '</tr>';
+        $total_besar_bayar += $data['besar_bayar'];
+        $total_sisapiutang += $data['sisapiutang'];
+        $total_obat += $data['obat'];
+        $total_ppn += $data['ppn'];
+        $total_tanpa_obat += $data['tanpa_obat'];
+        $total_semua += $data['total'];
     }
     // Baris total
     echo '<tr style="background:#e9ecef; font-weight:bold;">';
