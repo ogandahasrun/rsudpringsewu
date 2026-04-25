@@ -240,6 +240,16 @@ if ($tgl_awal && $tgl_akhir) {
     while ($row = mysqli_fetch_assoc($result)) {
         $no_rkm_medis = $row['no_rkm_medis'];
         if (!isset($pasien_data[$no_rkm_medis])) {
+            // Ambil data billing untuk no_rawat pertama pasien ini
+            $no_rawat = $row['no_rawat'];
+            $q_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan <> 'PPN Obat'");
+            $obat = mysqli_fetch_assoc($q_obat)['total'] ?: 0;
+            $q_ppn = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan = 'PPN Obat'");
+            $ppn = mysqli_fetch_assoc($q_ppn)['total'] ?: 0;
+            $q_tanpa_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status <> 'obat'");
+            $tanpa_obat = mysqli_fetch_assoc($q_tanpa_obat)['total'] ?: 0;
+            $q_total = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat'");
+            $total = mysqli_fetch_assoc($q_total)['total'] ?: 0;
             $pasien_data[$no_rkm_medis] = [
                 'no_rawat' => $row['no_rawat'],
                 'nm_pasien' => $row['nm_pasien'],
@@ -251,27 +261,17 @@ if ($tgl_awal && $tgl_akhir) {
                 'besar_bayar' => 0,
                 'sisapiutang' => 0,
                 'obat' => 0,
-                'ppn' => 0,
+                'ppn' => $ppn, // hanya dari transaksi pertama
                 'tanpa_obat' => 0,
                 'total' => 0
             ];
+            $pasien_data[$no_rkm_medis]['obat'] = $obat;
+            $pasien_data[$no_rkm_medis]['tanpa_obat'] = $tanpa_obat;
+            $pasien_data[$no_rkm_medis]['total'] = $total;
         }
+        // Untuk transaksi berikutnya, hanya tambahkan besar_bayar dan sisapiutang
         $pasien_data[$no_rkm_medis]['besar_bayar'] += (float)($row['besar_bayar'] ?: 0);
         $pasien_data[$no_rkm_medis]['sisapiutang'] += (float)($row['sisapiutang'] ?: 0);
-        // Ambil data billing untuk semua no_rawat pasien ini
-        $no_rawat = $row['no_rawat'];
-        $q_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan <> 'PPN Obat'");
-        $obat = mysqli_fetch_assoc($q_obat)['total'] ?: 0;
-        $pasien_data[$no_rkm_medis]['obat'] += $obat;
-        $q_ppn = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status = 'obat' AND nm_perawatan = 'PPN Obat'");
-        $ppn = mysqli_fetch_assoc($q_ppn)['total'] ?: 0;
-        $pasien_data[$no_rkm_medis]['ppn'] += $ppn;
-        $q_tanpa_obat = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat' AND status <> 'obat'");
-        $tanpa_obat = mysqli_fetch_assoc($q_tanpa_obat)['total'] ?: 0;
-        $pasien_data[$no_rkm_medis]['tanpa_obat'] += $tanpa_obat;
-        $q_total = mysqli_query($koneksi, "SELECT SUM(totalbiaya) AS total FROM billing WHERE no_rawat = '$no_rawat'");
-        $total = mysqli_fetch_assoc($q_total)['total'] ?: 0;
-        $pasien_data[$no_rkm_medis]['total'] += $total;
     }
 
     echo '<div style="margin-bottom: 15px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 10px;">';
