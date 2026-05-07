@@ -169,15 +169,7 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
             </form>
 
             <?php
-            // Buat tabel lokasi_barang_medis jika belum ada
-            $create_table = "CREATE TABLE IF NOT EXISTS lokasi_barang_medis (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                kode_brng VARCHAR(15) UNIQUE NOT NULL,
-                kd_bangsal VARCHAR(5) DEFAULT 'GO',
-                lokasi TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )";
-            mysqli_query($koneksi, $create_table);
+            // ...existing code...
             
             if (!empty($search) || !empty($show_all) || !empty($filter_bangsal) || !empty($filter_lokasi)) {
                 // Query data barang dengan lokasi medis dan stok

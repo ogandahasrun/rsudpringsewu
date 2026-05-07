@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nomor_kartu'])) {
     } elseif (!preg_match('/^\\d{13,16}$/', $nomor_kartu)) {
         $error = "Nomor kartu harus 13-16 digit angka!";
     } else {
-        // Buat URL API
-        $api_url = $URLVCLAIM . "/Rujukan/List/Peserta/" . $nomor_kartu;
+        // Buat URL API (hanya satu rujukan, endpoint lama)
+        $api_url = $URLVCLAIM . "/Rujukan/Peserta/" . $nomor_kartu;
 
         // Get signature dan headers untuk VClaim
         $signature = generateVClaimSignature();
@@ -229,16 +229,11 @@ Contoh: <?php echo htmlspecialchars($URLVCLAIM); ?>/Rujukan/List/Peserta/0001234
                     $rujukan = null;
                     if (isset($result['response']['rujukan'])) {
                         $rujukan = $result['response']['rujukan'];
-                    } elseif (isset($result['response'][0]['rujukan'])) {
-                        $rujukan = $result['response'][0]['rujukan'];
-                    } elseif (isset($result['response']) && is_array($result['response'])) {
-                        $rujukan = $result['response'];
                     }
                     ?>
                     <?php if ($rujukan && is_array($rujukan)): ?>
                         <p><strong>Status Dekripsi:</strong> ✅ Berhasil didekripsi</p>
                         <?php
-                        // Fungsi untuk menampilkan array/objek sebagai tabel (rekursif)
                         function renderTable($data, $parentKey = '') {
                             echo '<table style="width:100%;border-collapse:collapse;margin:10px 0;background:#fff">';
                             echo '<tr style="background:#f0f9ff"><th style="padding:8px 12px;border:1px solid #e2e8f0;text-align:left;">Field</th><th style="padding:8px 12px;border:1px solid #e2e8f0;text-align:left;">Data</th></tr>';
@@ -257,16 +252,7 @@ Contoh: <?php echo htmlspecialchars($URLVCLAIM); ?>/Rujukan/List/Peserta/0001234
                             }
                             echo '</table>';
                         }
-                        // Jika rujukan berupa array numerik (beberapa rujukan), tampilkan semua
-                        if (array_keys($rujukan) === range(0, count($rujukan) - 1)) {
-                            foreach ($rujukan as $idx => $item) {
-                                echo '<div style="margin-bottom:24px;"><b>Rujukan #' . ($idx+1) . '</b>';
-                                renderTable($item);
-                                echo '</div>';
-                            }
-                        } else {
-                            renderTable($rujukan);
-                        }
+                        renderTable($rujukan);
                         ?>
                     <?php elseif (isset($result['raw_encrypted_response'])): ?>
                         <p><strong>Status Dekripsi:</strong> ❌ Gagal didekripsi - menampilkan data terenkripsi</p>
