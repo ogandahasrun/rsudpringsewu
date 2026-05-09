@@ -128,9 +128,9 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
         <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
         <div class="icon-menu">
             <a href="pemesanandokumentasi.php" title="Dokumentasi Barang Farmasi"><i class="fas fa-box"></i><span>Dokumentasi Barang Farmasi</span></a>
-            <a href="2025spjekatalog.php" title="SPJ E-Katalog 2025"><i class="fas fa-file-invoice"></i><span>SPJ E-Katalog</span></a>
-            <a href="2025spjreguler.php" title="SPJ Reguler 2025"><i class="fas fa-file-invoice-dollar"></i><span>SPJ Reguler</span></a>
-            <a href="2025spjregulergabungan.php" title="SPJ Reguler Gabungan 2025"><i class="fas fa-file-contract"></i><span>SPJ Gabungan</span></a>
+            <a href="spjekatalog.php" title="SPJ E-Katalog"><i class="fas fa-file-invoice"></i><span>SPJ E-Katalog</span></a>
+            <a href="spjregulern.php" title="SPJ Reguler"><i class="fas fa-file-invoice-dollar"></i><span>SPJ Reguler</span></a>
+            <a href="2026spjregulergabunganheran.php" title="SPJ Reguler Gabungan 2026"><i class="fas fa-file-contract"></i><span>SPJ Gabungan</span></a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
