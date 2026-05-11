@@ -361,6 +361,11 @@ include 'koneksi.php';
         $query = "SELECT 
                     lec_umbal.no_sep,
                     lec_umbal.no_rawat,
+                    CASE 
+                        WHEN nota_inap.no_rawat IS NOT NULL THEN nota_inap.no_nota
+                        WHEN nota_jalan.no_rawat IS NOT NULL THEN nota_jalan.no_nota
+                        ELSE ''
+                    END as no_nota,
                     lec_umbal.tgl_registrasi,
                     lec_umbal.nm_pasien,
                     lec_umbal.nm_dokter,
@@ -376,6 +381,8 @@ include 'koneksi.php';
                     INNER JOIN reg_periksa ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
                     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
                     LEFT JOIN lec_kelompok_prosedur ON lec_umbal.kd_prosedur = lec_kelompok_prosedur.kd_prosedur
+                    LEFT JOIN nota_inap ON lec_umbal.no_rawat = nota_inap.no_rawat
+                    LEFT JOIN nota_jalan ON lec_umbal.no_rawat = nota_jalan.no_rawat
                 WHERE
                     rspsw_umbal.bulanklaim = '$bulanklaim'";
 
@@ -393,6 +400,7 @@ include 'koneksi.php';
                             <th>No</th>
                             <th>No SEP</th>
                             <th>No Rawat</th>
+                            <th>No Nota</th>
                             <th>Tgl Registrasi</th>
                             <th>Nama Pasien</th>                            
                             <th>Nomor RM</th>
@@ -413,6 +421,7 @@ include 'koneksi.php';
                         <td>{$no}</td>
                         <td>{$row['no_sep']}</td>
                         <td>{$row['no_rawat']}</td>
+                        <td>{$row['no_nota']}</td>
                         <td>{$row['tgl_registrasi']}</td>
                         <td>{$row['nm_pasien']}</td>
                         <td>{$row['no_rkm_medis']}</td>
