@@ -1166,8 +1166,8 @@
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19850806 201101 1 006</td><td></td></tr>
                 <tr><td>5</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Emmy Saragih, Amd.Gz</td><td>..................</td></tr>
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19690118 199203 2 006</td><td></td></tr>
-                <tr><td>6</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Aini Siswanto</td><td>..................</td></tr>
-                <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19680622 200801 1 010</td><td></td></tr>
+                <tr><td>6</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Riyadi, SE</td><td>..................</td></tr>
+                <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19731024 201001 1 001</td><td></td></tr>
                 <tr><td>7</td><td>Tim Teknis Pengadaan Barang dan jasa</td><td>Aida Septiana, Amd. Farm</td><td>..................</td></tr>
                 <tr><td></td><td>Rumah Sakit Umum Daerah Pringsewu</td><td>NIP. 19820927 200604 2 015</td><td></td></tr>
             </table>
