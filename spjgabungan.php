@@ -200,7 +200,7 @@ if (!empty($nopgdn)) {
 
         <!-- ...existing code... -->
             <?php // CONTOH PEMANGGILAN VARIABEL TANGGAL, letakkan setelah blok PHP utama agar variabel sudah terisi ?>
-            <div style="background:#f8f8f8; border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <!-- <div style="background:#f8f8f8; border:1px solid #ccc; padding:10px; margin:10px 0;">
                 <p>Tanggal Awal Bulan: <strong><?php echo $tanggal_awal_bulan; ?></strong></p>
                 <p>Tanggal Akhir Bulan: <strong><?php echo $tanggal_akhir_bulan; ?></strong></p>
                 <p>Bulan (Romawi): <strong><?php echo $bulan_romawi; ?></strong></p>
@@ -208,7 +208,7 @@ if (!empty($nopgdn)) {
                 <p>Bulan dan Tahun (Indonesia): <strong><?php echo $bulan_tahun_indonesia; ?></strong></p>
                 <p>Format Tanggal Lengkap Awal: <strong><?php echo $tanggal_lengkap_awal; ?></strong></p>
                 <p>Format Tanggal Lengkap Akhir: <strong><?php echo $tanggal_lengkap_akhir; ?></strong></p>
-            </div>
+            </div> -->
             <h4 class="center-text">PERMOHONAN BELANJA BARANG/JASA (PPBJ)</h4>
 
             <table class="no-border-table">
