@@ -130,7 +130,7 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="pemesanandokumentasi.php" title="Dokumentasi Barang Farmasi"><i class="fas fa-box"></i><span>Dokumentasi Barang Farmasi</span></a>
             <a href="spjekatalog.php" title="SPJ E-Katalog"><i class="fas fa-file-invoice"></i><span>SPJ E-Katalog</span></a>
             <a href="spjregulern.php" title="SPJ Reguler"><i class="fas fa-file-invoice-dollar"></i><span>SPJ Reguler</span></a>
-            <a href="2026spjregulergabunganheran.php" title="SPJ Reguler Gabungan 2026"><i class="fas fa-file-contract"></i><span>SPJ Gabungan</span></a>
+            <a href="spjgabungan.php" title="SPJ Gabungan"><i class="fas fa-file-contract"></i><span>SPJ Gabungan</span></a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
