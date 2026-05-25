@@ -106,6 +106,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <i class="fas fa-hand-holding-usd fa-2x" style="color:#e11d48;"></i>
             <span style="color:#222;font-weight:bold;">Penagihan Faktur</span>
         </a>
+        <a href="piutangpasien.php" class="menu-item">
+            <i class="fas fa-hand-holding-usd fa-2x" style="color:#e11d48;"></i>
+            <span style="color:#222;font-weight:bold;">Piutang Pasien</span>
+        </a>        
         <a href="detailtindakan.php" class="menu-item">
             <i class="fas fa-shopping-cart fa-2x" style="color:#4f46e5;"></i>
             <span style="color:#222;font-weight:bold;">Detail Tindakan</span>
