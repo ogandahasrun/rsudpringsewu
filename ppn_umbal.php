@@ -218,7 +218,7 @@ include 'koneksi.php';
             font-weight: 700;
             padding: 10px 6px;
             text-align: center;
-            border: none;
+            border: 1px solid #d6d6d6;
             border-right: 1px solid #d6d6d6;
             font-size: 11px;
             white-space: nowrap;
@@ -358,8 +358,10 @@ include 'koneksi.php';
 
         $query = "SELECT 
                     lec_umbal.bulanklaim,
+                    lec_umbal.tgl_registrasi AS tgl_sep,
                     lec_umbal.no_sep,
                     reg_periksa.no_rawat,
+                    reg_periksa.tgl_registrasi AS tgl_registrasi,
                     lec_umbal.norm,
                     lec_umbal.nm_pasien,
                     lec_umbal.disetujui,
@@ -414,7 +416,9 @@ include 'koneksi.php';
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>Tanggal Registrasi</th>
                             <th>Bulan Klaim</th>
+                            <th>Tanggal SEP</th>
                             <th>No SEP</th>
                             <th>No Rawat</th>
                             <th>No RM</th>
@@ -437,7 +441,9 @@ include 'koneksi.php';
             while ($row = mysqli_fetch_assoc($result)) {
                 echo "<tr>
                         <td>{$no}</td>
+                        <td>{$row['tgl_registrasi']}</td>
                         <td>{$row['bulanklaim']}</td>
+                        <td>{$row['tgl_sep']}</td>
                         <td>{$row['no_sep']}</td>
                         <td>{$row['no_rawat']}</td>
                         <td>{$row['norm']}</td>
@@ -460,7 +466,7 @@ include 'koneksi.php';
             echo "</tbody>
                 <tfoot>
                     <tr>
-                        <th colspan='6'>Total</th>
+                        <th colspan='8'>Total</th>
                         <th>" . formatRupiah($total_disetujui) . "</th>
                         <th></th>
                         <th>" . formatRupiah($total_non_obat) . "</th>
