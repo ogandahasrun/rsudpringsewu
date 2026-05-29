@@ -328,6 +328,24 @@
         $tanggal_awal = $_POST['tanggal_awal'];
         $tanggal_akhir = $_POST['tanggal_akhir'];
         $filter_by = isset($_POST['filter_by']) ? $_POST['filter_by'] : 'tgl_registrasi';
+        $kamar_join = "LEFT JOIN (
+                        SELECT kamar_inap.no_rawat,
+                               MAX(kamar_inap.tgl_masuk) AS tgl_masuk,
+                               SUBSTRING_INDEX(
+                                   GROUP_CONCAT(bangsal.nm_bangsal ORDER BY kamar_inap.tgl_masuk DESC SEPARATOR '||'),
+                                   '||',
+                                   1
+                               ) AS kamar,
+                               SUBSTRING_INDEX(
+                                   GROUP_CONCAT(kamar_inap.lama ORDER BY kamar_inap.tgl_masuk DESC SEPARATOR '||'),
+                                   '||',
+                                   1
+                               ) AS lama
+                        FROM kamar_inap
+                        INNER JOIN kamar ON kamar_inap.kd_kamar = kamar.kd_kamar
+                        INNER JOIN bangsal ON kamar.kd_bangsal = bangsal.kd_bangsal
+                        GROUP BY kamar_inap.no_rawat
+                    ) kmr ON kmr.no_rawat = reg_periksa.no_rawat";
 
         if ($filter_by == 'tgl_keluar') {
             // Filter berdasarkan tgl_keluar (ambil yang paling akhir per no_rawat)
@@ -337,7 +355,10 @@
                         pasien.nm_pasien, 
                         reg_periksa.kd_poli, 
                         bridging_sep.no_sep,
-                        bridging_sep.nmdpdjp, 
+                        bridging_sep.nmdpdjp,
+                        kmr.kamar,
+                        kmr.tgl_masuk,
+                        kmr.lama,
                         MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
                         rspsw_umbal.diajukan,
                         rspsw_umbal.disetujui,
@@ -350,6 +371,7 @@
                     LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
                     LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat 
                         AND (rspsw_umbal.no_sep = bridging_sep.no_sep OR rspsw_umbal.no_sep IS NULL)
+                    $kamar_join
                     LEFT JOIN (
                         SELECT no_rawat, MAX(tgl_keluar) AS tgl_keluar, MAX(stts_pulang) AS stts_pulang
                         FROM kamar_inap
@@ -371,7 +393,10 @@
                         pasien.nm_pasien, 
                         reg_periksa.kd_poli, 
                         bridging_sep.no_sep,
-                        bridging_sep.nmdpdjp, 
+                        bridging_sep.nmdpdjp,
+                        kmr.kamar,
+                        kmr.tgl_masuk,
+                        kmr.lama,
                         MAX(diagnosa_pasien.kd_penyakit) AS kd_penyakit,
                         rspsw_umbal.diajukan,
                         rspsw_umbal.disetujui,
@@ -384,6 +409,7 @@
                     LEFT JOIN diagnosa_pasien ON diagnosa_pasien.no_rawat = reg_periksa.no_rawat
                     LEFT JOIN rspsw_umbal ON rspsw_umbal.no_rawat = reg_periksa.no_rawat 
                         AND (rspsw_umbal.no_sep = bridging_sep.no_sep OR rspsw_umbal.no_sep IS NULL)
+                    $kamar_join
                     WHERE 
                         (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                         AND reg_periksa.status_lanjut = 'ranap' 
@@ -410,7 +436,10 @@
                     <th>POLIKLINIK</th>
                     <th>NOMOR SEP</th>
                     <th>NAMA DPJP</th>
+                    <th>KAMAR</th>
+                    <th>TGL MASUK</th>
                     <th>TGL KELUAR</th>
+                    <th>LAMA</th>
                     <th>STATUS PULANG</th>
                     <th>DIAJUKAN</th>
                     <th>DISETUJUI</th>
@@ -430,7 +459,10 @@
                         <td>{$row['kd_poli']}</td>
                         <td>{$row['no_sep']}</td>
                         <td>{$row['nmdpdjp']}</td>
+                        <td>" . ($row['kamar'] ? $row['kamar'] : '-') . "</td>
+                        <td>" . ($row['tgl_masuk'] ? $row['tgl_masuk'] : '-') . "</td>
                         <td>" . ($row['tgl_keluar'] ? $row['tgl_keluar'] : '-') . "</td>
+                        <td>" . ($row['lama'] !== null ? $row['lama'] : '-') . "</td>
                         <td>" . ($row['stts_pulang'] ? $row['stts_pulang'] : '-') . "</td>
                         <td>{$row['diajukan']}</td>
                         <td>{$row['disetujui']}</td>
@@ -438,7 +470,7 @@
                 $no++;    
             }
             echo "<tr class='total-row'>
-                    <td colspan='10' style='text-align:right;font-weight:bold;'>💰 Total Jumlah</td>
+                    <td colspan='13' style='text-align:right;font-weight:bold;'>💰 Total Jumlah</td>
                     <td style='font-weight:bold;'>{$total_diajukan}</td>
                     <td style='font-weight:bold;'>{$total_disetujui}</td>
                 </tr>";
