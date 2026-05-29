@@ -358,6 +358,7 @@
                     WHERE 
                         (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                         AND reg_periksa.status_lanjut = 'ranap' 
+                        AND stts_pulang <> 'Pindah Kamar'
                         AND ki.tgl_keluar BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
                     GROUP BY 
                         reg_periksa.no_rawat, bridging_sep.no_sep
