@@ -373,14 +373,21 @@
                         AND (rspsw_umbal.no_sep = bridging_sep.no_sep OR rspsw_umbal.no_sep IS NULL)
                     $kamar_join
                     LEFT JOIN (
-                        SELECT no_rawat, MAX(tgl_keluar) AS tgl_keluar, MAX(stts_pulang) AS stts_pulang
+                        SELECT
+                            no_rawat,
+                            MAX(tgl_keluar) AS tgl_keluar,
+                            SUBSTRING_INDEX(
+                                GROUP_CONCAT(stts_pulang ORDER BY tgl_keluar DESC SEPARATOR '||'),
+                                '||',
+                                1
+                            ) AS stts_pulang
                         FROM kamar_inap
+                        WHERE stts_pulang <> 'Pindah Kamar'
                         GROUP BY no_rawat
                     ) ki ON ki.no_rawat = reg_periksa.no_rawat
                     WHERE 
                         (reg_periksa.kd_pj = 'BPJ' OR (reg_periksa.kd_pj != 'BPJ' AND bridging_sep.no_sep IS NOT NULL))
                         AND reg_periksa.status_lanjut = 'ranap' 
-                        AND stts_pulang <> 'Pindah Kamar'
                         AND ki.tgl_keluar BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
                     GROUP BY 
                         reg_periksa.no_rawat, bridging_sep.no_sep

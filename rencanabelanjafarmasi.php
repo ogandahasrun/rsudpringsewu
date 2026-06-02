@@ -168,7 +168,7 @@ while ($row = mysqli_fetch_assoc($q_jual)) {
                     <td><?php echo $no++; ?></td>
                     <td><?php echo htmlspecialchars($kode_brng); ?></td>
                     <td><?php echo htmlspecialchars($info['nama_brng']); ?></td>
-                    <td style="text-align:right;"><?php echo number_format($info['h_beli'], 2, ',', '.'); ?></td>
+                    <td style="text-align:right;"><?php echo htmlspecialchars((string) $info['h_beli']); ?></td>
                     <td><?php echo htmlspecialchars($info['kode_sat']); ?></td>
                     <td style="text-align:right;"><?php echo $stok_go; ?></td>
                     <td style="text-align:right;"><?php echo $stok_dri; ?></td>
