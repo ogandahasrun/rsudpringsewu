@@ -298,7 +298,7 @@ $query = "SELECT
             LEFT JOIN bridging_sep ON bridging_sep.no_rawat = reg_periksa.no_rawat
         WHERE
             resep_obat.`status` = 'ralan' AND
-            reg_periksa.kd_poli NOT IN ('IGDK','HDL') AND
+            reg_periksa.kd_poli NOT IN ('IGDK','VCT') AND
             resep_obat.tgl_perawatan BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
         ORDER BY resep_obat.tgl_perawatan, resep_obat.no_resep";
 
