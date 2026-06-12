@@ -121,6 +121,53 @@ function getVClaimHeaders($userkey = null) {
 }
 
 /**
+ * Generate Aplicare Signature
+ * 
+ * @param string $consid - Consumer ID (default dari config)
+ * @param string $secretkey - Secret Key (default dari config)
+ * @return array - Array berisi X-cons-id, X-timestamp, dan X-signature
+ */
+function generateAplicareSignature($consid = null, $secretkey = null) {
+    global $CONSIDAPLICARE, $SECRETKEYAPLICARE;
+    
+    $data = $consid ?? $CONSIDAPLICARE;
+    $secretKey = $secretkey ?? $SECRETKEYAPLICARE;
+    
+    date_default_timezone_set('UTC');
+    
+    $tStamp = strval(time() - strtotime('1970-01-01 00:00:00'));
+    $signature = hash_hmac('sha256', $data . "&" . $tStamp, $secretKey, true);
+    $encodedSignature = base64_encode($signature);
+    
+    return array(
+        'x-cons-id' => $data,
+        'x-timestamp' => $tStamp,
+        'x-signature' => $encodedSignature
+    );
+}
+
+/**
+ * Generate Aplicare Headers untuk cURL
+ * 
+ * @param string $userkey - User Key (default dari config)
+ * @return array - Array header siap pakai untuk cURL
+ */
+function getAplicareHeaders($userkey = null) {
+    global $USERKEYAPLICARE;
+    
+    $signature = generateAplicareSignature();
+    $user_key = $userkey ?? $USERKEYAPLICARE;
+    
+    return array(
+        'X-cons-id: ' . $signature['x-cons-id'],
+        'X-timestamp: ' . $signature['x-timestamp'],
+        'X-signature: ' . $signature['x-signature'],
+        'user_key: ' . $user_key,
+        'Content-Type: application/json'
+    );
+}
+
+/**
  * Decrypt VClaim API Response
  * 
  * @param string $encryptedResponse - The encrypted response string from API
@@ -157,12 +204,16 @@ function decryptVClaimResponse($encryptedResponse, $timestamp, $consid = null, $
 function displayBPJSSignature() {
     global $URLAPIMOBILEJKN, $CONSIDAPIMOBILEJKN, $SECRETKEYAPIMOBILEJKN, $USERKEYAPIMOBILEJKN;
     global $URLVCLAIM, $CONSIDVCLAIM, $SECRETKEYVCLAIM, $USERKEYVCLAIM;
+    global $URLAPLICARE, $CONSIDAPLICARE, $SECRETKEYAPLICARE, $USERKEYAPLICARE;
     
     $signature = generateBPJSSignature();
     $headers = getBPJSHeaders();
     
     $signature_vclaim = generateVClaimSignature();
     $headers_vclaim = getVClaimHeaders();
+
+    $signature_aplicare = generateAplicareSignature();
+    $headers_aplicare = getAplicareHeaders();
     
     ?>
     <!DOCTYPE html>
@@ -211,7 +262,7 @@ function displayBPJSSignature() {
                     <strong>✅ Status:</strong> Signature MJKN & VClaim berhasil di-generate! File berfungsi dengan baik.
                 </div>
                 
-                <?php if ($CONSIDAPIMOBILEJKN == 'your_consumer_id_here' || $SECRETKEYAPIMOBILEJKN == 'your_secret_key_here' || $CONSIDVCLAIM == 'your_consumer_id_here' || $SECRETKEYVCLAIM == 'your_secret_key_here'): ?>
+                <?php if ($CONSIDAPIMOBILEJKN == 'your_consumer_id_here' || $SECRETKEYAPIMOBILEJKN == 'your_secret_key_here' || $CONSIDVCLAIM == 'your_consumer_id_here' || $SECRETKEYVCLAIM == 'your_secret_key_here' || $CONSIDAPLICARE == 'your_consumer_id_here' || $SECRETKEYAPLICARE == 'your_secret_key_here'): ?>
                 <div class="status warning">
                     <strong>⚠️ Perhatian:</strong> Anda masih menggunakan konfigurasi default. Silakan update kredensial BPJS di file <code>koneksi.php</code>
                 </div>
@@ -248,6 +299,23 @@ function displayBPJSSignature() {
                         
                         <div class="config-label">User Key:</div>
                         <div class="config-value"><?php echo str_repeat('*', strlen($USERKEYVCLAIM) - 4) . substr($USERKEYVCLAIM, -4); ?></div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📋 Konfigurasi Aplicare dari koneksi.php</div>
+                    <div class="config-grid">
+                        <div class="config-label">URL API:</div>
+                        <div class="config-value"><?php echo htmlspecialchars($URLAPLICARE); ?></div>
+                        
+                        <div class="config-label">Consumer ID:</div>
+                        <div class="config-value"><?php echo htmlspecialchars($CONSIDAPLICARE); ?></div>
+                        
+                        <div class="config-label">Secret Key:</div>
+                        <div class="config-value"><?php echo str_repeat('*', strlen($SECRETKEYAPLICARE) - 4) . substr($SECRETKEYAPLICARE, -4); ?></div>
+                        
+                        <div class="config-label">User Key:</div>
+                        <div class="config-value"><?php echo str_repeat('*', strlen($USERKEYAPLICARE) - 4) . substr($USERKEYAPLICARE, -4); ?></div>
                     </div>
                 </div>
                 
@@ -296,6 +364,29 @@ function displayBPJSSignature() {
                         </div>
                     </div>
                 </div>
+
+                <div class="section">
+                    <div class="section-title">🔑 Generated Signature Aplicare</div>
+                    <div class="signature-box">
+                        <div class="signature-item">
+                            <div class="signature-label">X-cons-id:</div>
+                            <div class="signature-value" id="consid_aplicare"><?php echo htmlspecialchars($signature_aplicare['x-cons-id']); ?></div>
+                            <button class="copy-btn" onclick="copyToClipboard('consid_aplicare')">📋 Copy</button>
+                        </div>
+                        
+                        <div class="signature-item">
+                            <div class="signature-label">X-timestamp:</div>
+                            <div class="signature-value" id="timestamp_aplicare"><?php echo htmlspecialchars($signature_aplicare['x-timestamp']); ?></div>
+                            <button class="copy-btn" onclick="copyToClipboard('timestamp_aplicare')">📋 Copy</button>
+                        </div>
+                        
+                        <div class="signature-item">
+                            <div class="signature-label">X-signature:</div>
+                            <div class="signature-value" id="signature_aplicare"><?php echo htmlspecialchars($signature_aplicare['x-signature']); ?></div>
+                            <button class="copy-btn" onclick="copyToClipboard('signature_aplicare')">📋 Copy</button>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="section">
                     <div class="section-title">📤 Complete Headers MJKN untuk cURL Request</div>
@@ -303,7 +394,7 @@ function displayBPJSSignature() {
                         <?php foreach ($headers as $header): ?>
                             <div class="header-item"><?php echo htmlspecialchars($header); ?></div>
                         <?php endforeach; ?>
-                        <button class="copy-btn" onclick="copyHeaders('mjkn')">📋 Copy All MJKN Headers</button>
+                        <button class="copy-btn" onclick="copyHeaders(this, 'MJKN')">📋 Copy All MJKN Headers</button>
                     </div>
                 </div>
                 
@@ -313,7 +404,17 @@ function displayBPJSSignature() {
                         <?php foreach ($headers_vclaim as $header): ?>
                             <div class="header-item"><?php echo htmlspecialchars($header); ?></div>
                         <?php endforeach; ?>
-                        <button class="copy-btn" onclick="copyHeaders('vclaim')">📋 Copy All VClaim Headers</button>
+                        <button class="copy-btn" onclick="copyHeaders(this, 'VClaim')">📋 Copy All VClaim Headers</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📤 Complete Headers Aplicare untuk cURL Request</div>
+                    <div class="headers-box">
+                        <?php foreach ($headers_aplicare as $header): ?>
+                            <div class="header-item"><?php echo htmlspecialchars($header); ?></div>
+                        <?php endforeach; ?>
+                        <button class="copy-btn" onclick="copyHeaders(this, 'Aplicare')">📋 Copy All Aplicare Headers</button>
                     </div>
                 </div>
                 
@@ -366,6 +467,31 @@ function displayBPJSSignature() {
 <span style="color: #ff79c6;">?&gt;</span></pre>
                     </div>
                 </div>
+
+                <div class="section">
+                    <div class="section-title">💡 Cara Penggunaan Aplicare</div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <p style="margin-bottom: 15px;"><strong>Di file PHP Anda:</strong></p>
+                        <pre style="background: #2d2d2d; color: #fff; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px;">
+<span style="color: #ff79c6;">&lt;?php</span>
+<span style="color: #6272a4;">// Include file signature</span>
+<span style="color: #8be9fd;">require_once</span> <span style="color: #f1fa8c;">'bpjssignature.php'</span>;
+
+<span style="color: #6272a4;">// Get headers untuk request Aplicare</span>
+<span style="color: #ff79c6;">$</span>headers = <span style="color: #50fa7b;">getAplicareHeaders</span>();
+
+<span style="color: #6272a4;">// Contoh request ke BPJS Aplicare</span>
+<span style="color: #ff79c6;">$</span>ch = <span style="color: #50fa7b;">curl_init</span>();
+<span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_URL, <span style="color: #ff79c6;">$</span>URLAPLICARE . <span style="color: #f1fa8c;">"/rest/bed/read/0001"</span>);
+<span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_HTTPHEADER, <span style="color: #ff79c6;">$</span>headers);
+<span style="color: #50fa7b;">curl_setopt</span>(<span style="color: #ff79c6;">$</span>ch, CURLOPT_RETURNTRANSFER, <span style="color: #bd93f9;">true</span>);
+<span style="color: #ff79c6;">$</span>response = <span style="color: #50fa7b;">curl_exec</span>(<span style="color: #ff79c6;">$</span>ch);
+<span style="color: #50fa7b;">curl_close</span>(<span style="color: #ff79c6;">$</span>ch);
+
+<span style="color: #ff79c6;">echo</span> <span style="color: #ff79c6;">$</span>response;
+<span style="color: #ff79c6;">?&gt;</span></pre>
+                    </div>
+                </div>
                 
                 <div style="text-align: center;">
                     <a href="?refresh=1" class="refresh-btn">🔄 Generate Ulang (Timestamp Baru)</a>
@@ -391,82 +517,22 @@ function displayBPJSSignature() {
                 });
             }
             
-            function copyHeaders(type) {
-                let selector = '.header-item';
-                if (type === 'mjkn') {
-                    // Copy only MJKN headers (first headers section)
-                    const sections = document.querySelectorAll('.section');
-                    const mjknSection = Array.from(sections).find(section => 
-                        section.querySelector('.section-title') && 
-                        section.querySelector('.section-title').textContent.includes('MJKN')
-                    );
-                    if (mjknSection) {
-                        selector = '.header-item';
-                        const headers = mjknSection.querySelectorAll(selector);
-                        let text = '';
-                        headers.forEach(header => {
-                            text += header.textContent + '\n';
-                        });
-                        
-                        navigator.clipboard.writeText(text).then(() => {
-                            const btn = event.target;
-                            const originalText = btn.textContent;
-                            btn.textContent = '✅ MJKN Headers Copied!';
-                            btn.style.background = '#28a745';
-                            
-                            setTimeout(() => {
-                                btn.textContent = originalText;
-                                btn.style.background = '#007bff';
-                            }, 2000);
-                        });
-                        return;
-                    }
-                } else if (type === 'vclaim') {
-                    // Copy only VClaim headers (second headers section)
-                    const sections = document.querySelectorAll('.section');
-                    const vclaimSection = Array.from(sections).find(section => 
-                        section.querySelector('.section-title') && 
-                        section.querySelector('.section-title').textContent.includes('VClaim')
-                    );
-                    if (vclaimSection) {
-                        selector = '.header-item';
-                        const headers = vclaimSection.querySelectorAll(selector);
-                        let text = '';
-                        headers.forEach(header => {
-                            text += header.textContent + '\n';
-                        });
-                        
-                        navigator.clipboard.writeText(text).then(() => {
-                            const btn = event.target;
-                            const originalText = btn.textContent;
-                            btn.textContent = '✅ VClaim Headers Copied!';
-                            btn.style.background = '#28a745';
-                            
-                            setTimeout(() => {
-                                btn.textContent = originalText;
-                                btn.style.background = '#007bff';
-                            }, 2000);
-                        });
-                        return;
-                    }
-                }
-                
-                // Default behavior - copy all headers
-                const headers = document.querySelectorAll(selector);
+            function copyHeaders(button, type) {
+                const section = button.closest('.headers-box');
+                const headers = section ? section.querySelectorAll('.header-item') : [];
                 let text = '';
                 headers.forEach(header => {
                     text += header.textContent + '\n';
                 });
                 
                 navigator.clipboard.writeText(text).then(() => {
-                    const btn = event.target;
-                    const originalText = btn.textContent;
-                    btn.textContent = '✅ All Headers Copied!';
-                    btn.style.background = '#28a745';
+                    const originalText = button.textContent;
+                    button.textContent = '✅ ' + type + ' Headers Copied!';
+                    button.style.background = '#28a745';
                     
                     setTimeout(() => {
-                        btn.textContent = originalText;
-                        btn.style.background = '#007bff';
+                        button.textContent = originalText;
+                        button.style.background = '#007bff';
                     }, 2000);
                 });
             }

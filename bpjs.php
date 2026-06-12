@@ -141,7 +141,11 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <a href="updatejadwaldokter.php" title="Update Jadwal Dokter BPJS">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Update Jadwal Dokter</span>
-            </a>            
+            </a>
+            <a href="update_kamar_aplicare.php" title="Update Kamar Aplicare">
+                <i class="fas fa-bed"></i>
+                <span>Update Kamar Aplicare</span>
+            </a>
             <a href="referensipasienmjkn.php" title="Referensi Pasien Mobile JKN">
                 <i class="fas fa-mobile-alt"></i>
                 <span>Referensi Pasien Mobile JKN</span>
