@@ -93,6 +93,9 @@
                     // Ambil data pemesanan
                     $pemesanan = mysqli_fetch_assoc($result);
                     
+                    // Inisialisasi total untuk resume
+                    $total_with_ppn = isset($pemesanan['tagihan']) ? $pemesanan['tagihan'] : 0;
+                    
                     // Buat tanggal awal bulan dari tgl_faktur
                     if (!empty($pemesanan['tgl_faktur'])) {
                         $tgl_faktur = $pemesanan['tgl_faktur'];
@@ -1355,15 +1358,118 @@
             </table>
         </div>
     </div>
-</body>
-</html>
-
 <!------------------------------ BATAS HALAMAN 10  ------------------------------->
 
-</head>
-<body>
     <div class="container">
-        <!-- Halaman Kedua -->
+        <!-- Halaman Ke 11: Resume -->
+        <div class="page-break">
+            <?php include 'header.php'; ?>
+            <table class="no-border-table">
+                <tr><td>Nomor</td><td>:</td><td>445 /&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/PHPL/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></td></tr>
+                <tr><td>Lampiran</td><td>:</td><td>-</td></tr>
+                <tr><td>Perihal</td><td>:</td><td> Penyampaian Resume Pengadaan</td></tr>    
+            </table>
+
+            <table class="no-border-table">        
+                <tr><td>Kepada Yth</td></tr>
+                <tr><td>Pejabat Pembuat Komitmen (PPK)</td></tr>
+                <tr><td>di -</td></tr>
+                <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tempat</td></tr>
+                </td></tr>
+            </table>
+
+            <table class="no-border-table">        
+                <tr><td>Sehubungan dengan Pengadaan Obat-obatan/BMHP kami sampaikan resume pengadaan sebagai berikut :</td></tr>
+            </table>            
+
+            <table border="1" cellpadding="5" cellspacing="0" style="margin-top: 8px;">
+                <tr>
+                    <td style="width: 7%; text-align: center;">1</td>
+                    <td style="width: 24%;">Program</td>
+                    <td>Belanja Operasional Rumah Sakit</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">2</td>
+                    <td>Kegiatan</td>
+                    <td>Belanja Barang dan Jasa BLUD</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">3</td>
+                    <td>Pekerjaan</td>
+                    <td>Belanja Bahan Habis Pakai</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">4</td>
+                    <td>Nomor Rekening</td>
+                    <td>5.1.92.99.99.9999</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">5</td>
+                    <td>Penyampaian Hasil Pengadaan</td>
+                    <td>445 /<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">6</td>
+                    <td>Tanggal</td>
+                    <!-- <td><?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td> -->
+                </tr>
+                <tr>
+                    <td style="text-align: center;">7</td>
+                    <td>Penyedia</td>
+                    <td><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">8</td>
+                    <td>Senilai</td>
+                    <td><?php echo $total_with_ppn > 0 ? 'Rp. ' . number_format($total_with_ppn, 0, ',', '.') : ''; ?></td>
+                </tr>
+                <tr>
+                    <td rowspan="8" style="text-align: center; vertical-align: top;">9</td>
+                    <td rowspan="8" style="vertical-align: top;">Rekening Kegiatan</td>
+                    <td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai FARMASI</td>
+                </tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai GIGI</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai MATA</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai LAB</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai UTD</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai RADIOLOGI</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Bahan/Alat Habis Pakai ORTOPEDI</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Belanja Alat/Bahan untuk Kegiatan Rumah Sakit - Obat-obatan</td></tr>
+                <tr>
+                    <td rowspan="3" style="text-align: center; vertical-align: top;">10</td>
+                    <td rowspan="3" style="vertical-align: top;">Jenis Harga</td>
+                    <td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>e-Katalog</td>
+                </tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Penyampaian e-Katalog</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Reguler</td></tr>
+                <tr>
+                    <td rowspan="3" style="text-align: center; vertical-align: top;">11</td>
+                    <td rowspan="3" style="vertical-align: top;">Cara Belanja</td>
+                    <td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>e-Purchasing</td>
+                </tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Nomor :</td></tr>
+                <tr><td><span style="display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-right: 6px; vertical-align: middle;"></span>Manual</td></tr>
+            </table>
+
+            <table class="no-border-table">        
+                <tr><td>Demikian, atas perhatian dan kerjasamanya kami ucapkan terima kasih.</td></tr>
+            </table> 
+
+            <table class="no-border-table" style="text-align: center;">
+                <tr><td></td><td>Mengetahui dan menyetujui</td><td></td><td></td></tr>
+                <tr><td></td><td>Pejabat Pembuat Komitmen</td><td></td><td>Pejabat Pengadaan Barang dan Jasa</td></tr>
+                <tr><td><br></td><td></td><td></td><td></td></tr>
+                <tr><td><br></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td><strong><u>dr. Herman Syahrial</u></strong></td><td></td><td><strong><u>WISNETTY, S.Si., Apt., M. Kes</u></strong></td></tr>
+                <tr><td></td><td>NIP. 19690927 200212 1 003</td><td></td><td>NIP. 19701020 200002 2002</td></tr>
+            </table>
+        </div>
+    </div>
+
+<!------------------------------ BATAS HALAMAN 12  ------------------------------->
+
+    <div class="container">
+        <!-- Halaman Dokumentasi Faktur -->
         <div class="page-break">
             <!-- Panggil file header.php -->
             <?php include 'header.php'; ?>
@@ -1388,6 +1494,9 @@
                 }
                 ?>
             </table>
+        </div>
+    </div>
 </body>
+</html>
 
 <!------------------------------ BATAS HALAMAN terakhir  ------------------------------->
