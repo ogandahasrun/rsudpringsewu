@@ -203,6 +203,14 @@
         }
     </style>
     <script>
+        function copyNoKartu(no_kartu) {
+            if (!no_kartu) return;
+            navigator.clipboard.writeText(no_kartu).then(function() {
+                alert('No. Kartu berhasil disalin: ' + no_kartu);
+            }, function(err) {
+                alert('Gagal menyalin No. Kartu');
+            });
+        }
         function copyNoSEP(no_sep) {
             if (!no_sep) return;
             navigator.clipboard.writeText(no_sep).then(function() {
@@ -287,6 +295,7 @@ $query = "SELECT
             databarang.kode_sat,
             resep_dokter.aturan_pakai,
             dokter.nm_dokter,
+            bridging_sep.no_kartu,
             bridging_sep.no_sep
         FROM
             resep_obat
@@ -313,6 +322,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             'no_rkm_medis'  => $row['no_rkm_medis'],
             'nm_pasien'     => $row['nm_pasien'],
             'nm_dokter'     => $row['nm_dokter'],
+            'no_kartu'      => $row['no_kartu'],
             'no_sep'        => $row['no_sep'],
             'obat'          => []
         ];
@@ -339,6 +349,7 @@ if (count($data_grouped) > 0) {
                 <th>NO RM</th>
                 <th>NAMA PASIEN</th>
                 <th>DOKTER</th>
+                <th>NO KARTU</th>
                 <th>NO SEP</th>
                 <th>KODE BARANG</th>
                 <th>NAMA BARANG</th>
@@ -360,6 +371,7 @@ if (count($data_grouped) > 0) {
                     <td rowspan='$rowspan' style='vertical-align: top;'>{$data['no_rkm_medis']}</td>
                     <td rowspan='$rowspan' style='vertical-align: top;'>{$data['nm_pasien']}</td>
                     <td rowspan='$rowspan' style='vertical-align: top;'>{$data['nm_dokter']}</td>
+                    <td rowspan='$rowspan' style='vertical-align: top; cursor:pointer; color:#007bff; text-decoration:underline' onclick=\"copyNoKartu('{$data['no_kartu']}')\" title='Klik untuk copy No. Kartu'>{$data['no_kartu']}</td>
                     <td rowspan='$rowspan' style='vertical-align: top; cursor:pointer; color:#007bff; text-decoration:underline' onclick=\"copyNoSEP('{$data['no_sep']}')\" title='Klik untuk copy No. SEP'>{$data['no_sep']}</td>";
                 $first_row = false;
                 $no++;
