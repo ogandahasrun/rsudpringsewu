@@ -316,6 +316,7 @@ if (!isset($_SESSION['username'])) {
                         <option value="6">6️⃣ Harga Termasuk PPN + Ongkir</option>
                         <option value="7">7️⃣ Harga Belum PPN + Diskon + Ongkir</option>
                         <option value="8">8️⃣ Harga Termasuk PPN + Diskon + Ongkir</option>
+                        <option value="9">9️⃣ Harga dengan potongan belum termasuk PPN</option>
                     </select>
                 </div>
             </div>
@@ -481,6 +482,7 @@ if (!isset($_SESSION['username'])) {
                 case '6': results.scenario6 = calculateScenario6(items, ongkir); break;
                 case '7': results.scenario7 = calculateScenario7(items, hargaDiskon, ongkir); break;
                 case '8': results.scenario8 = calculateScenario8(items, hargaDiskon, ongkir); break;
+                case '9': results.scenario9 = calculateScenario9(items, hargaDiskon); break;
                 default: return;
             }
             displayResults(results, hargaTotal, hargaDiskon, ongkir, scenario);
@@ -649,6 +651,22 @@ if (!isset($_SESSION['username'])) {
             });
         }
 
+        // Skenario 9: Harga dengan potongan belum termasuk PPN
+        function calculateScenario9(items, hargaDiskon) {
+            const totalNilaiHitung = items.reduce((sum, item) => sum + item.value, 0);
+            return items.map(item => {
+                const proporsi = item.value / totalNilaiHitung;
+                const potonganDiskon = hargaDiskon * proporsi;
+                const nilaiSetelahDiskon = item.value - potonganDiskon;
+                const hargaPerItem = nilaiSetelahDiskon / item.qty;
+                return {
+                    ...item,
+                    hargaPerItem: hargaPerItem,
+                    totalHarga: nilaiSetelahDiskon
+                };
+            });
+        }
+
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -729,6 +747,7 @@ if (!isset($_SESSION['username'])) {
                 case '6': html += createTable('6️⃣ Harga Termasuk PPN termasuk Ongkir', results.scenario6); break;
                 case '7': html += createTable('7️⃣ Harga Belum PPN dengan Diskon dan Ongkir', results.scenario7); break;
                 case '8': html += createTable('8️⃣ Harga Termasuk PPN dengan Diskon dan Ongkir', results.scenario8); break;
+                case '9': html += createTable('9️⃣ Harga dengan potongan belum termasuk PPN', results.scenario9); break;
             }
             document.getElementById('resultsSection').innerHTML = html;
             document.getElementById('resultsSection').style.display = 'block';
