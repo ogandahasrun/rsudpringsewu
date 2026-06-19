@@ -127,6 +127,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <div class="container">
         <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
         <div class="icon-menu">
+            <a href="kontrolbiayapasienranapbpjs.php" title="Kontrol Biaya Pasien Ranap BPJS">
+                <i class="fas fa-money-bill"></i>
+                <span>Kontrol Biaya Pasien Ranap BPJS</span>
+            </a>
             <a href="kelengkapanranap.php" title="Kelengkapan Berkas Rawat Inap">
                 <i class="fas fa-bed"></i>
                 <span>Kelengkapan Berkas Rawat Inap</span>
@@ -140,7 +144,6 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-clone"></i>
                 <span>Kontrol SEP Ganda</span>
             </a>
-
             <a href="hapusgabungberkas.php" title="Hapus Gabung Berkas Klaim">
                 <i class="fas fa-file-excel"></i>
                 <span>Hapus Gabung Berkas Klaim</span>
