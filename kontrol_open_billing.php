@@ -360,6 +360,7 @@
                     <th>No</th>
                     <th>TANGGAL CLOSE BILL</th>
                     <th>TANGGAL OPEN BILL</th>
+                    <th>SELISIH WAKTU</th>
                     <th>NO RAWAT</th>
                     <th>NO RKM MEDIS</th>
                     <th>NAMA PASIEN</th>
@@ -367,24 +368,59 @@
                 </tr>";
             $no = 1; 
             while ($row = mysqli_fetch_assoc($result)) {
-                $tanggal = htmlspecialchars($row['tanggal']);
-                $no_rawat = htmlspecialchars($row['no_rawat']);
-                $no_rkm_medis = htmlspecialchars($row['no_rkm_medis']);
-                $nm_pasien = htmlspecialchars($row['nm_pasien']);
-                $nama = htmlspecialchars($row['nama']);
-                $tanggal_close_bill = $row['tanggal_close_bill'] 
-                    ? htmlspecialchars($row['tanggal_close_bill']) 
-                    : '<span style="color:#aaa;font-style:italic;">-</span>';
+                $tanggal       = htmlspecialchars($row['tanggal']);
+                $no_rawat      = htmlspecialchars($row['no_rawat']);
+                $no_rkm_medis  = htmlspecialchars($row['no_rkm_medis']);
+                $nm_pasien     = htmlspecialchars($row['nm_pasien']);
+                $nama          = htmlspecialchars($row['nama']);
+
+                // Tanggal close bill & selisih waktu
+                if ($row['tanggal_close_bill']) {
+                    $tanggal_close_bill = htmlspecialchars($row['tanggal_close_bill']);
+
+                    $dt_close = new DateTime($row['tanggal_close_bill']);
+                    $dt_open  = new DateTime($row['tanggal']);
+                    $diff     = $dt_close->diff($dt_open);
+
+                    // Format selisih: hari / jam / menit
+                    $selisih_parts = [];
+                    if ($diff->days > 0)  $selisih_parts[] = $diff->days . ' hari';
+                    if ($diff->h > 0)     $selisih_parts[] = $diff->h . ' jam';
+                    if ($diff->i > 0)     $selisih_parts[] = $diff->i . ' menit';
+                    if (empty($selisih_parts)) $selisih_parts[] = '< 1 menit';
+                    $selisih_text = implode(' ', $selisih_parts);
+
+                    // Warna indikator berdasarkan total menit
+                    $total_menit = ($diff->days * 1440) + ($diff->h * 60) + $diff->i;
+                    if ($total_menit <= 60) {
+                        $selisih_color = '#28a745'; // hijau  — <= 1 jam
+                        $selisih_bg    = '#d4edda';
+                    } elseif ($total_menit <= 360) {
+                        $selisih_color = '#856404'; // kuning — <= 6 jam
+                        $selisih_bg    = '#fff3cd';
+                    } else {
+                        $selisih_color = '#721c24'; // merah  — > 6 jam
+                        $selisih_bg    = '#f8d7da';
+                    }
+                    $selisih_html = "<span style='display:inline-block;padding:3px 8px;border-radius:12px;"
+                        . "background:{$selisih_bg};color:{$selisih_color};font-weight:bold;font-size:12px;'>"
+                        . "⏱ {$selisih_text}</span>";
+                } else {
+                    $tanggal_close_bill = '<span style="color:#aaa;font-style:italic;">-</span>';
+                    $selisih_html       = '<span style="color:#aaa;font-style:italic;">-</span>';
+                }
+
                 echo "<tr>
                         <td>{$no}</td>
                         <td>{$tanggal_close_bill}</td>
                         <td>{$tanggal}</td>
+                        <td style='text-align:center;'>{$selisih_html}</td>
                         <td>{$no_rawat}</td>
                         <td>{$no_rkm_medis}</td>
                         <td>{$nm_pasien}</td>
                         <td>{$nama}</td>
                     </tr>";
-                $no++;    
+                $no++;
             }
             echo "</table></div>";
             
