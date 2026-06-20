@@ -392,14 +392,14 @@
 
                     // Warna indikator berdasarkan total menit
                     $total_menit = ($diff->days * 1440) + ($diff->h * 60) + $diff->i;
-                    if ($total_menit <= 60) {
-                        $selisih_color = '#28a745'; // hijau  — <= 1 jam
+                    if ($total_menit <= 1440) {
+                        $selisih_color = '#28a745'; // hijau  — <= 1440 menit
                         $selisih_bg    = '#d4edda';
-                    } elseif ($total_menit <= 360) {
-                        $selisih_color = '#856404'; // kuning — <= 6 jam
+                    } elseif ($total_menit <= 2880) {
+                        $selisih_color = '#856404'; // kuning — <= 2880 menit
                         $selisih_bg    = '#fff3cd';
                     } else {
-                        $selisih_color = '#721c24'; // merah  — > 6 jam
+                        $selisih_color = '#721c24'; // merah  — > 2880 menit
                         $selisih_bg    = '#f8d7da';
                     }
                     $selisih_html = "<span style='display:inline-block;padding:3px 8px;border-radius:12px;"
