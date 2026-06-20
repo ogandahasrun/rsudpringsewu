@@ -324,21 +324,28 @@
         $tanggal_akhir = mysqli_real_escape_string($koneksi, $_POST['tanggal_akhir']);
         
         $query = "SELECT 
-                    trackersql.tanggal,
-                    pegawai.nama,
-                    reg_periksa.no_rawat,
-                    pasien.no_rkm_medis,
-                    pasien.nm_pasien
+                    ob.tanggal,
+                    peg.nama,
+                    rp.no_rawat,
+                    pas.no_rkm_medis,
+                    pas.nm_pasien,
+                    MAX(cb.tanggal) AS tanggal_close_bill
                 FROM 
-                    trackersql
-                INNER JOIN reg_periksa ON reg_periksa.no_rawat = SUBSTRING_INDEX(SUBSTRING_INDEX(trackersql.sqle, \"no_rawat='\", -1), \"'\", 1)
-                INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
-                LEFT JOIN pegawai ON trackersql.usere = pegawai.nik
+                    trackersql ob
+                INNER JOIN reg_periksa rp 
+                    ON rp.no_rawat = SUBSTRING_INDEX(SUBSTRING_INDEX(ob.sqle, \"no_rawat='\", -1), \"'\", 1)
+                INNER JOIN pasien pas ON rp.no_rkm_medis = pas.no_rkm_medis
+                LEFT JOIN pegawai peg ON ob.usere = peg.nik
+                LEFT JOIN trackersql cb 
+                    ON cb.sqle LIKE '%update reg_periksa set status_bayar=''Sudah Bayar''%'
+                    AND cb.sqle LIKE CONCAT('%no_rawat=''', rp.no_rawat, '''%')
+                    AND cb.tanggal <= ob.tanggal
                 WHERE
-                    trackersql.sqle LIKE '%delete from billing%'
-                    AND trackersql.sqle LIKE '%no_rawat=''%'
-                    AND trackersql.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
-                ORDER BY trackersql.tanggal DESC";
+                    ob.sqle LIKE '%delete from billing%'
+                    AND ob.sqle LIKE '%no_rawat=''%'
+                    AND ob.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
+                GROUP BY ob.tanggal, peg.nama, rp.no_rawat, pas.no_rkm_medis, pas.nm_pasien
+                ORDER BY ob.tanggal DESC";
         $result = mysqli_query($koneksi, $query);
         if ($result) {
             $total_rows = mysqli_num_rows($result);
@@ -351,7 +358,8 @@
             echo "<div class='table-responsive'><table>
                 <tr>
                     <th>No</th>
-                    <th>TANGGAL</th>
+                    <th>TANGGAL CLOSE BILL</th>
+                    <th>TANGGAL OPEN BILL</th>
                     <th>NO RAWAT</th>
                     <th>NO RKM MEDIS</th>
                     <th>NAMA PASIEN</th>
@@ -364,8 +372,12 @@
                 $no_rkm_medis = htmlspecialchars($row['no_rkm_medis']);
                 $nm_pasien = htmlspecialchars($row['nm_pasien']);
                 $nama = htmlspecialchars($row['nama']);
+                $tanggal_close_bill = $row['tanggal_close_bill'] 
+                    ? htmlspecialchars($row['tanggal_close_bill']) 
+                    : '<span style="color:#aaa;font-style:italic;">-</span>';
                 echo "<tr>
                         <td>{$no}</td>
+                        <td>{$tanggal_close_bill}</td>
                         <td>{$tanggal}</td>
                         <td>{$no_rawat}</td>
                         <td>{$no_rkm_medis}</td>
