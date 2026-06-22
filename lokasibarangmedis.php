@@ -1,45 +1,44 @@
 <?php
 include 'koneksi.php';
 
+// Fetch list of bangsal for dropdowns
+$bangsal_list = [];
+$bangsal_query = mysqli_query($koneksi, "SELECT kd_bangsal, nm_bangsal FROM bangsal WHERE nm_bangsal IS NOT NULL AND nm_bangsal != '' AND nm_bangsal != '-' ORDER BY nm_bangsal ASC");
+if ($bangsal_query) {
+    while ($row_b = mysqli_fetch_assoc($bangsal_query)) {
+        $bangsal_list[] = $row_b;
+    }
+}
+
 // Handle form submission untuk simpan/edit lokasi
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     $kode_brng = mysqli_real_escape_string($koneksi, $_POST['kode_brng']);
     $kd_bangsal = mysqli_real_escape_string($koneksi, $_POST['kd_bangsal']);
     $lokasi = mysqli_real_escape_string($koneksi, $_POST['lokasi']);
+    $stok_minimal_bangsal = isset($_POST['stok_minimal_bangsal']) ? mysqli_real_escape_string($koneksi, $_POST['stok_minimal_bangsal']) : 0;
+    $original_kd_bangsal = isset($_POST['original_kd_bangsal']) ? mysqli_real_escape_string($koneksi, $_POST['original_kd_bangsal']) : '';
     
-    // Buat tabel lokasi_barang_medis jika belum ada
-    $create_table = "CREATE TABLE IF NOT EXISTS lokasi_barang_medis (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        kode_brng VARCHAR(15) UNIQUE NOT NULL,
-        kd_bangsal VARCHAR(5) DEFAULT 'GO',
-        lokasi TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )";
-    mysqli_query($koneksi, $create_table);
-    
-    if ($_POST['action'] == 'simpan') {
-        // Insert data baru
-        $insert_query = "INSERT INTO lokasi_barang_medis (kode_brng, kd_bangsal, lokasi) 
-                        VALUES ('$kode_brng', '$kd_bangsal', '$lokasi') 
-                        ON DUPLICATE KEY UPDATE 
-                        kd_bangsal = VALUES(kd_bangsal),
-                        lokasi = VALUES(lokasi)";
-        
-        if (mysqli_query($koneksi, $insert_query)) {
-            $message = "✅ Data berhasil disimpan!";
-        } else {
-            $message = "❌ Gagal menyimpan data: " . mysqli_error($koneksi);
-        }
-    } elseif ($_POST['action'] == 'edit') {
-        // Update data yang sudah ada
+    if (!empty($original_kd_bangsal) && $original_kd_bangsal !== $kd_bangsal) {
+        // Jika user mengubah bangsal, kita harus mengupdate baris composite key yang lama
         $update_query = "UPDATE lokasi_barang_medis 
-                        SET kd_bangsal = '$kd_bangsal', lokasi = '$lokasi' 
-                        WHERE kode_brng = '$kode_brng'";
-        
+                        SET kd_bangsal = '$kd_bangsal', lokasi = '$lokasi', stok_minimal_bangsal = '$stok_minimal_bangsal' 
+                        WHERE kode_brng = '$kode_brng' AND kd_bangsal = '$original_kd_bangsal'";
         if (mysqli_query($koneksi, $update_query)) {
             $message = "✅ Data berhasil diperbarui!";
         } else {
             $message = "❌ Gagal memperbarui data: " . mysqli_error($koneksi);
+        }
+    } else {
+        // Simpan baru atau update (jika bangsal sama)
+        $insert_query = "INSERT INTO lokasi_barang_medis (kode_brng, kd_bangsal, lokasi, stok_minimal_bangsal) 
+                        VALUES ('$kode_brng', '$kd_bangsal', '$lokasi', '$stok_minimal_bangsal') 
+                        ON DUPLICATE KEY UPDATE 
+                        lokasi = VALUES(lokasi),
+                        stok_minimal_bangsal = VALUES(stok_minimal_bangsal)";
+        if (mysqli_query($koneksi, $insert_query)) {
+            $message = "✅ Data berhasil disimpan!";
+        } else {
+            $message = "❌ Gagal menyimpan data: " . mysqli_error($koneksi);
         }
     }
 }
@@ -49,6 +48,41 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $show_all = isset($_GET['show_all']) ? $_GET['show_all'] : '';
 $filter_bangsal = isset($_GET['filter_bangsal']) ? $_GET['filter_bangsal'] : '';
 $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
+
+// Edit form parameters
+$edit_mode = false;
+$edit_kode_brng = '';
+$edit_nama_brng = '';
+$edit_kd_bangsal = '';
+$edit_lokasi = '';
+$edit_stok_minimal = 0;
+
+if (isset($_GET['edit_kode_brng']) && isset($_GET['edit_kd_bangsal'])) {
+    $edit_mode = true;
+    $edit_kode_brng = mysqli_real_escape_string($koneksi, $_GET['edit_kode_brng']);
+    $edit_kd_bangsal = mysqli_real_escape_string($koneksi, $_GET['edit_kd_bangsal']);
+    
+    // Fetch details
+    $edit_query = "SELECT databarang.nama_brng, lokasi_barang_medis.lokasi, lokasi_barang_medis.stok_minimal_bangsal 
+                   FROM databarang 
+                   LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng 
+                        AND lokasi_barang_medis.kd_bangsal = '$edit_kd_bangsal'
+                   WHERE databarang.kode_brng = '$edit_kode_brng'";
+    $edit_result = mysqli_query($koneksi, $edit_query);
+    if ($edit_result && $edit_row = mysqli_fetch_assoc($edit_result)) {
+        $edit_nama_brng = $edit_row['nama_brng'];
+        $edit_lokasi = $edit_row['lokasi'];
+        $edit_stok_minimal = $edit_row['stok_minimal_bangsal'];
+    }
+}
+
+// Preserve search parameters for redirect links
+$url_params = http_build_query([
+    'search' => $search,
+    'show_all' => $show_all,
+    'filter_bangsal' => $filter_bangsal,
+    'filter_lokasi' => $filter_lokasi
+]);
 ?>
 
 <!DOCTYPE html>
@@ -87,21 +121,35 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
         .table-container { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; background: white; }
         th { background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; }
-        td { padding: 12px; border-bottom: 1px solid #e9ecef; font-size: 13px; }
-        tr:nth-child(even) td { background: #f8f9fa; }
-        tr:hover td { background: #e8f5e8; }
         .no-data { text-align: center; color: #666; font-style: italic; padding: 40px; background: #f8f9fa; }
-        .input-small { width: 80px; padding: 6px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 12px; text-align: center; }
-        .input-medium { width: 200px; padding: 6px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 12px; }
-        .input-small:focus, .input-medium:focus { outline: none; border-color: #28a745; }
-        .form-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .save-btn { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
-        .save-btn:hover { background: #218838; }
-        .edit-btn { background: #ffc107; color: #212529; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
-        .edit-btn:hover { background: #e0a800; }
-        .data-display { background: #e8f5e8; padding: 6px 10px; border-radius: 6px; font-weight: bold; color: #155724; border: 1px solid #28a745; margin-right: 8px; }
         .bangsal-go { background: #20c997; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
         
+        /* Layout */
+        .main-grid { margin-top: 20px; }
+        
+        /* Modal Overlay */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s ease; padding: 15px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Form Card inside Modal */
+        .form-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 450px; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .form-card-header { background: linear-gradient(45deg, #28a745, #20c997); color: white; padding: 15px; font-weight: bold; font-size: 15px; text-align: center; }
+        .form-card-body { padding: 20px; }
+        .form-group-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; text-align: left; }
+        .form-group-field label { font-weight: bold; font-size: 12px; color: #495057; }
+        .form-input-field, .form-select-field, .input-disabled { padding: 10px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 13px; outline: none; transition: all 0.3s ease; width: 100%; box-sizing: border-box; }
+        .form-input-field:focus, .form-select-field:focus { border-color: #28a745; }
+        .input-disabled { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; }
+        .form-card-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+        
+        /* Action buttons in table */
+        .btn-action { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; text-align: center; transition: all 0.3s ease; }
+        .btn-edit-row { background: #ffc107; color: #212529; }
+        .btn-edit-row:hover { background: #e0a800; transform: translateY(-1px); }
+        .btn-setup-row { background: #28a745; color: white; }
+        .btn-setup-row:hover { background: #218838; transform: translateY(-1px); }
         @media (max-width: 768px) {
             body { padding: 10px; }
             .header { padding: 20px 15px; }
@@ -110,8 +158,6 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
             .filter-form { padding: 20px 15px; }
             .filter-grid { grid-template-columns: 1fr; }
             th, td { padding: 8px 6px; font-size: 12px; }
-            .form-inline { flex-direction: column; align-items: stretch; }
-            .input-small, .input-medium { width: 100%; margin-bottom: 5px; }
         }
     </style>
 </head>
@@ -132,8 +178,63 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                 </div>
             <?php endif; ?>
 
-            <form method="GET" class="filter-form">
-                <div class="filter-title">🔍 Filter Data Barang</div>
+            <div class="main-grid">
+                <!-- Modal Popup for Form Card -->
+                <?php if ($edit_mode): ?>
+                    <div class="modal-overlay">
+                        <div class="form-card">
+                            <div class="form-card-header">✏️ Edit Lokasi & Stok Min</div>
+                            <div class="form-card-body">
+                                <form method="POST" action="lokasibarangmedis.php?<?php echo $url_params; ?>">
+                                    <input type="hidden" name="action" value="simpan">
+                                    <input type="hidden" name="kode_brng" value="<?php echo htmlspecialchars($edit_kode_brng); ?>">
+                                    <input type="hidden" name="original_kd_bangsal" value="<?php echo htmlspecialchars($edit_kd_bangsal); ?>">
+                                    
+                                    <div class="form-group-field">
+                                        <label>📦 Kode Barang</label>
+                                        <input type="text" class="input-disabled" value="<?php echo htmlspecialchars($edit_kode_brng); ?>" readonly>
+                                    </div>
+                                    
+                                    <div class="form-group-field">
+                                        <label>🏷️ Nama Barang</label>
+                                        <textarea class="input-disabled" style="resize: none; height: 60px;" disabled><?php echo htmlspecialchars($edit_nama_brng); ?></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group-field">
+                                        <label>🏥 Nama Bangsal</label>
+                                        <select name="kd_bangsal" class="form-select-field">
+                                            <?php foreach ($bangsal_list as $b): ?>
+                                                <option value="<?php echo htmlspecialchars($b['kd_bangsal']); ?>" <?php echo ($edit_kd_bangsal == $b['kd_bangsal']) ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($b['nm_bangsal'] . ' (' . $b['kd_bangsal'] . ')'); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group-field">
+                                        <label>📍 Nama Lokasi</label>
+                                        <input type="text" name="lokasi" class="form-input-field" value="<?php echo htmlspecialchars($edit_lokasi); ?>" placeholder="Contoh: Rak A-1..." required>
+                                    </div>
+                                    
+                                    <div class="form-group-field">
+                                        <label>📊 Stok Minimal</label>
+                                        <input type="number" name="stok_minimal_bangsal" class="form-input-field" value="<?php echo (int)$edit_stok_minimal; ?>" min="0" required>
+                                    </div>
+                                    
+                                    <div class="form-card-actions">
+                                        <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">💾 Simpan</button>
+                                        <a href="lokasibarangmedis.php?<?php echo $url_params; ?>" class="btn btn-secondary" style="padding: 10px 20px;">❌ Batal</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Main Content Area: Filter & Table -->
+                <div class="right-content">
+                    <form method="GET" class="filter-form">
+                        <div class="filter-title">🔍 Filter Data Barang</div>
                 
                 <div class="filter-grid">
                     <div class="filter-group">
@@ -153,7 +254,14 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                     
                     <div class="filter-group">
                         <label for="filter_bangsal">🏥 Filter Bangsal</label>
-                        <input type="text" id="filter_bangsal" name="filter_bangsal" placeholder="Contoh: GO, AP, DRI..." value="<?php echo htmlspecialchars($filter_bangsal); ?>">
+                        <select id="filter_bangsal" name="filter_bangsal">
+                            <option value="">-- Semua Bangsal --</option>
+                            <?php foreach ($bangsal_list as $b): ?>
+                                <option value="<?php echo htmlspecialchars($b['kd_bangsal']); ?>" <?php echo ($filter_bangsal == $b['kd_bangsal']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($b['nm_bangsal'] . ' (' . $b['kd_bangsal'] . ')'); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     
                     <div class="filter-group">
@@ -179,6 +287,7 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                             databarang.kode_sat,
                             COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') as kd_bangsal,
                             COALESCE(lokasi_barang_medis.lokasi, '') as lokasi,
+                            COALESCE(lokasi_barang_medis.stok_minimal_bangsal, 0) as stok_minimal_bangsal,
                             COALESCE(gudangbarang.stok, 0) as stok
                         FROM databarang
                         LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng
@@ -203,7 +312,7 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                 // Filter berdasarkan kd_bangsal
                 if (!empty($filter_bangsal)) {
                     $bangsal_escaped = mysqli_real_escape_string($koneksi, $filter_bangsal);
-                    $where_conditions[] = "COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') LIKE '%$bangsal_escaped%'";
+                    $where_conditions[] = "COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') = '$bangsal_escaped'";
                 }
                 
                 // Filter berdasarkan lokasi
@@ -236,7 +345,9 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                                         <th>kode_sat</th>
                                         <th>kd_bangsal</th>
                                         <th>Stok</th>
-                                        <th>Lokasi & Aksi</th>
+                                        <th>Stok Min</th>
+                                        <th>Lokasi</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>';
@@ -244,39 +355,31 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                     $no = 1;
                     while ($row = mysqli_fetch_assoc($result)) {
                         $stok = $row['stok'];
-                        $stok_class = $stok > 0 ? 'color: #28a745; font-weight: bold;' : 'color: #dc3545; font-weight: bold;';
+                        $stok_min = $row['stok_minimal_bangsal'];
+                        
+                        // Stok di bawah stok minimal -> merah. Di atas/sama dengan -> hijau.
+                        $stok_class = $stok < $stok_min ? 'color: #dc3545; font-weight: bold;' : 'color: #28a745; font-weight: bold;';
+                        
+                        $lokasi_display = !empty($row['lokasi']) ? htmlspecialchars($row['lokasi']) : '<span style="color: #999; font-style: italic;">- Belum diatur -</span>';
+                        $aksi_text = !empty($row['lokasi']) ? '✏️ Edit' : '✏️ Atur Lokasi';
+                        $aksi_class = !empty($row['lokasi']) ? 'btn-edit-row' : 'btn-setup-row';
+                        
+                        // Edit URL parameters preserving filters
+                        $edit_url = "lokasibarangmedis.php?edit_kode_brng=" . urlencode($row['kode_brng']) . "&edit_kd_bangsal=" . urlencode($row['kd_bangsal']) . "&" . $url_params;
                         
                         echo "<tr>
                                 <td style='text-align: center; font-weight: bold;'>{$no}</td>
-                                <td style='font-family: monospace;'>" . htmlspecialchars($row['kode_brng']) . "</td>
+                                <td>" . htmlspecialchars($row['kode_brng']) . "</td>
                                 <td>" . htmlspecialchars($row['nama_brng']) . "</td>
-                                <td style='text-align: center; font-family: monospace;'>" . htmlspecialchars($row['kode_sat'] ?: '-') . "</td>
+                                <td style='text-align: center;'>" . htmlspecialchars($row['kode_sat'] ?: '-') . "</td>
                                 <td style='text-align: center;'><span class='bangsal-go'>" . htmlspecialchars($row['kd_bangsal']) . "</span></td>
                                 <td style='text-align: right; {$stok_class}'>" . number_format($stok) . "</td>
-                                <td>";
-                        
-                        if (!empty($row['lokasi'])) {
-                            // Mode edit - data sudah ada
-                            echo '<form method="POST" class="form-inline">
-                                    <input type="hidden" name="kode_brng" value="' . htmlspecialchars($row['kode_brng']) . '">
-                                    <input type="hidden" name="action" value="edit">
-                                    <span class="data-display">' . htmlspecialchars($row['lokasi']) . '</span>
-                                    <input type="text" name="kd_bangsal" class="input-small" value="' . htmlspecialchars($row['kd_bangsal']) . '" placeholder="Bangsal">
-                                    <input type="text" name="lokasi" class="input-medium" value="' . htmlspecialchars($row['lokasi']) . '" placeholder="Lokasi detail...">
-                                    <button type="submit" class="edit-btn">✏️ Edit</button>
-                                  </form>';
-                        } else {
-                            // Mode simpan - data belum ada
-                            echo '<form method="POST" class="form-inline">
-                                    <input type="hidden" name="kode_brng" value="' . htmlspecialchars($row['kode_brng']) . '">
-                                    <input type="hidden" name="action" value="simpan">
-                                    <input type="text" name="kd_bangsal" class="input-small" value="GO" placeholder="Bangsal">
-                                    <input type="text" name="lokasi" class="input-medium" placeholder="Masukkan lokasi..." required>
-                                    <button type="submit" class="save-btn">💾 Simpan</button>
-                                  </form>';
-                        }
-                        
-                        echo "</td></tr>";
+                                <td style='text-align: right; font-weight: bold; color: #495057;'>" . number_format($stok_min) . "</td>
+                                <td>{$lokasi_display}</td>
+                                <td style='text-align: center;'>
+                                    <a href='{$edit_url}' class='btn-action {$aksi_class}'>{$aksi_text}</a>
+                                </td>
+                              </tr>";
                         $no++;
                     }
                     
@@ -305,7 +408,9 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                                 <li><strong>Kolom 4:</strong> kode_sat (dari databarang)</li>
                                 <li><strong>Kolom 5:</strong> kd_bangsal (default: <span class="bangsal-go">GO</span>)</li>
                                 <li><strong>Kolom 6:</strong> Stok (dari gudangbarang sesuai kd_bangsal)</li>
-                                <li><strong>Kolom 7:</strong> Lokasi (input manual) + Tombol Aksi</li>
+                                <li><strong>Kolom 7:</strong> Stok Min (stok minimal pada bangsal/lokasi)</li>
+                                <li><strong>Kolom 8:</strong> Lokasi (input manual)</li>
+                                <li><strong>Kolom 9:</strong> Aksi (Tombol atur/edit lokasi)</li>
                             </ol>
                             <br>
                             <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7;">
@@ -315,12 +420,16 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                                     <li><strong>Tombol Edit:</strong> Untuk mengubah data yang sudah ada</li>
                                     <li><strong>kd_bangsal:</strong> Default "GO", dapat diubah saat input</li>
                                     <li><strong>Lokasi:</strong> Input manual sesuai kebutuhan</li>
-                                    <li><strong>Stok:</strong> Otomatis dari tabel gudangbarang sesuai kd_bangsal (hijau = ada stok, merah = stok 0)</li>
+                                    <li><strong>Stok:</strong> Dibandingkan dengan Stok Minimal (merah = di bawah min, hijau = aman)</li>
                                 </ul>
                             </div>
                         </div>
                       </div>';
             }
+            ?>
+                </div> <!-- closing right-content -->
+            </div> <!-- closing main-grid -->
+            <?php
             
             mysqli_close($koneksi);
             ?>
@@ -354,25 +463,12 @@ $filter_lokasi = isset($_GET['filter_lokasi']) ? $_GET['filter_lokasi'] : '';
                 });
             }
             
-            // Auto-focus pada input lokasi yang kosong
-            const emptyInputs = document.querySelectorAll('input[placeholder="Masukkan lokasi..."]');
-            if (emptyInputs.length > 0) {
-                emptyInputs[0].focus();
+            // Auto-focus pada input lokasi saat mengedit
+            const lokasiInput = document.querySelector('input[name="lokasi"]');
+            if (lokasiInput) {
+                lokasiInput.focus();
+                lokasiInput.select();
             }
-            
-            // Enter key handling untuk form
-            const inputs = document.querySelectorAll('.input-medium');
-            inputs.forEach(input => {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const form = this.closest('form');
-                        if (form && this.value.trim() !== '') {
-                            form.submit();
-                        }
-                    }
-                });
-            });
         });
         
         // Show notification function
