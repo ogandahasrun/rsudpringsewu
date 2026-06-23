@@ -118,9 +118,37 @@ $url_params = http_build_query([
         .message { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; }
         .message.success { background: #d1edff; color: #0c5460; border: 1px solid #bee5eb; }
         .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .table-container { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        .table-container { 
+            overflow-x: auto; 
+            max-height: 65vh; 
+            overflow-y: auto; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            margin-top: 20px; 
+        }
         table { width: 100%; border-collapse: collapse; background: white; }
-        th { background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; }
+        th { 
+            position: sticky; 
+            top: 0; 
+            background: linear-gradient(45deg, #343a40, #495057); 
+            color: white; 
+            padding: 15px 12px; 
+            text-align: left; 
+            font-weight: bold; 
+            font-size: 13px; 
+            white-space: nowrap; 
+            z-index: 10;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            color: #495057;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
         .no-data { text-align: center; color: #666; font-style: italic; padding: 40px; background: #f8f9fa; }
         .bangsal-go { background: #20c997; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
         
@@ -339,15 +367,15 @@ $url_params = http_build_query([
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        <th style="text-align: center;">No</th>
                                         <th>kode_brng</th>
                                         <th>nama_brng</th>
-                                        <th>kode_sat</th>
-                                        <th>kd_bangsal</th>
-                                        <th>Stok</th>
-                                        <th>Stok Min</th>
+                                        <th style="text-align: center;">kode_sat</th>
+                                        <th style="text-align: center;">kd_bangsal</th>
+                                        <th style="text-align: right;">Stok</th>
+                                        <th style="text-align: right;">Stok Min</th>
                                         <th>Lokasi</th>
-                                        <th>Aksi</th>
+                                        <th style="text-align: center;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>';
