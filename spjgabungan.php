@@ -529,7 +529,7 @@ if (!empty($nopgdn)) {
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
                     bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Enam (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
+                    tahun <?php echo ucwords(trim($tahun_terbilang)); ?> (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
             <table class="no-border-table">
@@ -683,7 +683,7 @@ if (!empty($nopgdn)) {
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
                     bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    tahun Dua Ribu Dua Puluh Enam (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
+                    tahun <?php echo ucwords(trim($tahun_terbilang)); ?> (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
             <table class="no-border-table">
@@ -778,7 +778,9 @@ if (!empty($nopgdn)) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/BASTP/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Delapan Bulan Februari Tahun Dua Ribu Dua Puluh Enam (28/02/2026),</td></tr>
+                <tr><td>Pada hari ini .................., tanggal ....................... 
+                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
+                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -869,7 +871,9 @@ if (!empty($nopgdn)) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Delapan Bulan Februari Tahun Dua Ribu Dua Puluh Enam (28/02/2026),</td></tr>
+                <tr><td>Pada hari ini .................., tanggal ....................... 
+                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
+                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -956,7 +960,9 @@ if (!empty($nopgdn)) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Delapan Bulan Februari Tahun Dua Ribu Dua Puluh Enam (28/02/2026),</td></tr>
+                <tr><td>Pada hari ini .................., tanggal ....................... 
+                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
+                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1065,7 +1071,7 @@ if (!empty($nopgdn)) {
                 <tr><td>1</td><td>Program</td><td>: Operasional Pelayanan Rumah Sakit</td></tr>
                 <tr><td>2</td><td>Kegiatan</td><td>: Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>3</td><td>Pekerjaan</td><td>: Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/  /<?php echo $tahun; ?></td></tr>
+                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></td></tr>
                 <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
                 <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
                 echo "" . ucfirst($terbilang_total) . " rupiah";}?> </td></tr>
@@ -1137,7 +1143,9 @@ if (!empty($nopgdn)) {
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Delapan Bulan Februari Tahun Dua Ribu Dua Puluh Enam (28/02/2026),</td></tr>
+                <tr><td>Pada hari ini .................., tanggal ....................... 
+                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
+                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
             <table class="no-border-table">        
@@ -1216,7 +1224,9 @@ if (!empty($nopgdn)) {
             <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $tahun; ?></h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini SABTU, tanggal Dua Puluh Delapan Bulan Februari Tahun Dua Ribu Dua Puluh Enam (28/02/2026),
+                <tr><td>Pada hari ini .................., tanggal ....................... 
+                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
+                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
