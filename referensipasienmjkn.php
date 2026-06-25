@@ -442,7 +442,8 @@
                 INNER JOIN reg_periksa ON referensi_mobilejkn_bpjs.no_rawat = reg_periksa.no_rawat
                 INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
                 INNER JOIN maping_dokter_dpjpvclaim ON referensi_mobilejkn_bpjs.kodedokter = maping_dokter_dpjpvclaim.kd_dokter_bpjs
-                INNER JOIN poliklinik ON referensi_mobilejkn_bpjs.kodepoli = poliklinik.kd_poli
+                INNER JOIN maping_poli_bpjs ON referensi_mobilejkn_bpjs.kodepoli = maping_poli_bpjs.kd_poli_bpjs
+                INNER JOIN poliklinik ON maping_poli_bpjs.kd_poli_rs = poliklinik.kd_poli
                 $where
                 ORDER BY referensi_mobilejkn_bpjs.tanggalperiksa, referensi_mobilejkn_bpjs.nobooking
                 ";
