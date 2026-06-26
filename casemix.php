@@ -131,6 +131,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-money-bill"></i>
                 <span>Kontrol Biaya Pasien Ranap BPJS</span>
             </a>
+            <a href="kontrolbiayapasienralanbpjs.php" title="Evaluasi Biaya Pasien Ralan BPJS">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Evaluasi Biaya Pasien Ralan BPJS</span>
+            </a>
             <a href="kelengkapanranap.php" title="Kelengkapan Berkas Rawat Inap">
                 <i class="fas fa-bed"></i>
                 <span>Kelengkapan Berkas Rawat Inap</span>
