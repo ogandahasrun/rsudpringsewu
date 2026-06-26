@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login RSUD Pringsewu</title>
+    <title>Login - <?php echo htmlspecialchars($nama_instansi); ?></title>
     <style>
         body {
             background: linear-gradient(to right, #00c6ff, #0072ff);
@@ -59,8 +59,8 @@
 <body>
 
 <a href="index.php" style="display: block; text-align: center; margin-top: 30px;">
-    <img src="images/logo.png" alt="Logo" width="80" height="100">
-    <h1>RSUD PRINGSEWU</h1>
+    <img src="<?php echo $logo_src; ?>" alt="Logo" width="80" height="100">
+    <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
 </a>
 
 <div class="login-container">
