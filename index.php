@@ -144,6 +144,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <img src="images/nonmedis.png" alt="Barang Non Medis">
             <span>Barang Non Medis</span>
         </a>
+        <a href="pengajuan_cuti.php" class="menu-item">
+            <img src="images/cuti.png" alt="Pengajuan Cuti">
+            <span>Pengajuan Cuti</span>
+        </a>
     </div>
 
     <a href="logout.php" class="logout">Logout</a>
