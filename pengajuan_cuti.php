@@ -133,6 +133,10 @@ while ($row = $res_hist->fetch_assoc()) {
     <title>Pengajuan Cuti Online</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jQuery & Select2 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
         :root {
             --primary: #0f766e;
@@ -293,6 +297,34 @@ while ($row = $res_hist->fetch_assoc()) {
             color: #475569;
             cursor: not-allowed;
             border-color: var(--border-color);
+        }
+
+        /* Select2 Customization */
+        .select2-container .select2-selection--single {
+            height: 44px;
+            background-color: var(--neutral-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: var(--text-main);
+            padding-left: 14px;
+            padding-right: 14px;
+            width: 100%;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 42px;
+            right: 10px;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: var(--primary-light);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
         }
 
         /* Quota Progress Bar Widget */
@@ -658,6 +690,13 @@ while ($row = $res_hist->fetch_assoc()) {
 
 <!-- Client-side script logic -->
 <script>
+    $(document).ready(function() {
+        $('#nik_pj').select2({
+            placeholder: "-- Pilih Penanggung Jawab --",
+            width: '100%'
+        });
+    });
+
     // Memasukkan data cuti yang sudah diambil per tahun dari PHP
     const historyCutiByYear = <?php echo $yearly_json; ?>;
 
