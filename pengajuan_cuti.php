@@ -19,6 +19,18 @@ if ($row_info = $res_peg_info->fetch_assoc()) {
 $error_msg = '';
 $success_msg = '';
 
+// Ambil daftar hari libur nasional dari database
+$holidays = [];
+$query_holidays = "SELECT tanggal FROM set_hari_libur";
+$res_holidays = mysqli_query($koneksi, $query_holidays);
+if ($res_holidays) {
+    while ($row = mysqli_fetch_assoc($res_holidays)) {
+        $holidays[] = $row['tanggal'];
+    }
+}
+$holidays_json = json_encode($holidays);
+$holidays_lookup = array_fill_keys($holidays, true);
+
 // Proses Simpan Pengajuan Cuti
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
     $tanggal_awal = $_POST['tanggal_awal'] ?? '';
@@ -32,14 +44,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
     if (empty($tanggal_awal) || empty($tanggal_akhir) || empty($urgensi) || empty($nik_pj)) {
         $error_msg = "Semua kolom wajib diisi!";
     } else {
-        // Hitung selisih hari (End Date - Start Date)
+        // Hitung selisih hari secara inklusif dengan mengecualikan Minggu & Libur Nasional
         $start_ts = strtotime($tanggal_awal);
         $end_ts = strtotime($tanggal_akhir);
         
         if ($end_ts < $start_ts) {
             $error_msg = "Tanggal akhir tidak boleh mendahului tanggal awal!";
         } else {
-            $jumlah = (int)(($end_ts - $start_ts) / 86400); // Selisih waktu dalam hari
+            $jumlah = 0;
+            $current_ts = $start_ts;
+            while ($current_ts <= $end_ts) {
+                $current_date = date('Y-m-d', $current_ts);
+                $day_of_week = (int)date('w', $current_ts); // 0 = Minggu
+                
+                if ($day_of_week !== 0 && !isset($holidays_lookup[$current_date])) {
+                    $jumlah++;
+                }
+                
+                $current_ts = strtotime("+1 day", $current_ts);
+            }
             
             // Validasi kuota 12 hari per tahun
             $year = date('Y', $start_ts);
@@ -77,11 +100,130 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
                 $stmt_insert->bind_param("sssssssisss", $no_pengajuan, $tanggal_pengajuan, $tanggal_awal, $tanggal_akhir, $nik, $urgensi, $alamat, $jumlah, $kepentingan, $nik_pj, $status_default);
                 
                 if ($stmt_insert->execute()) {
-                    $success_msg = "Pengajuan cuti dengan nomor $no_pengajuan berhasil diajukan!";
+                    // Cari rantai atasan (approvers) secara rekursif dari atasan_pegawai
+                    $approvers = [];
+                    $current_employee = $nik;
+                    
+                    for ($level = 1; $level <= 3; $level++) {
+                        $query_atasan = "SELECT nik_atasan FROM atasan_pegawai WHERE nik = ?";
+                        $stmt_atasan = $koneksi->prepare($query_atasan);
+                        $stmt_atasan->bind_param("s", $current_employee);
+                        $stmt_atasan->execute();
+                        $res_atasan = $stmt_atasan->get_result();
+                        
+                        if ($row_atasan = $res_atasan->fetch_assoc()) {
+                            $atasan_nik = $row_atasan['nik_atasan'];
+                            if (!empty($atasan_nik)) {
+                                $approvers[] = [
+                                    'level' => $level,
+                                    'nik_approver' => $atasan_nik
+                                ];
+                                $current_employee = $atasan_nik; // Naik ke level berikutnya
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Fallback jika tidak ada atasan terdaftar di atasan_pegawai
+                    if (empty($approvers)) {
+                        $approvers[] = [
+                            'level' => 1,
+                            'nik_approver' => $nik_pj
+                        ];
+                    }
+                    
+                    // Simpan data persetujuan ke tabel persetujuan_cuti
+                    $query_insert_pc = "INSERT INTO persetujuan_cuti (no_pengajuan, level, nik_approver, status) VALUES (?, ?, ?, 'Pending')";
+                    $stmt_insert_pc = $koneksi->prepare($query_insert_pc);
+                    
+                    $pc_ok = true;
+                    foreach ($approvers as $app) {
+                        $stmt_insert_pc->bind_param("sis", $no_pengajuan, $app['level'], $app['nik_approver']);
+                        if (!$stmt_insert_pc->execute()) {
+                            $pc_ok = false;
+                        }
+                    }
+                    
+                    if ($pc_ok) {
+                        $success_msg = "Pengajuan cuti dengan nomor $no_pengajuan berhasil diajukan!";
+                    } else {
+                        $error_msg = "Pengajuan berhasil diajukan, namun gagal menginisialisasi alur persetujuan: " . $koneksi->error;
+                    }
                 } else {
                     $error_msg = "Gagal menyimpan pengajuan cuti: " . $koneksi->error;
                 }
             }
+        }
+    }
+}
+
+// Proses Verifikasi/Persetujuan Cuti oleh Atasan
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_approval'])) {
+    $persetujuan_id = (int)($_POST['persetujuan_id'] ?? 0);
+    $action = $_POST['action'] ?? ''; // 'Disetujui' atau 'Ditolak'
+    $catatan = $_POST['catatan'] ?? '';
+    
+    if (empty($action) || !in_array($action, ['Disetujui', 'Ditolak'])) {
+        $error_msg = "Aksi persetujuan tidak valid!";
+    } else {
+        // Ambil detail persetujuan
+        $query_app = "SELECT no_pengajuan, level, nik_approver FROM persetujuan_cuti WHERE id = ?";
+        $stmt_app = $koneksi->prepare($query_app);
+        $stmt_app->bind_param("i", $persetujuan_id);
+        $stmt_app->execute();
+        $res_app = $stmt_app->get_result();
+        
+        if ($row_app = $res_app->fetch_assoc()) {
+            $no_pengajuan = $row_app['no_pengajuan'];
+            $level = (int)$row_app['level'];
+            $nik_approver = $row_app['nik_approver'];
+            
+            // Pastikan yang menyetujui adalah yang sedang login
+            if ($nik_approver === $nik) {
+                $now = date('Y-m-d H:i:s');
+                $query_update_pc = "UPDATE persetujuan_cuti SET status = ?, tanggal_keputusan = ?, catatan = ? WHERE id = ?";
+                $stmt_up_pc = $koneksi->prepare($query_update_pc);
+                $stmt_up_pc->bind_param("sssi", $action, $now, $catatan, $persetujuan_id);
+                
+                if ($stmt_up_pc->execute()) {
+                    if ($action === 'Ditolak') {
+                        // Jika ditolak di tingkat mana pun, status utama langsung 'Ditolak'
+                        $query_update_main = "UPDATE pengajuan_cuti SET status = 'Ditolak' WHERE no_pengajuan = ?";
+                        $stmt_up_main = $koneksi->prepare($query_update_main);
+                        $stmt_up_main->bind_param("s", $no_pengajuan);
+                        $stmt_up_main->execute();
+                        $success_msg = "Pengajuan cuti nomor $no_pengajuan berhasil ditolak.";
+                    } else {
+                        // Jika disetujui, cek apakah ini level terakhir untuk pengajuan ini
+                        $query_check_last = "SELECT MAX(level) AS max_level FROM persetujuan_cuti WHERE no_pengajuan = ?";
+                        $stmt_last = $koneksi->prepare($query_check_last);
+                        $stmt_last->bind_param("s", $no_pengajuan);
+                        $stmt_last->execute();
+                        $res_last = $stmt_last->get_result()->fetch_assoc();
+                        $max_level = (int)$res_last['max_level'];
+                        
+                        if ($level === $max_level) {
+                            // Jika sudah di level akhir, status utama menjadi 'Disetujui'
+                            $query_update_main = "UPDATE pengajuan_cuti SET status = 'Disetujui' WHERE no_pengajuan = ?";
+                            $stmt_up_main = $koneksi->prepare($query_update_main);
+                            $stmt_up_main->bind_param("s", $no_pengajuan);
+                            $stmt_up_main->execute();
+                            $success_msg = "Pengajuan cuti nomor $no_pengajuan telah disetujui sepenuhnya.";
+                        } else {
+                            $success_msg = "Persetujuan Level $level untuk pengajuan $no_pengajuan berhasil disimpan. Menunggu persetujuan level selanjutnya.";
+                        }
+                    }
+                } else {
+                    $error_msg = "Gagal memproses persetujuan: " . $koneksi->error;
+                }
+            } else {
+                $error_msg = "Anda tidak memiliki hak akses untuk menyetujui pengajuan ini!";
+            }
+        } else {
+            $error_msg = "Data persetujuan tidak ditemukan.";
         }
     }
 }
@@ -107,6 +249,37 @@ $res_pj = $stmt_pj->get_result();
 $list_pj = [];
 while ($row = $res_pj->fetch_assoc()) {
     $list_pj[] = $row;
+}
+
+// Ambil daftar pengajuan cuti yang butuh persetujuan dari user ini (jika user adalah atasan)
+$query_approvals = "
+    SELECT p.no_pengajuan, p.tanggal, p.tanggal_awal, p.tanggal_akhir, p.jumlah, p.urgensi, p.kepentingan,
+           peg.nama AS nama_pegawai, pc.level, pc.id AS persetujuan_id
+    FROM persetujuan_cuti pc
+    INNER JOIN pengajuan_cuti p ON pc.no_pengajuan = p.no_pengajuan
+    INNER JOIN pegawai peg ON p.nik = peg.nik
+    WHERE pc.nik_approver = ? AND pc.status = 'Pending' AND p.status = 'Proses Pengajuan'
+      AND (
+          pc.level = 1 
+          OR (
+              pc.level > 1 
+              AND EXISTS (
+                  SELECT 1 FROM persetujuan_cuti pc_prev 
+                  WHERE pc_prev.no_pengajuan = pc.no_pengajuan 
+                    AND pc_prev.level = pc.level - 1 
+                    AND pc_prev.status = 'Disetujui'
+              )
+          )
+      )
+    ORDER BY p.tanggal_awal ASC
+";
+$stmt_approvals = $koneksi->prepare($query_approvals);
+$stmt_approvals->bind_param("s", $nik);
+$stmt_approvals->execute();
+$res_approvals = $stmt_approvals->get_result();
+$list_approvals = [];
+while ($row = $res_approvals->fetch_assoc()) {
+    $list_approvals[] = $row;
 }
 
 // Ambil riwayat cuti per pegawai (untuk ditampilkan di bagian bawah)
@@ -506,6 +679,49 @@ while ($row = $res_hist->fetch_assoc()) {
         </div>
     <?php endif; ?>
 
+    <!-- Persetujuan Cuti Card (Hanya muncul jika ada antrean approval) -->
+    <?php if (!empty($list_approvals)): ?>
+        <div class="card" style="border: 1.5px solid var(--primary-light); background-color: var(--primary-bg);">
+            <div class="card-title" style="color: var(--primary-dark); font-weight: 700; border-bottom-color: var(--primary-light);">
+                <span>📝 Persetujuan Cuti Staf</span>
+                <span class="status-badge status-proses" style="font-weight: 600;"><?php echo count($list_approvals); ?> Butuh Tindakan</span>
+            </div>
+            
+            <?php foreach ($list_approvals as $app): ?>
+                <div style="background: #ffffff; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <strong style="color: var(--text-main); font-size: 15px;"><?php echo htmlspecialchars($app['nama_pegawai']); ?></strong>
+                        <span style="font-size: 11px; background: #e2e8f0; padding: 2px 8px; border-radius: 12px; font-weight: 500;">Level <?php echo $app['level']; ?></span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-muted); display: grid; gap: 4px; margin-bottom: 12px;">
+                        <div><strong>No Pengajuan:</strong> <?php echo htmlspecialchars($app['no_pengajuan']); ?></div>
+                        <div><strong>Tanggal Cuti:</strong> <?php echo date('d-m-Y', strtotime($app['tanggal_awal'])); ?> s/d <?php echo date('d-m-Y', strtotime($app['tanggal_akhir'])); ?> (<?php echo $app['jumlah']; ?> Hari)</div>
+                        <div><strong>Urgensi:</strong> <?php echo htmlspecialchars($app['urgensi']); ?></div>
+                        <div><strong>Keperluan:</strong> "<?php echo htmlspecialchars($app['kepentingan']); ?>"</div>
+                    </div>
+                    
+                    <form action="pengajuan_cuti.php" method="POST" style="border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                        <input type="hidden" name="persetujuan_id" value="<?php echo $app['persetujuan_id']; ?>">
+                        
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <input type="text" name="catatan" class="form-input" placeholder="Tulis catatan (opsional)..." style="background:#ffffff; font-size: 13px; padding: 8px 12px;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <button type="submit" name="action_approval" value="setujui" onclick="this.form.action.value='Disetujui';" class="submit-btn" style="margin-top: 0; padding: 8px; font-size: 13px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));">
+                                Setujui
+                            </button>
+                            <button type="submit" name="action_approval" value="tolak" onclick="this.form.action.value='Ditolak';" class="submit-btn" style="margin-top: 0; padding: 8px; font-size: 13px; background: linear-gradient(135deg, var(--danger), #991b1b); box-shadow: 0 4px 8px rgba(185, 28, 28, 0.2);">
+                                Tolak
+                            </button>
+                        </div>
+                        <input type="hidden" name="action" value="">
+                    </form>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
     <!-- Form Card -->
     <div class="card">
         <div class="card-title">
@@ -660,6 +876,8 @@ while ($row = $res_hist->fetch_assoc()) {
 <script>
     // Memasukkan data cuti yang sudah diambil per tahun dari PHP
     const historyCutiByYear = <?php echo $yearly_json; ?>;
+    // Memasukkan data hari libur nasional dari PHP
+    const listHariLibur = <?php echo $holidays_json; ?>;
 
     function onDateChanged() {
         const tglAwalVal = document.getElementById('tanggal_awal').value;
@@ -684,16 +902,34 @@ while ($row = $res_hist->fetch_assoc()) {
         const start = new Date(tglAwalVal);
         const end = new Date(tglAkhirVal);
         
-        // hitung selisih hari (End - Start)
-        const diffTime = end - start;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
+        if (end < start) {
             jumlahInput.value = 0;
             quotaWidget.style.display = 'none';
             submitBtn.disabled = true;
             alert("Tanggal akhir tidak boleh kurang dari tanggal awal!");
             return;
+        }
+
+        // hitung selisih hari inklusif dengan mengecualikan Minggu & Libur Nasional
+        let diffDays = 0;
+        let curDate = new Date(start);
+        curDate.setHours(0, 0, 0, 0);
+        const normalizedEnd = new Date(end);
+        normalizedEnd.setHours(0, 0, 0, 0);
+
+        while (curDate <= normalizedEnd) {
+            const dayOfWeek = curDate.getDay(); // 0 = Minggu
+            
+            // Format to YYYY-MM-DD
+            const yyyy = curDate.getFullYear();
+            const mm = String(curDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(curDate.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+            
+            if (dayOfWeek !== 0 && !listHariLibur.includes(dateStr)) {
+                diffDays++;
+            }
+            curDate.setDate(curDate.getDate() + 1);
         }
 
         jumlahInput.value = diffDays;
