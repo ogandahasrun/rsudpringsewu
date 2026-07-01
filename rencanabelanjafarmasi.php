@@ -83,7 +83,7 @@ while ($row = mysqli_fetch_assoc($q_jual)) {
     <title>Rencana Belanja Farmasi</title>
     <style>
         body { font-family: Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; }
-        .container { max-width: 1200px; margin: 30px auto; background: #fff; padding: 30px 30px 20px 30px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);}
+        .container { max-width: 98%; margin: 15px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);}
         h1 { text-align: center; color: #4CAF50; margin-bottom: 24px; }
         .filter-form { margin-bottom: 18px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center;}
         .filter-form label { margin-right: 6px; }
@@ -96,16 +96,31 @@ while ($row = mysqli_fetch_assoc($q_jual)) {
         .copy-btn { margin-bottom: 16px; background: #2196F3; color: #fff; border: none; padding: 6px 18px; border-radius: 4px; cursor: pointer;}
         .copy-btn:hover { background: #1976D2; }
         table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; font-size: 13px; }
-        th { background: #4CAF50; color: #fff; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; font-size: 12px; }
+        th { background: #4CAF50; color: #fff; white-space: nowrap; }
         tr:nth-child(even) { background: #f2f2f2; }
         tr:hover { background: #e3f2fd; }
         .no-data { text-align: center; color: #888; padding: 20px; }
-        .table-scroll {max-height: 500px; overflow-y: auto;}
+        .table-scroll { max-height: 75vh; overflow: auto; }
+        .table-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
         @media (max-width: 700px) {
             .container { padding: 8px; }
             .filter-form { flex-direction: column; gap: 8px;}
-            th, td { font-size: 12px; padding: 6px;}
+            th, td { font-size: 11px; padding: 4px;}
         }
     </style>
 </head>
