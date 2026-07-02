@@ -131,6 +131,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-bed"></i>
                 <span>Kontrol Pasien Hepatitis C</span>
             </a>
+            <a href="morfologidarahtepi.php" title="Morfologi Darah Tepi">
+                <i class="fas fa-glass-martini"></i>
+                <span>Morfologi Darah Tepi</span>
+            </a>            
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
