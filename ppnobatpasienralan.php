@@ -178,10 +178,17 @@ while ($row = mysqli_fetch_assoc($result)) {
         <tbody>
         <?php
         $no = 1;
+        $total_jml = 0;
+        $total_biaya = 0;
+        $total_ppn = 0;
         foreach ($data as $key => $row) {
             $rowspan = count($row['obat']);
             $first = true;
             foreach ($row['obat'] as $obat) {
+                $total_jml += $obat['jml'];
+                $total_biaya += $obat['total'];
+                $total_ppn += $obat['total'] * 0.11;
+
                 echo '<tr>';
                 if ($first) {
                     echo '<td rowspan="'.$rowspan.'">'.$no.'</td>';
@@ -204,6 +211,14 @@ while ($row = mysqli_fetch_assoc($result)) {
         }
         ?>
         </tbody>
+        <tfoot>
+            <tr style="font-weight: bold; background-color: #f1f5f9; color: #0f172a;">
+                <td colspan="9" style="text-align: right; padding: 10px;">Total:</td>
+                <td style="padding: 10px;"><?php echo number_format($total_jml, 0, ',', '.'); ?></td>
+                <td style="padding: 10px;"><?php echo number_format($total_biaya, 2, ',', '.'); ?></td>
+                <td style="padding: 10px;"><?php echo number_format($total_ppn, 2, ',', '.'); ?></td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 <script>
