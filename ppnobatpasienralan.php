@@ -12,9 +12,24 @@ if (!isset($_SESSION['username'])) {
 // Ambil tanggal awal dan akhir dari form, default hari ini
 $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
+$kd_pj = isset($_GET['kd_pj']) ? $_GET['kd_pj'] : '';
+
+// Ambil daftar PJ untuk filter dropdown
+$query_pj = "SELECT kd_pj, png_jawab FROM penjab ORDER BY png_jawab ASC";
+$result_pj = mysqli_query($koneksi, $query_pj);
+$list_pj = [];
+while ($row_pj = mysqli_fetch_assoc($result_pj)) {
+    $list_pj[] = $row_pj;
+}
 
 // Query data
-$sql = "SELECT reg_periksa.tgl_registrasi, reg_periksa.no_rawat, pasien.no_rkm_medis, pasien.nm_pasien, penjab.png_jawab, databarang.kode_brng, databarang.nama_brng, databarang.kode_sat, detail_pemberian_obat.jml, detail_pemberian_obat.total FROM reg_periksa INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj INNER JOIN detail_pemberian_obat ON detail_pemberian_obat.no_rawat = reg_periksa.no_rawat INNER JOIN databarang ON detail_pemberian_obat.kode_brng = databarang.kode_brng WHERE reg_periksa.status_lanjut = 'ralan' AND reg_periksa.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir' ORDER BY reg_periksa.tgl_registrasi, reg_periksa.no_rawat, databarang.kode_brng";
+$sql = "SELECT reg_periksa.tgl_registrasi, reg_periksa.no_rawat, pasien.no_rkm_medis, pasien.nm_pasien, penjab.png_jawab, databarang.kode_brng, databarang.nama_brng, databarang.kode_sat, detail_pemberian_obat.jml, detail_pemberian_obat.total FROM reg_periksa INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis INNER JOIN penjab ON reg_periksa.kd_pj = penjab.kd_pj INNER JOIN detail_pemberian_obat ON detail_pemberian_obat.no_rawat = reg_periksa.no_rawat INNER JOIN databarang ON detail_pemberian_obat.kode_brng = databarang.kode_brng WHERE reg_periksa.status_lanjut = 'ralan' AND reg_periksa.tgl_registrasi BETWEEN '$tgl_awal' AND '$tgl_akhir'";
+
+if (!empty($kd_pj)) {
+    $sql .= " AND reg_periksa.kd_pj = '$kd_pj'";
+}
+
+$sql .= " ORDER BY reg_periksa.tgl_registrasi, reg_periksa.no_rawat, databarang.kode_brng";
 $result = mysqli_query($koneksi, $sql);
 
 // Proses data untuk tampilan merge kolom
@@ -79,11 +94,13 @@ while ($row = mysqli_fetch_assoc($result)) {
             justify-content: center;
             margin-bottom: 25px;
         }
-        .filter-form input[type="date"] {
+        .filter-form input[type="date"],
+        .filter-form select {
             padding: 7px 12px;
             border-radius: 6px;
             border: 1px solid #ccc;
             font-size: 15px;
+            background-color: #fff;
         }
         .filter-form button {
             background: #667eea;
@@ -125,6 +142,16 @@ while ($row = mysqli_fetch_assoc($result)) {
     <form class="filter-form" method="get">
         <label>Dari: <input type="date" name="tgl_awal" value="<?php echo $tgl_awal; ?>"></label>
         <label>Sampai: <input type="date" name="tgl_akhir" value="<?php echo $tgl_akhir; ?>"></label>
+        <label>Penanggung Jawab: 
+            <select name="kd_pj">
+                <option value="">- Semua -</option>
+                <?php foreach ($list_pj as $pj): ?>
+                    <option value="<?php echo htmlspecialchars($pj['kd_pj']); ?>" <?php echo $kd_pj === $pj['kd_pj'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($pj['png_jawab']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </label>
         <button type="submit">Tampilkan</button>
     </form>
     <div style="display:flex; gap:10px; margin-bottom:18px;">
