@@ -118,9 +118,9 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-cash-register fa-2x" style="color:#f59e0b;"></i>
                 <span style="color:#222;font-weight:bold;">PPN Obat Pasien Ralan</span>
         </a>    
-        <a href="piutangpasien.php" class="menu-item">
-            <i class="fas fa-hand-holding-usd fa-2x" style="color:#e11d48;"></i>
-            <span style="color:#222;font-weight:bold;">Piutang Pasien</span>
+        <a href="penjualan_bebas.php" class="menu-item" title="Penjualan Bebas">
+            <i class="fas fa-prescription-bottle-alt fa-2x" style="color:#d97706;"></i>
+            <span style="color:#222;font-weight:bold;">Penjualan Bebas</span>
         </a>       
          <a href="kontrol_open_billing.php" class="menu-item">
             <i class="fas fa-file-invoice-dollar fa-2x" style="color:#059669;"></i>
