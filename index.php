@@ -100,6 +100,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <h1><?php echo htmlspecialchars($nama_instansi); ?></h1>
 
     <div class="menu-grid">
+        <a href="kepegawaian.php" class="menu-item">
+            <img src="images/kepegawaian.png" alt="Kepegawaian">
+            <span>Kepegawaian</span>
+        </a>
         <a href="farmasi.php" class="menu-item">
             <img src="images/farmasi.png" alt="Farmasi">
             <span>Farmasi</span>
