@@ -41,7 +41,7 @@ $result = mysqli_query($koneksi, $query);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Rencana Belanja Farmasi</title>
+    <title>Rencana Belanja Farmasi (Flat Detail)</title>
     <style>
         * { box-sizing: border-box; }
         body, table, th, td, input, select, button { font-family: Tahoma, Geneva, Verdana, sans-serif; }
@@ -102,7 +102,7 @@ $result = mysqli_query($koneksi, $query);
 <body>
 <div class="container" id="allTables">
     <div class="header">
-        <h1>🛒 Rencana Belanja Farmasi</h1>
+        <h1>🛒 Rencana Belanja Farmasi (Detail Flat)</h1>
     </div>
     
     <div class="content">
@@ -129,10 +129,10 @@ $result = mysqli_query($koneksi, $query);
             
             <div class="filter-actions">
                 <button type="submit" class="btn btn-primary">📊 Tampilkan Data</button>
-                <a href="rencanabelanja.php" class="btn btn-secondary">🔄 Reset Filter</a>
+                <a href="rencanabelanja2.php" class="btn btn-secondary">🔄 Reset Filter</a>
                 <button type="button" class="btn btn-info" id="copyTableBtn">📋 Copy ke Clipboard</button>
                 <button type="button" class="btn btn-info" id="exportExcelBtn">📊 Export Excel</button>
-                <a href="rencanabelanja2.php?tanggal_awal=<?php echo urlencode($tanggal_awal); ?>&tanggal_akhir=<?php echo urlencode($tanggal_akhir); ?>" class="btn btn-warning">📋 Lihat Versi Detail Flat</a>
+                <a href="rencanabelanja.php?tanggal_awal=<?php echo urlencode($tanggal_awal); ?>&tanggal_akhir=<?php echo urlencode($tanggal_akhir); ?>" class="btn btn-warning">📋 Lihat Versi Ringkas</a>
             </div>
         </form>
 
@@ -175,10 +175,6 @@ $result = mysqli_query($koneksi, $query);
         </div>
         
         <?php } ?>
-        
-        <?php if ($result && mysqli_num_rows($result) > 0): ?>
-            <!-- Tombol copy data, copy terseleksi, dan print dihilangkan -->
-        <?php endif; ?>
         
         <div class="table-container">
             <table id="dataTable">
@@ -229,53 +225,33 @@ $result = mysqli_query($koneksi, $query);
             if (!isset($rows) || !is_array($rows)) {
                 $rows = [];
             }
-            $last_faktur_total = '';
             ?>
             <?php
             if (count($rows) > 0) {
                 $no = 1;
                 foreach ($rows as $row) {
-                    if ($row['no_faktur'] !== $last_faktur_total) {
-                        $last_faktur_total = $row['no_faktur'];
-                        ?>
-                        <tr style="background:#e8f5e8;font-weight:bold;">
-                            <td class="center"><?php echo $no++; ?></td>
-                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_faktur']); ?></td>
-                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_order']); ?></td>
-                            <td><?php echo htmlspecialchars($row['nama_suplier']); ?></td>
-                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['kode_brng']); ?></td>
-                            <td><?php echo htmlspecialchars($row['nama_brng']); ?></td>
-                            <td class="center"><?php echo htmlspecialchars($row['satuan']); ?></td>
-                            <td class="center"><?php echo htmlspecialchars($row['jumlah']); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['h_pesan']); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['subtotal']); ?></td>
-                            <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_faktur'])); ?></td>
-                            <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_pesan'])); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['total2']); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['ppn']); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['tagihan']); ?></td>
-                            <td><?php echo htmlspecialchars($row['direktur']); ?></td>
-                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['NPWP']); ?></td>
-                            <td><?php echo htmlspecialchars($row['jabatan']); ?></td>
-                        </tr>
-                        <?php
-                    } else {
-                        ?>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td style="font-family: monospace;"><?php echo htmlspecialchars($row['kode_brng']); ?></td>
-                            <td><?php echo htmlspecialchars($row['nama_brng']); ?></td>
-                            <td class="center"><?php echo htmlspecialchars($row['satuan']); ?></td>
-                            <td class="center"><?php echo htmlspecialchars($row['jumlah']); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['h_pesan']); ?></td>
-                            <td class="money"><?php echo htmlspecialchars($row['subtotal']); ?></td>
-                            <td colspan="8"></td>
-                        </tr>
-                        <?php
-                    }
+                    ?>
+                    <tr>
+                        <td class="center"><?php echo $no++; ?></td>
+                        <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_faktur']); ?></td>
+                        <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_order']); ?></td>
+                        <td><?php echo htmlspecialchars($row['nama_suplier']); ?></td>
+                        <td style="font-family: monospace;"><?php echo htmlspecialchars($row['kode_brng']); ?></td>
+                        <td><?php echo htmlspecialchars($row['nama_brng']); ?></td>
+                        <td class="center"><?php echo htmlspecialchars($row['satuan']); ?></td>
+                        <td class="center"><?php echo htmlspecialchars($row['jumlah']); ?></td>
+                        <td class="money"><?php echo htmlspecialchars($row['h_pesan']); ?></td>
+                        <td class="money"><?php echo htmlspecialchars($row['subtotal']); ?></td>
+                        <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_faktur'])); ?></td>
+                        <td class="center"><?php echo date('d/m/Y', strtotime($row['tgl_pesan'])); ?></td>
+                        <td class="money"><?php echo htmlspecialchars($row['total2']); ?></td>
+                        <td class="money"><?php echo htmlspecialchars($row['ppn']); ?></td>
+                        <td class="money"><?php echo htmlspecialchars($row['tagihan']); ?></td>
+                        <td><?php echo htmlspecialchars($row['direktur']); ?></td>
+                        <td style="font-family: monospace;"><?php echo htmlspecialchars($row['NPWP']); ?></td>
+                        <td><?php echo htmlspecialchars($row['jabatan']); ?></td>
+                    </tr>
+                    <?php
                 }
             } else {
                 ?>
@@ -315,20 +291,45 @@ $result = mysqli_query($koneksi, $query);
     </div>
 </div>
 <script>
-// Fungsi copy table ke clipboard yang lebih baik
+// Fungsi show notification
+function showNotification(message, isError = false) {
+    const oldNotification = document.querySelector('.copy-notification');
+    if (oldNotification) {
+        oldNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = 'copy-notification' + (isError ? ' error' : '');
+    notification.innerHTML = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Fungsi copy table ke clipboard
 function copyTableToClipboard() {
     const table = document.getElementById('dataTable');
     if (!table) {
-        alert('❌ Tidak ada data untuk disalin');
+        showNotification('❌ Tidak ada data untuk disalin', true);
         return;
     }
 
-    // Buat string text dari table
-    let textToCopy = "RENCANA BELANJA FARMASI\n";
+    let textToCopy = "RENCANA BELANJA FARMASI (DETAIL FLAT)\n";
     textToCopy += "Periode: <?php echo date('d/m/Y', strtotime($tanggal_awal)) . ' s/d ' . date('d/m/Y', strtotime($tanggal_akhir)); ?>\n";
     textToCopy += "Tanggal Export: " + new Date().toLocaleDateString('id-ID') + "\n\n";
     
-    // Header table
     const headers = table.querySelectorAll('thead th');
     let headerRow = "";
     headers.forEach((header, index) => {
@@ -337,7 +338,6 @@ function copyTableToClipboard() {
     });
     textToCopy += headerRow + "\n";
     
-    // Data rows
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
@@ -349,7 +349,6 @@ function copyTableToClipboard() {
         textToCopy += rowText + "\n";
     });
 
-    // Copy menggunakan modern clipboard API
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(textToCopy).then(() => {
             showCopySuccess();
@@ -362,7 +361,6 @@ function copyTableToClipboard() {
     }
 }
 
-// Fallback method untuk browser lama
 function fallbackCopyTextToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
@@ -388,7 +386,6 @@ function fallbackCopyTextToClipboard(text) {
     document.body.removeChild(textArea);
 }
 
-// Tampilkan pesan sukses
 function showCopySuccess() {
     const btn = document.getElementById('copyTableBtn');
     const originalText = btn.innerHTML;
@@ -417,122 +414,6 @@ function showCopyError() {
     }, 2000);
 }
 
-// Fungsi copy selected text
-function copySelectedText() {
-    const selection = window.getSelection();
-    if (selection.rangeCount === 0) {
-        showNotification('❌ Silahkan pilih/seleksi data yang ingin dicopy terlebih dahulu!', true);
-        return;
-    }
-    
-    const selectedText = selection.toString();
-    if (!selectedText) {
-        showNotification('❌ Tidak ada teks yang dipilih!', true);
-        return;
-    }
-    
-    // Copy menggunakan clipboard API
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(selectedText).then(() => {
-            showNotification('✅ Teks yang dipilih berhasil disalin!');
-        }).catch(err => {
-            console.error('Gagal copy selection:', err);
-            showNotification('❌ Gagal menyalin teks!', true);
-        });
-    } else {
-        // Fallback
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showNotification('✅ Teks yang dipilih berhasil disalin!');
-            } else {
-                showNotification('❌ Gagal menyalin teks!', true);
-            }
-        } catch (err) {
-            showNotification('❌ Browser tidak mendukung copy otomatis!', true);
-        }
-    }
-}
-
-// Fungsi print table
-function printTable() {
-    const table = document.getElementById('dataTable');
-    if (!table) {
-        alert('❌ Tidak ada data untuk dicetak');
-        return;
-    }
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Rencana Belanja Farmasi</title>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                h2 { text-align: center; color: #333; }
-                .info { text-align: center; margin-bottom: 20px; color: #666; }
-                table { width: 100%; border-collapse: collapse; font-size: 12px; }
-                th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-                th { background: #f0f0f0; font-weight: bold; }
-                tr:nth-child(even) { background: #f9f9f9; }
-                .money { text-align: right; }
-                .center { text-align: center; }
-                @media print {
-                    body { margin: 0; }
-                    table { font-size: 10px; }
-                    th, td { padding: 4px; }
-                }
-            </style>
-        </head>
-        <body>
-            <h2>Rencana Belanja Farmasi</h2>
-            <div class="info">
-                <p>Periode: <?php echo date('d/m/Y', strtotime($tanggal_awal)) . ' s/d ' . date('d/m/Y', strtotime($tanggal_akhir)); ?></p>
-                <p>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</p>
-            </div>
-            ${table.outerHTML}
-        </body>
-        </html>
-    `);
-    
-    printWindow.document.close();
-    printWindow.focus();
-    
-    // Wait for content to load then print
-    setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-    }, 500);
-}
-
-// Fungsi show notification
-function showNotification(message, isError = false) {
-    const oldNotification = document.querySelector('.copy-notification');
-    if (oldNotification) {
-        oldNotification.remove();
-    }
-    
-    const notification = document.createElement('div');
-    notification.className = 'copy-notification' + (isError ? ' error' : '');
-    notification.innerHTML = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-
 // Fungsi export ke Excel
 function exportToExcel() {
     const table = document.getElementById('dataTable');
@@ -543,11 +424,11 @@ function exportToExcel() {
     
     const htmlTable = table.outerHTML;
     const uri = 'data:application/vnd.ms-excel;base64,';
-    const template = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Rencana Belanja</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta charset="UTF-8"></head><body><h2>Rencana Belanja Farmasi - RSUD Pringsewu</h2><p>Tanggal Export: \${new Date().toLocaleDateString('id-ID')}</p><p>Periode: <?php echo date('d/m/Y', strtotime($tanggal_awal)) . ' s/d ' . date('d/m/Y', strtotime($tanggal_akhir)); ?></p>\${htmlTable}</body></html>`;
+    const template = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Rencana Belanja Detail</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta charset="UTF-8"></head><body><h2>Rencana Belanja Farmasi (Detail Flat) - RSUD Pringsewu</h2><p>Tanggal Export: \${new Date().toLocaleDateString('id-ID')}</p><p>Periode: <?php echo date('d/m/Y', strtotime($tanggal_awal)) . ' s/d ' . date('d/m/Y', strtotime($tanggal_akhir)); ?></p>\${htmlTable}</body></html>`;
     
     const link = document.createElement('a');
     link.href = uri + btoa(unescape(encodeURIComponent(template)));
-    link.download = 'Rencana_Belanja_' + new Date().toISOString().slice(0,10) + '.xls';
+    link.download = 'Rencana_Belanja_Detail_' + new Date().toISOString().slice(0,10) + '.xls';
     
     document.body.appendChild(link);
     link.click();
@@ -564,20 +445,8 @@ function exportToExcel() {
     }, 2000);
 }
 
-// Event listeners
 document.getElementById('copyTableBtn').onclick = copyTableToClipboard;
 document.getElementById('exportExcelBtn').onclick = exportToExcel;
-
-// Event listeners untuk tombol tambahan (jika ada)
-document.addEventListener('DOMContentLoaded', function() {
-    const copyBtn2 = document.getElementById('copyTableBtn2');
-    const copySelectedBtn = document.getElementById('copySelectedBtn');
-    const printBtn = document.getElementById('printTableBtn');
-    
-    if (copyBtn2) copyBtn2.onclick = copyTableToClipboard;
-    if (copySelectedBtn) copySelectedBtn.onclick = copySelectedText;
-    if (printBtn) printBtn.onclick = printTable;
-});
 
 // Set default date to today if not set
 document.addEventListener('DOMContentLoaded', function() {
@@ -596,7 +465,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </html>
 
 <?php
-// Tutup koneksi database
 if (isset($result)) {
     mysqli_free_result($result);
 }

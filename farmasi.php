@@ -320,6 +320,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                     <i class="fas fa-clipboard-check fa-2x" style="margin-bottom:10px;color:#0ea5e9;"></i>
                     <span style="color:#222;font-weight:bold;">Rencana Belanja</span>
                 </a>
+                <a href="rencanabelanja2.php" class="menu-item">
+                    <i class="fas fa-clipboard-list fa-2x" style="margin-bottom:10px;color:#10b981;"></i>
+                    <span style="color:#222;font-weight:bold;">Rencana Belanja Detail</span>
+                </a>
                 <a href="rencanabelanjafarmasi.php" class="menu-item">
                     <i class="fas fa-notes-medical fa-2x" style="margin-bottom:10px;color:#a21caf;"></i>
                     <span style="color:#222;font-weight:bold;">Rencana Belanja Farmasi</span>
