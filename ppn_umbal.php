@@ -331,7 +331,7 @@ include 'koneksi.php';
                         <select name="bulanklaim" id="bulanklaim" required>
                             <option value="">-- Pilih Bulan --</option>
                             <?php
-                            $query_bulan = "SELECT DISTINCT bulanklaim FROM lec_umbal ORDER BY bulanklaim DESC";
+                            $query_bulan = "SELECT DISTINCT bulanklaim FROM rspsw_umbal ORDER BY bulanklaim DESC";
                             $result_bulan = mysqli_query($koneksi, $query_bulan);
                             while ($row_bulan = mysqli_fetch_assoc($result_bulan)) {
                                 $selected = (isset($_GET['bulanklaim']) && $_GET['bulanklaim'] == $row_bulan['bulanklaim']) ? 'selected' : '';
@@ -357,7 +357,7 @@ include 'koneksi.php';
         $bulanklaim = mysqli_real_escape_string($koneksi, $_GET['bulanklaim']);
 
         $query = "SELECT 
-                    lec_umbal.bulanklaim,
+                    rspsw_umbal.bulanklaim,
                     lec_umbal.tgl_registrasi AS tgl_sep,
                     lec_umbal.no_sep,
                     reg_periksa.no_rawat,
@@ -372,6 +372,7 @@ include 'koneksi.php';
                     COALESCE(total_billing.total_biaya, 0) AS total_biaya
                 FROM 
                     lec_umbal
+                    LEFT JOIN rspsw_umbal ON lec_umbal.no_sep = rspsw_umbal.no_sep
                     INNER JOIN reg_periksa ON lec_umbal.no_rawat = reg_periksa.no_rawat
                     LEFT JOIN (
                         SELECT 
@@ -405,7 +406,7 @@ include 'koneksi.php';
                         GROUP BY no_rawat
                     ) AS total_billing ON lec_umbal.no_rawat = total_billing.no_rawat
                 WHERE
-                    lec_umbal.bulanklaim = '$bulanklaim'
+                    rspsw_umbal.bulanklaim = '$bulanklaim'
                 ORDER BY lec_umbal.no_sep";
 
         $result = mysqli_query($koneksi, $query);
