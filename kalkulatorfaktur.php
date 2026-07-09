@@ -31,7 +31,7 @@ if (!isset($_SESSION['username'])) {
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 98%;
             margin: 0 auto;
             background: white;
             border-radius: 15px;

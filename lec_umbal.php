@@ -31,7 +31,7 @@ include 'koneksi.php';
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 98%;
             margin: 0 auto;
             background: #ffffff;
             border-radius: 15px;
@@ -440,7 +440,7 @@ include 'koneksi.php';
             echo "</tbody>
                 <tfoot>
                     <tr>
-                        <th colspan='9'>Total</th>
+                        <th colspan='10'>Total</th>
                         <th>" . formatRupiah($total_diajukan) . "</th>
                         <th>" . formatRupiah($total_disetujui) . "</th>
                         <th></th>

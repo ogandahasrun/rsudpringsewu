@@ -69,7 +69,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             min-height: 100vh;
         }
         .container {
-            max-width: 1400px;
+            max-width: 98%;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
