@@ -364,7 +364,7 @@ include 'koneksi.php';
                     reg_periksa.tgl_registrasi AS tgl_registrasi,
                     lec_umbal.norm,
                     lec_umbal.nm_pasien,
-                    lec_umbal.disetujui,
+                    rspsw_umbal.disetujui,
                     lec_umbal.status,
                     COALESCE(non_obat.total_non_obat, 0) AS biaya_non_obat,
                     COALESCE(obat.total_obat, 0) AS biaya_obat,
