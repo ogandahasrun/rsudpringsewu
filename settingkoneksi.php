@@ -24,4 +24,11 @@ $URLAUTHMJKN = "https://localhost/auth"; // URL Auth Mobile JKN
 $USERNAMEAUTHMJKN = "usermjkn"; // Username untuk Auth
 $PASSWORDAUTHMJKN = "passwordmjkn"; // Password untuk Auth
 
+//KONFIGURASI SATU SEHAT
+$URLAUTHSATUSEHAT = "https://api-satusehat.kemkes.go.id/oauth2/v1";
+$URLFHIRSATUSEHAT = "https://api-satusehat.kemkes.go.id/fhir-r4/v1";
+$ORGANIZATIONID = "zzz";
+$CLIENTID = "zzz";
+$CLIENTSECRET = "zzz";
+
 ?>
