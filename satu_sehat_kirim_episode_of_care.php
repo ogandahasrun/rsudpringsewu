@@ -28,16 +28,13 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     }
 }
 
-// Handle AJAX Request untuk pengiriman data ke SATUSEHAT
+// Handle AJAX Request untuk SATUSEHAT EpisodeOfCare
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
 
-    if ($_POST['action'] === 'kirim_vaksin') {
+    if ($_POST['action'] === 'kirim_episodeofcare') {
         $payload_raw = $_POST['payload'] ?? '';
         $no_rawat = $_POST['no_rawat'] ?? '';
-        $kode_brng = $_POST['kode_brng'] ?? '';
-        $no_batch = $_POST['no_batch'] ?? '';
-        $no_faktur = $_POST['no_faktur'] ?? '';
         
         // Validasi Payload JSON
         $payload_decoded = json_decode($payload_raw, true);
@@ -65,42 +62,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $token_cached = $token_res['cached'] ?? false;
 
         // Jalankan Langkah 2: Kirim ke FHIR Server
-        $send_res = sendImmunization($token, $payload_decoded);
+        $send_res = sendEpisodeOfCare($token, $payload_decoded);
 
-        // Jalankan Langkah 3: Simpan Ke DB SIMRS Lokal jika sukses dan data lokal lengkap
+        // Jalankan Langkah 3: Simpan Ke DB SIMRS Lokal jika sukses dan nomor rawat terisi
         $db_saved = false;
         $db_error = '';
-        if ($send_res['success'] && !empty($no_rawat) && !empty($kode_brng)) {
-            $id_immunization = $send_res['response']['id'] ?? '';
-            if (!empty($id_immunization)) {
-                // Ekstrak tgl_perawatan & jam dari occurrenceDateTime
-                $occurrenceDateTime = $payload_decoded['occurrenceDateTime'] ?? '';
-                $tgl_perawatan = date('Y-m-d');
-                $jam = date('H:i:s');
-                if (!empty($occurrenceDateTime)) {
-                    try {
-                        $dt = new DateTime($occurrenceDateTime);
-                        $tgl_perawatan = $dt->format('Y-m-d');
-                        $jam = $dt->format('H:i:s');
-                    } catch (Exception $e) {
-                        // abaikan jika parsing gagal
-                    }
-                }
-                
-                // Cek data duplikat key
-                $check_stmt = $koneksi->prepare("SELECT id_immunization FROM satu_sehat_immunization WHERE no_rawat = ? AND tgl_perawatan = ? AND jam = ? AND kode_brng = ?");
-                $check_stmt->bind_param("ssss", $no_rawat, $tgl_perawatan, $jam, $kode_brng);
+        if ($send_res['success'] && !empty($no_rawat)) {
+            $id_episodeofcare = $send_res['response']['id'] ?? '';
+            if (!empty($id_episodeofcare)) {
+                // Cek data duplikat key di satu_sehat_episodeofcare
+                // Catatan: Kolom id_encounter di tabel ini digunakan untuk menyimpan id_episodeofcare UUID
+                $check_stmt = $koneksi->prepare("SELECT id_encounter FROM satu_sehat_episodeofcare WHERE no_rawat = ?");
+                $check_stmt->bind_param("s", $no_rawat);
                 $check_stmt->execute();
                 $check_res = $check_stmt->get_result();
                 
                 if ($check_res->num_rows > 0) {
                     // Update
-                    $save_stmt = $koneksi->prepare("UPDATE satu_sehat_immunization SET no_batch = ?, no_faktur = ?, id_immunization = ? WHERE no_rawat = ? AND tgl_perawatan = ? AND jam = ? AND kode_brng = ?");
-                    $save_stmt->bind_param("sssssss", $no_batch, $no_faktur, $id_immunization, $no_rawat, $tgl_perawatan, $jam, $kode_brng);
+                    $save_stmt = $koneksi->prepare("UPDATE satu_sehat_episodeofcare SET id_encounter = ? WHERE no_rawat = ?");
+                    $save_stmt->bind_param("ss", $id_episodeofcare, $no_rawat);
                 } else {
                     // Insert
-                    $save_stmt = $koneksi->prepare("INSERT INTO satu_sehat_immunization (no_rawat, tgl_perawatan, jam, kode_brng, no_batch, no_faktur, id_immunization) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    $save_stmt->bind_param("sssssss", $no_rawat, $tgl_perawatan, $jam, $kode_brng, $no_batch, $no_faktur, $id_immunization);
+                    $save_stmt = $koneksi->prepare("INSERT INTO satu_sehat_episodeofcare (no_rawat, id_encounter) VALUES (?, ?)");
+                    $save_stmt->bind_param("ss", $no_rawat, $id_episodeofcare);
                 }
                 
                 if ($save_stmt->execute()) {
@@ -152,33 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    if ($_POST['action'] === 'cari_nakes_nik') {
-        $nik = trim($_POST['nik'] ?? '');
-        
-        if (empty($nik) || !preg_match('/^\d{16}$/', $nik)) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'NIK harus 16 digit angka.'
-            ]);
-            exit();
-        }
-        
-        $token_res = getSatuSehatToken();
-        if (!$token_res['success']) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Gagal mendapatkan token: ' . $token_res['message']
-            ]);
-            exit();
-        }
-        
-        $token = $token_res['token'];
-        $search_res = searchPractitionerByNIK($token, $nik);
-        
-        echo json_encode($search_res);
-        exit();
-    }
-
     if ($_POST['action'] === 'clear_token') {
         unset($_SESSION['satu_sehat_token']);
         unset($_SESSION['satu_sehat_token_expires']);
@@ -196,7 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 function getSatuSehatToken() {
     global $URLAUTHSATUSEHAT, $CLIENTID, $CLIENTSECRET;
 
-    // Periksa apakah token ada dalam cache session dan belum kedaluwarsa
     if (isset($_SESSION['satu_sehat_token']) && isset($_SESSION['satu_sehat_token_expires']) && $_SESSION['satu_sehat_token_expires'] > time() + 60) {
         return [
             'success' => true,
@@ -257,12 +213,12 @@ function getSatuSehatToken() {
 }
 
 /**
- * Mengirim data Immunization ke FHIR server SATUSEHAT
+ * Mengirim data EpisodeOfCare ke FHIR server SATUSEHAT
  */
-function sendImmunization($token, $payload) {
+function sendEpisodeOfCare($token, $payload) {
     global $URLFHIRSATUSEHAT;
 
-    $url = $URLFHIRSATUSEHAT . "/Immunization";
+    $url = $URLFHIRSATUSEHAT . "/EpisodeOfCare";
     $payload_string = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
     $ch = curl_init();
@@ -293,16 +249,15 @@ function sendImmunization($token, $payload) {
 
     $data = json_decode($response, true);
     
-    // Status HTTP 200 OK atau 201 Created menunjukkan keberhasilan
     if ($http_code == 201 || $http_code == 200) {
         return [
             'success' => true,
             'http_code' => $http_code,
-            'message' => 'Data Imunisasi berhasil terkirim dan disimpan di SATUSEHAT.',
+            'message' => 'Resource EpisodeOfCare berhasil terkirim dan disimpan di SATUSEHAT.',
             'response' => $data
         ];
     } else {
-        $err_msg = 'Gagal mengirim data. Kode HTTP: ' . $http_code;
+        $err_msg = 'Gagal mengirim data EpisodeOfCare. Kode HTTP: ' . $http_code;
         if (isset($data['issue'][0]['diagnostics'])) {
             $err_msg .= ' | Detail: ' . $data['issue'][0]['diagnostics'];
         }
@@ -386,77 +341,6 @@ function searchPatientByNIK($token, $nik) {
     }
 }
 
-/**
- * Mencari data praktisi (nakes) di SATUSEHAT berdasarkan NIK (mengembalikan IHS ID & Nama)
- */
-function searchPractitionerByNIK($token, $nik) {
-    global $URLFHIRSATUSEHAT;
-    
-    $url = $URLFHIRSATUSEHAT . "/Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|" . urlencode($nik);
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $token
-    ]);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curl_error = curl_error($ch);
-    curl_close($ch);
-    
-    if ($response === false) {
-        return [
-            'success' => false,
-            'message' => 'Curl Error searching practitioner: ' . $curl_error
-        ];
-    }
-    
-    $data = json_decode($response, true);
-    if ($http_code == 200 && isset($data['resourceType']) && $data['resourceType'] === 'Bundle') {
-        if (isset($data['total']) && $data['total'] > 0 && isset($data['entry'][0]['resource'])) {
-            $practitioner = $data['entry'][0]['resource'];
-            $id = $practitioner['id'] ?? '';
-            
-            $name = '';
-            if (isset($practitioner['name'][0]['text'])) {
-                $name = $practitioner['name'][0]['text'];
-            } elseif (isset($practitioner['name'][0]['given'])) {
-                $name = implode(' ', $practitioner['name'][0]['given']);
-                if (isset($practitioner['name'][0]['family'])) {
-                    $name .= ' ' . $practitioner['name'][0]['family'];
-                }
-            }
-            
-            return [
-                'success' => true,
-                'id' => $id,
-                'name' => $name,
-                'response' => $data
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Nakes dengan NIK ' . $nik . ' tidak ditemukan di basis data SATUSEHAT.'
-            ];
-        }
-    } else {
-        $err_msg = 'Gagal mencari data nakes. Kode HTTP: ' . $http_code;
-        if (isset($data['issue'][0]['diagnostics'])) {
-            $err_msg .= ' | Detail: ' . $data['issue'][0]['diagnostics'];
-        }
-        return [
-            'success' => false,
-            'message' => $err_msg,
-            'response' => $data
-        ];
-    }
-}
-
 // Atur default datetime untuk input form (Local Waktu Saat Ini)
 $default_datetime = date('Y-m-d\TH:i');
 ?>
@@ -465,7 +349,7 @@ $default_datetime = date('Y-m-d\TH:i');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirim Vaksin SATUSEHAT - <?php echo htmlspecialchars($nama_instansi); ?></title>
+    <title>Kirim EpisodeOfCare SATUSEHAT - <?php echo htmlspecialchars($nama_instansi); ?></title>
     <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -946,12 +830,6 @@ $default_datetime = date('Y-m-d\TH:i');
             margin-top: 10px;
         }
 
-        /* Tooltips */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
         /* Footer copy */
         footer {
             text-align: center;
@@ -990,8 +868,8 @@ $default_datetime = date('Y-m-d\TH:i');
         <!-- Page Title & Status -->
         <div class="page-title-section">
             <div>
-                <h1><i class="fa-solid fa-syringe"></i> Kirim Data Imunisasi (Vaksin)</h1>
-                <p style="color: var(--text-muted); margin-top: 4px; font-size: 14px;">Bridging data vaksinasi pasien ke basis data Satu Sehat Kemenkes secara realtime.</p>
+                <h1><i class="fa-solid fa-folder-open"></i> Kirim EpisodeOfCare (Episode Perawatan)</h1>
+                <p style="color: var(--text-muted); margin-top: 4px; font-size: 14px;">Membuat episode perawatan untuk program medis (ANC, Kanker, TB, dll.) di platform SATUSEHAT.</p>
             </div>
             
             <div class="header-actions">
@@ -1026,7 +904,7 @@ $default_datetime = date('Y-m-d\TH:i');
 
                 <!-- Tab content Form -->
                 <div class="card-body-scrollable" id="tab-form-content">
-                    <form id="immunization-form">
+                    <form id="episodeofcare-form">
                         
                         <!-- Pasien Section -->
                         <div class="section-divider">Data Pasien</div>
@@ -1054,96 +932,45 @@ $default_datetime = date('Y-m-d\TH:i');
                             </div>
                         </div>
 
-                        <!-- Vaksin Section -->
-                        <div class="section-divider">Data Vaksinasi</div>
+                        <!-- Episode Details -->
+                        <div class="section-divider">Detail Episode Perawatan</div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="vaccine_code">Kode Vaksin (KFA)</label>
-                                <input type="text" id="vaccine_code" class="form-input" value="VG137" placeholder="Contoh: VG137" required>
+                                <label class="form-label" for="status">Status Episode</label>
+                                <select id="status" class="form-input" style="height: 44px; background-color: #fafafa;">
+                                    <option value="active" selected>active (Sedang Berjalan)</option>
+                                    <option value="planned">planned (Direncanakan)</option>
+                                    <option value="waitlist">waitlist (Daftar Tunggu)</option>
+                                    <option value="onhold">onhold (Ditangguhkan)</option>
+                                    <option value="finished">finished (Selesai)</option>
+                                    <option value="cancelled">cancelled (Dibatalkan)</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="vaccine_display">Nama Vaksin (Display)</label>
-                                <input type="text" id="vaccine_display" class="form-input" value="quadrivalent" placeholder="Nama display vaksin" required>
+                                <label class="form-label" for="identifier_value">ID Episode SIMRS (Identifier)</label>
+                                <input type="text" id="identifier_value" class="form-input" value="EOC-2026-0001" placeholder="Contoh: EOC-2026-0001" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="dose_number">Dosis Ke-</label>
-                                <input type="number" id="dose_number" class="form-input" value="1" min="1" required>
+                                <label class="form-label" for="start_time">Waktu Mulai Episode</label>
+                                <input type="datetime-local" id="start_time" class="form-input" value="<?php echo $default_datetime; ?>" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="location_display">Lokasi / Faskes Pelaksana</label>
-                                <input type="text" id="location_display" class="form-input" value="<?php echo htmlspecialchars($nama_instansi); ?>" placeholder="Nama Rumah Sakit" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="occurrence_date_time">Waktu Pemberian Vaksin</label>
-                                <input type="datetime-local" id="occurrence_date_time" class="form-input" value="<?php echo $default_datetime; ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="recorded_date_time">Waktu Pencatatan Sistem</label>
-                                <input type="datetime-local" id="recorded_date_time" class="form-input" value="<?php echo $default_datetime; ?>" required>
-                            </div>
-                        </div>
-
-                        <!-- Kunjungan & Nakes Section -->
-                        <div class="section-divider">Referensi Layanan & Nakes</div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="encounter_id">ID Kunjungan (Encounter UUID)</label>
-                            <input type="text" id="encounter_id" class="form-input" value="4a546c9a-6f30-4804-97c1-21fc0b7bcbe1" placeholder="Encounter UUID" required>
-                        </div>
-
-                        <!-- Pencarian NIK Nakes -->
-                        <div class="form-group full-width" style="margin-bottom: 20px;">
-                            <label class="form-label">Cari ID Praktisi via NIK Kemenkes (Lookup)</label>
-                            <div style="display: flex; gap: 10px;">
-                                <input type="text" id="nik_nakes_lookup" class="form-input" placeholder="Masukkan 16 digit NIK Dokter/Nakes" maxlength="16" style="flex: 1;">
-                                <button type="button" class="btn-primary" id="btn-nik-nakes-lookup" onclick="lookupPractitionerByNIK()" style="padding: 10px 20px; box-shadow: none; white-space: nowrap;">
-                                    <i class="fa-solid fa-magnifying-glass"></i> Cari Nakes
-                                </button>
-                            </div>
-                            <div id="nik-nakes-lookup-feedback" style="font-size: 12px; margin-top: 5px; font-weight: 500;"></div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="practitioner_id">ID Praktisi (Nakes UUID)</label>
-                                <input type="text" id="practitioner_id" class="form-input" value="10001231676" placeholder="Practitioner UUID" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="practitioner_name">Nama Dokter / Pemeriksa</label>
-                                <input type="text" id="practitioner_name" class="form-input" value="dr. Ratna Sari Ritonga., M.M., Sp.A, FISQua" placeholder="Nama Lengkap & Gelar" required>
+                                <label class="form-label" for="end_time">Waktu Selesai (Opsional)</label>
+                                <input type="datetime-local" id="end_time" class="form-input">
                             </div>
                         </div>
 
                         <!-- Bridging SIMRS Section -->
-                        <div class="section-divider">Bridging SIMRS Lokal (Opsional untuk Simpan DB)</div>
+                        <div class="section-divider">Bridging SIMRS Lokal (Untuk Simpan DB)</div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="no_rawat">Nomor Rawat (no_rawat)</label>
-                                <input type="text" id="no_rawat" class="form-input" placeholder="Contoh: 2026/04/12/000001">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="kode_brng">Kode Barang / Vaksin (kode_brng)</label>
-                                <input type="text" id="kode_brng" class="form-input" placeholder="Contoh: OBT0001">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="no_batch">Nomor Batch (no_batch)</label>
-                                <input type="text" id="no_batch" class="form-input" placeholder="Contoh: B12345">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="no_faktur">Nomor Faktur (no_faktur)</label>
-                                <input type="text" id="no_faktur" class="form-input" placeholder="Contoh: FAK6789">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label" for="no_rawat">Nomor Rawat Pasien (no_rawat)</label>
+                            <input type="text" id="no_rawat" class="form-input" placeholder="Contoh: 2026/07/11/000001">
+                            <small style="color: var(--text-muted); font-size: 11px;">Jika diisi, relasi EOC terkirim akan disimpan ke tabel local <code>satu_sehat_episodeofcare</code>.</small>
                         </div>
 
                     </form>
@@ -1180,7 +1007,7 @@ $default_datetime = date('Y-m-d\TH:i');
                     </button>
                 </div>
 
-                <!-- Console Output Log (dynamically opened on execution) -->
+                <!-- Console Output Log -->
                 <div class="card-body-scrollable" id="console-output" style="display: none; background: #0f172a; border-top: 2px solid var(--border); max-height: 350px;">
                     <div class="console-body">
                         <!-- Progress Stepper -->
@@ -1195,7 +1022,7 @@ $default_datetime = date('Y-m-d\TH:i');
                             </div>
                             <div class="step-item" id="step-send">
                                 <span class="step-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
-                                <span>Langkah 3: Transmisi Data ke Endpoint Imunisasi...</span>
+                                <span>Langkah 3: Transmisi Data ke Endpoint EpisodeOfCare...</span>
                             </div>
                             <div class="step-item" id="step-db">
                                 <span class="step-icon"><i class="fa-solid fa-database"></i></span>
@@ -1232,13 +1059,14 @@ $default_datetime = date('Y-m-d\TH:i');
     <!-- Logic JS -->
     <script>
         let currentTab = 'form';
+        const organizationId = "<?php echo $ORGANIZATIONID; ?>";
         const rawJsonTextarea = document.getElementById('raw_json_textarea');
         const liveJsonPreview = document.getElementById('live-json-preview');
 
         // Initial loading
         document.addEventListener('DOMContentLoaded', function() {
             // Pasang event listener ke seluruh input form untuk regenerasi JSON
-            const formInputs = document.querySelectorAll('#immunization-form input');
+            const formInputs = document.querySelectorAll('#episodeofcare-form input, #episodeofcare-form select');
             formInputs.forEach(input => {
                 input.addEventListener('input', updateJSONFromForm);
             });
@@ -1277,98 +1105,50 @@ $default_datetime = date('Y-m-d\TH:i');
             }
         }
 
-        // Membaca input fields dan mengembalikan string JSON standar HL7 FHIR Immunization
+        // Membaca input fields dan mengembalikan string JSON standar HL7 FHIR EpisodeOfCare
         function generateJSONFromFields() {
             const patientId = document.getElementById('patient_id').value.trim();
             const patientName = document.getElementById('patient_name').value.trim();
-            const vaccineCode = document.getElementById('vaccine_code').value.trim();
-            const vaccineDisplay = document.getElementById('vaccine_display').value.trim();
-            const occurrenceTime = document.getElementById('occurrence_date_time').value;
-            const recordedTime = document.getElementById('recorded_date_time').value;
-            const encounterId = document.getElementById('encounter_id').value.trim();
-            const practitionerId = document.getElementById('practitioner_id').value.trim();
-            const practitionerName = document.getElementById('practitioner_name').value.trim();
-            const doseNumber = parseInt(document.getElementById('dose_number').value) || 1;
-            const locationDisplay = document.getElementById('location_display').value.trim();
+            const status = document.getElementById('status').value;
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+            const identifierValue = document.getElementById('identifier_value').value.trim();
 
             // Format datetime ISO 8601 dengan offset local +07:00 (WIB)
-            let occurrenceFormatted = occurrenceTime;
-            if (occurrenceFormatted && occurrenceFormatted.length === 16) {
-                occurrenceFormatted += ":00+07:00";
+            let startFormatted = startTime;
+            if (startFormatted && startFormatted.length === 16) {
+                startFormatted += ":00+07:00";
             }
-            let recordedFormatted = recordedTime;
-            if (recordedFormatted && recordedFormatted.length === 16) {
-                recordedFormatted += ":00+07:00";
+            let endFormatted = endTime;
+            if (endFormatted && endFormatted.length === 16) {
+                endFormatted += ":00+07:00";
             }
 
             const jsonObject = {
-                "resourceType": "Immunization",
-                "status": "completed",
-                "vaccineCode": {
-                    "coding": [
-                        {
-                            "system": "http://sys-ids.kemkes.go.id/kfa",
-                            "code": vaccineCode,
-                            "display": vaccineDisplay
-                        }
-                    ]
-                },
+                "resourceType": "EpisodeOfCare",
+                "status": status,
+                "identifier": [
+                    {
+                        "system": "http://sys-ids.kemkes.go.id/episodeofcare/" + organizationId,
+                        "use": "official",
+                        "value": identifierValue
+                    }
+                ],
                 "patient": {
                     "reference": "Patient/" + patientId,
                     "display": patientName
                 },
-                "occurrenceDateTime": occurrenceFormatted,
-                "recorded": recordedFormatted,
-                "primarySource": false,
-                "reportOrigin": {
-                    "coding": [
-                        {
-                            "system": "http://terminology.hl7.org/CodeSystem/immunization-origin",
-                            "code": "recall",
-                            "display": "Parent/Guardian/Patient Recall"
-                        }
-                    ]
+                "managingOrganization": {
+                    "reference": "Organization/" + organizationId
                 },
-                "performer": [
-                    {
-                        "function": {
-                            "coding": [
-                                {
-                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0443",
-                                    "code": "EP",
-                                    "display": "Entering Provider"
-                                }
-                            ]
-                        },
-                        "actor": {
-                            "reference": "Practitioner/" + practitionerId,
-                            "display": practitionerName
-                        }
-                    }
-                ],
-                "reasonCode": [
-                    {
-                        "coding": [
-                            {
-                                "system": "http://terminology.kemkes.go.id/CodeSystem/immunization-reason",
-                                "code": "IM-Pilihan",
-                                "display": "Imunisasi Pilihan"
-                            }
-                        ]
-                    }
-                ],
-                "encounter": {
-                    "reference": "Encounter/" + encounterId
-                },
-                "location": {
-                    "display": locationDisplay
-                },
-                "protocolApplied": [
-                    {
-                        "doseNumberPositiveInt": doseNumber
-                    }
-                ]
+                "period": {
+                    "start": startFormatted
+                }
             };
+
+            if (endFormatted) {
+                jsonObject.period.end = endFormatted;
+            }
 
             return JSON.stringify(jsonObject, null, 2);
         }
@@ -1413,18 +1193,13 @@ $default_datetime = date('Y-m-d\TH:i');
 
             // Persiapkan AJAX payload
             const formData = new FormData();
-            formData.append('action', 'kirim_vaksin');
+            formData.append('action', 'kirim_episodeofcare');
             formData.append('payload', payloadToSend);
-            
-            // Sertakan parameter SIMRS lokal
             formData.append('no_rawat', document.getElementById('no_rawat').value.trim());
-            formData.append('kode_brng', document.getElementById('kode_brng').value.trim());
-            formData.append('no_batch', document.getElementById('no_batch').value.trim());
-            formData.append('no_faktur', document.getElementById('no_faktur').value.trim());
 
             const startTime = performance.now();
 
-            fetch('satu_sehat_kirim_vaksin.php', {
+            fetch('satu_sehat_kirim_episode_of_care.php', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1463,13 +1238,13 @@ $default_datetime = date('Y-m-d\TH:i');
                     setStepStatus('step-db', 'active');
                     if (data.db_saved) {
                         setStepStatus('step-db', 'success');
-                        showConsoleSuccess(data.message + ' & Berhasil sinkronisasi ke tabel satu_sehat_immunization.', data.http_code, data.response);
+                        showConsoleSuccess(data.message + ' & Berhasil sinkronisasi ke tabel satu_sehat_episodeofcare.', data.http_code, data.response);
                     } else if (data.db_error) {
                         setStepStatus('step-db', 'failed');
                         showConsoleError(data.message + ' | Database Error: ' + data.db_error, data.http_code, data.response);
                     } else {
                         setStepStatus('step-db', 'success');
-                        document.getElementById('step-db-text').textContent = 'Langkah 4: Sinkronisasi Database SIMRS Lokal (Dilewati - Nomor Rawat/Kode Barang Kosong)';
+                        document.getElementById('step-db-text').textContent = 'Langkah 4: Sinkronisasi Database SIMRS Lokal (Dilewati - Nomor Rawat Kosong)';
                         showConsoleSuccess(data.message + ' (Sinkronisasi DB dilewati)', data.http_code, data.response);
                     }
                 } else {
@@ -1581,7 +1356,7 @@ $default_datetime = date('Y-m-d\TH:i');
             const formData = new FormData();
             formData.append('action', 'clear_token');
 
-            fetch('satu_sehat_kirim_vaksin.php', {
+            fetch('satu_sehat_kirim_episode_of_care.php', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1629,7 +1404,7 @@ $default_datetime = date('Y-m-d\TH:i');
             formData.append('action', 'cari_pasien_nik');
             formData.append('nik', nik);
             
-            fetch('satu_sehat_kirim_vaksin.php', {
+            fetch('satu_sehat_kirim_episode_of_care.php', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1649,75 +1424,6 @@ $default_datetime = date('Y-m-d\TH:i');
                     // Update input fields
                     document.getElementById('patient_id').value = data.id;
                     document.getElementById('patient_name').value = data.name;
-                    
-                    // Regenerasi Live JSON Preview
-                    updateJSONFromForm();
-                } else {
-                    feedback.style.color = 'var(--error)';
-                    feedback.textContent = '❌ ' + data.message;
-                }
-            })
-            .catch(err => {
-                btn.disabled = false;
-                feedback.style.color = 'var(--error)';
-                feedback.textContent = '❌ Terjadi kesalahan: ' + err.message;
-            });
-        }
-
-        // Jalankan lookup jika menekan tombol Enter di input NIK Nakes
-        document.getElementById('nik_nakes_lookup').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                lookupPractitionerByNIK();
-            }
-        });
-
-        // Mencari Nakes Berdasarkan NIK ke SATUSEHAT
-        function lookupPractitionerByNIK() {
-            const nikInput = document.getElementById('nik_nakes_lookup');
-            const nik = nikInput.value.trim();
-            const feedback = document.getElementById('nik-nakes-lookup-feedback');
-            const btn = document.getElementById('btn-nik-nakes-lookup');
-            
-            if (nik.length === 0) {
-                feedback.style.color = 'var(--error)';
-                feedback.textContent = '⚠️ Silakan masukkan NIK terlebih dahulu.';
-                return;
-            }
-            if (!/^\d{16}$/.test(nik)) {
-                feedback.style.color = 'var(--error)';
-                feedback.textContent = '⚠️ NIK harus berisi tepat 16 digit angka.';
-                return;
-            }
-            
-            feedback.style.color = 'var(--text-muted)';
-            feedback.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sedang mencari di platform SATUSEHAT...';
-            btn.disabled = true;
-            
-            const formData = new FormData();
-            formData.append('action', 'cari_nakes_nik');
-            formData.append('nik', nik);
-            
-            fetch('satu_sehat_kirim_vaksin.php', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('HTTP status ' + res.status);
-                return res.json();
-            })
-            .then(data => {
-                btn.disabled = false;
-                if (data.success) {
-                    feedback.style.color = 'var(--success)';
-                    feedback.innerHTML = '✅ Nakes ditemukan!';
-                    
-                    // Update input fields
-                    document.getElementById('practitioner_id').value = data.id;
-                    document.getElementById('practitioner_name').value = data.name;
                     
                     // Regenerasi Live JSON Preview
                     updateJSONFromForm();
