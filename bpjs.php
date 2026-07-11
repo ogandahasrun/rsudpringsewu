@@ -166,6 +166,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-address-card"></i>
                 <span>Cek Rujukan JKN</span>
             </a>             
+            <a href="satu_sehat_kirim_vaksin.php" title="Kirim Vaksin SATUSEHAT">
+                <i class="fas fa-syringe"></i>
+                <span>Kirim Vaksin SATUSEHAT</span>
+            </a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
