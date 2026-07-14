@@ -135,6 +135,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Evaluasi Biaya Pasien Ralan BPJS</span>
             </a>
+            <a href="evaluasi_obat_pasien_bpjs.php" title="Evaluasi Obat Pasien Ralan BPJS">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Evaluasi Obat Pasien Ralan BPJS</span>
+            </a>    
             <a href="kelengkapanranap.php" title="Kelengkapan Berkas Rawat Inap">
                 <i class="fas fa-bed"></i>
                 <span>Kelengkapan Berkas Rawat Inap</span>
@@ -157,3 +161,5 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <footer>by IT rsudpringsewu</footer>
 </body>
 </html>
+
+evaluasi_obat_pasien_bpjs.php
