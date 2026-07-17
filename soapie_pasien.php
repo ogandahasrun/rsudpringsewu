@@ -2,9 +2,12 @@
 session_start();
 include 'koneksi.php';
 
-// Menentukan NIK petugas yang login
+// Pastikan wajib login
 $nip = isset($_SESSION['nik']) ? $_SESSION['nik'] : (isset($_SESSION['username']) ? $_SESSION['username'] : '');
-if (empty($nip)) { $nip = '26091986'; } // Default fallback jika belum login
+if (empty($nip)) {
+    header("Location: login.php");
+    exit();
+}
 
 // Filter Data
 $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d');
