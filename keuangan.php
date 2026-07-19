@@ -125,6 +125,11 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
          <a href="kontrol_open_billing.php" class="menu-item">
             <i class="fas fa-file-invoice-dollar fa-2x" style="color:#059669;"></i>
             <span style="color:#222;font-weight:bold;">Kontrol Open Billing</span>        
+         </a>
+         <a href="lec_pendapatan_berdasarkan_billing.php" class="menu-item" title="Pendapatan Berdasarkan Billing">
+            <i class="fas fa-file-invoice-dollar fa-2x" style="color:#10b981;"></i>
+            <span style="color:#222;font-weight:bold;">Pendapatan Berdasarkan Billing</span>
+         </a>
     </div>
 
 
