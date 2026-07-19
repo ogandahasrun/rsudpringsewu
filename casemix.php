@@ -161,5 +161,3 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
     <footer>by IT rsudpringsewu</footer>
 </body>
 </html>
-
-evaluasi_obat_pasien_bpjs.php
