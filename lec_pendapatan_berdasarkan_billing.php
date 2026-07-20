@@ -225,7 +225,7 @@ if ($result_pj) {
             background: white;
             border-radius: 12px;
             border: 1px solid var(--border);
-            overflow: hidden;
+            overflow-x: auto;
             margin-top: 10px;
         }
 
