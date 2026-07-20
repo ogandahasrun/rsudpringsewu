@@ -463,6 +463,7 @@ if ($result_pj) {
                                     <th class="text-right">PPN Obat</th>
                                     <th class="text-right">Potongan</th>
                                     <th class="text-right">Sub Total</th>
+                                    <th>Keterangan Potongan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -511,6 +512,10 @@ if ($result_pj) {
                                                       FROM rawat_inap_drpr
                                                       WHERE rawat_inap_drpr.no_rawat = ?";
                                 $stmt_ranap_sub = mysqli_prepare($koneksi, $query_ranap_sub);
+
+                                // Query 4: Discount description for a specific no_rawat
+                                $query_potongan_ket_sub = "SELECT GROUP_CONCAT(nama_pengurangan SEPARATOR ', ') as nama_pengurangan FROM pengurangan_biaya WHERE no_rawat = ?";
+                                $stmt_potongan_ket_sub = mysqli_prepare($koneksi, $query_potongan_ket_sub);
 
                                 while ($row = mysqli_fetch_assoc($result_main)) {
                                     $no_rawat = $row['no_rawat'];
@@ -561,6 +566,17 @@ if ($result_pj) {
                                         }
                                     }
 
+                                    // 4. Fetch discount description from pengurangan_biaya
+                                    $ket_potongan = '';
+                                    if ($stmt_potongan_ket_sub) {
+                                        mysqli_stmt_bind_param($stmt_potongan_ket_sub, "s", $no_rawat);
+                                        mysqli_stmt_execute($stmt_potongan_ket_sub);
+                                        $res_ket = mysqli_stmt_get_result($stmt_potongan_ket_sub);
+                                        if ($r_ket = mysqli_fetch_assoc($res_ket)) {
+                                            $ket_potongan = $r_ket['nama_pengurangan'] ?? '';
+                                        }
+                                    }
+
                                     // Calculate columns based on rules
                                     $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
                                     $col_pelayanan_penunjang = $penunjang;
@@ -592,6 +608,7 @@ if ($result_pj) {
                                                 <td class='text-right'>" . formatRupiah($date_totals['ppn_obat']) . "</td>
                                                 <td class='text-right' style='color: var(--danger);'>" . formatRupiah($date_totals['potongan']) . "</td>
                                                 <td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['sub_total']) . "</td>
+                                                <td></td>
                                               </tr>";
                                               
                                         // Reset date totals
@@ -647,6 +664,7 @@ if ($result_pj) {
                                         <td class="text-right"><?php echo formatRupiah($col_ppn_obat); ?></td>
                                         <td class="text-right" style="color: var(--danger);"><?php echo formatRupiah($col_potongan); ?></td>
                                         <td class="text-right" style="font-weight: 600; color: var(--primary);"><?php echo formatRupiah($col_subtotal); ?></td>
+                                        <td><?php echo htmlspecialchars($ket_potongan); ?></td>
                                     </tr>
                                 <?php
                                 }
@@ -665,12 +683,14 @@ if ($result_pj) {
                                             <td class='text-right'>" . formatRupiah($date_totals['ppn_obat']) . "</td>
                                             <td class='text-right' style='color: var(--danger);'>" . formatRupiah($date_totals['potongan']) . "</td>
                                             <td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['sub_total']) . "</td>
+                                            <td></td>
                                           </tr>";
                                 }
  
                                 if ($stmt_billing_sub) mysqli_stmt_close($stmt_billing_sub);
                                 if ($stmt_ralan_sub) mysqli_stmt_close($stmt_ralan_sub);
                                 if ($stmt_ranap_sub) mysqli_stmt_close($stmt_ranap_sub);
+                                if ($stmt_potongan_ket_sub) mysqli_stmt_close($stmt_potongan_ket_sub);
                                 ?>
                             </tbody>
                             <tfoot>
@@ -687,6 +707,7 @@ if ($result_pj) {
                                     <th class="text-right"><?php echo formatRupiah($totals['ppn_obat']); ?></th>
                                     <th class="text-right" style="color: white; background: linear-gradient(135deg, #ef4444, #dc2626);"><?php echo formatRupiah($totals['potongan']); ?></th>
                                     <th class="text-right" style="color: white; background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold;"><?php echo formatRupiah($totals['sub_total']); ?></th>
+                                    <th></th>
                                 </tr>
                             </tfoot>
                         </table>
