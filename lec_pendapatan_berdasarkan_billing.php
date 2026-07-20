@@ -225,7 +225,8 @@ if ($result_pj) {
             background: white;
             border-radius: 12px;
             border: 1px solid var(--border);
-            overflow-x: auto;
+            max-height: 75vh;
+            overflow: auto;
             margin-top: 10px;
         }
 
@@ -255,17 +256,22 @@ if ($result_pj) {
 
         table.dataTable {
             width: 100% !important;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 13px;
         }
 
         table.dataTable thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
             background-color: #f8fafc;
             color: var(--text-main);
             font-weight: 600;
             padding: 14px 16px;
             text-align: left;
             border-bottom: 2px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         table.dataTable tbody td {
@@ -279,11 +285,15 @@ if ($result_pj) {
         }
 
         table.dataTable tfoot th {
+            position: sticky;
+            bottom: 0;
+            z-index: 15;
             background-color: #f8fafc;
             font-weight: 700;
             padding: 14px 16px;
             border-top: 2px solid var(--border);
             color: var(--text-main);
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .text-right {
@@ -440,6 +450,7 @@ if ($result_pj) {
                                     <th>No. Rawat</th>
                                     <th>No. RM</th>
                                     <th>Nama Pasien</th>
+                                    <th>Penjab</th>
                                     <th>Nama Perawatan</th>
                                     <th class="text-right">Rawat Jalan</th>
                                     <th class="text-right">Penunjang</th>
@@ -563,13 +574,13 @@ if ($result_pj) {
                                     $col_potongan = $potongan_total;
 
                                     $col_subtotal = ($col_rawat_jalan + $col_pelayanan_penunjang + $col_operasi + $col_lensa + 
-                                                     $col_obat_bhp + $col_ranap + $col_narkose + $col_laboratorium + $col_ppn_obat) - $col_potongan;
+                                                     $col_obat_bhp + $col_ranap + $col_narkose + $col_laboratorium + $col_ppn_obat) + $col_potongan;
 
                                     $tgl_byr = $row['tgl_byr'];
                                     if ($current_date !== null && $current_date !== $tgl_byr) {
                                         // Output subtotal row for the previous date
                                         echo "<tr class='subtotal-row' style='background-color: #f1f5f9; font-weight: 700; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border);'>
-                                                <td colspan='6' class='text-center'>SUBTOTAL TANGGAL " . htmlspecialchars($current_date) . "</td>
+                                                <td colspan='7' class='text-center'>SUBTOTAL TANGGAL " . htmlspecialchars($current_date) . "</td>
                                                 <td class='text-right'>" . formatRupiah($date_totals['ralan']) . "</td>
                                                 <td class='text-right'>" . formatRupiah($date_totals['penunjang']) . "</td>
                                                 <td class='text-right'>" . formatRupiah($date_totals['operasi']) . "</td>
@@ -623,6 +634,7 @@ if ($result_pj) {
                                         <td><span class="badge"><?php echo htmlspecialchars($row['no_rawat']); ?></span></td>
                                         <td><?php echo htmlspecialchars($row['no_rkm_medis']); ?></td>
                                         <td><?php echo htmlspecialchars($row['nm_pasien']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['png_jawab']); ?></td>
                                         <td><?php echo htmlspecialchars($row['nm_perawatan']); ?></td>
                                         <td class="text-right"><?php echo formatRupiah($col_rawat_jalan); ?></td>
                                         <td class="text-right"><?php echo formatRupiah($col_pelayanan_penunjang); ?></td>
@@ -641,7 +653,7 @@ if ($result_pj) {
 
                                 if ($current_date !== null) {
                                     echo "<tr class='subtotal-row' style='background-color: #f1f5f9; font-weight: 700; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border);'>
-                                            <td colspan='6' class='text-center'>SUBTOTAL TANGGAL " . htmlspecialchars($current_date) . "</td>
+                                            <td colspan='7' class='text-center'>SUBTOTAL TANGGAL " . htmlspecialchars($current_date) . "</td>
                                             <td class='text-right'>" . formatRupiah($date_totals['ralan']) . "</td>
                                             <td class='text-right'>" . formatRupiah($date_totals['penunjang']) . "</td>
                                             <td class='text-right'>" . formatRupiah($date_totals['operasi']) . "</td>
@@ -663,7 +675,7 @@ if ($result_pj) {
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="6" class="text-center">GRAND TOTAL</th>
+                                    <th colspan="7" class="text-center">GRAND TOTAL</th>
                                     <th class="text-right"><?php echo formatRupiah($totals['ralan']); ?></th>
                                     <th class="text-right"><?php echo formatRupiah($totals['penunjang']); ?></th>
                                     <th class="text-right"><?php echo formatRupiah($totals['operasi']); ?></th>
