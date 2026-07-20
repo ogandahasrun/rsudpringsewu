@@ -451,7 +451,7 @@ if ($result_pj) {
                                     <th>No. RM</th>
                                     <th>Nama Pasien</th>
                                     <th>Penjab</th>
-                                    <th>Nama Perawatan</th>
+                                    <th>Nomor Nota</th>
                                     <th class="text-right">Rawat Jalan</th>
                                     <th class="text-right">Penunjang</th>
                                     <th class="text-right">Operasi</th>
