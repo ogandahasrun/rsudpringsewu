@@ -549,7 +549,8 @@ if ($result_pj) {
                                 // Query 1: Billing details for a specific no_rawat
                                 $query_billing_sub = "SELECT 
                                                         Sum(CASE WHEN status = 'registrasi' THEN totalbiaya ELSE 0 END) as registrasi_total,
-                                                        Sum(CASE WHEN status = 'operasi' AND nm_perawatan <> 'Pemeriksaan NCT' THEN totalbiaya ELSE 0 END) as operasi_total,
+                                                        Sum(CASE WHEN status = 'operasi' AND nm_perawatan NOT LIKE '%Pemeriksaan NCT%' THEN totalbiaya ELSE 0 END) as operasi_total,
+                                                        Sum(CASE WHEN status = 'operasi' AND nm_perawatan LIKE '%Pemeriksaan NCT%' THEN totalbiaya ELSE 0 END) as nct_total,
                                                         Sum(CASE WHEN status = 'obat' AND nm_perawatan LIKE '%lensa%' AND nm_perawatan <> 'PPN Obat' THEN totalbiaya ELSE 0 END) as lensa_total,
                                                         Sum(CASE WHEN status = 'obat' AND nm_perawatan NOT LIKE '%lensa%' AND nm_perawatan <> 'PPN Obat' THEN totalbiaya ELSE 0 END) as obat_bhp_total,
                                                         Sum(CASE WHEN status = 'kamar' THEN totalbiaya ELSE 0 END) as kamar_total,
@@ -586,7 +587,7 @@ if ($result_pj) {
                                         $no_rawat = $row['no_rawat'];
 
                                         // 1. Fetch from billing table
-                                        $registrasi_total = 0; $operasi_total = 0; $lensa_total = 0;
+                                        $registrasi_total = 0; $operasi_total = 0; $nct_total = 0; $lensa_total = 0;
                                         $obat_bhp_total = 0; $kamar_total = 0; $narkose_total = 0;
                                         $laborat_total = 0; $ppn_obat_total = 0; $potongan_total = 0;
 
@@ -597,6 +598,7 @@ if ($result_pj) {
                                             if ($r_bill = mysqli_fetch_assoc($res_bill)) {
                                                 $registrasi_total = $r_bill['registrasi_total'] ?? 0;
                                                 $operasi_total = $r_bill['operasi_total'] ?? 0;
+                                                $nct_total = $r_bill['nct_total'] ?? 0;
                                                 $lensa_total = $r_bill['lensa_total'] ?? 0;
                                                 $obat_bhp_total = $r_bill['obat_bhp_total'] ?? 0;
                                                 $kamar_total = $r_bill['kamar_total'] ?? 0;
@@ -644,7 +646,7 @@ if ($result_pj) {
 
                                         // Calculate columns based on rules
                                         $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
-                                        $col_pelayanan_penunjang = $penunjang;
+                                        $col_pelayanan_penunjang = $penunjang + $nct_total;
                                         $col_operasi = $operasi_total;
                                         $col_lensa = $lensa_total;
                                         $col_obat_bhp = $obat_bhp_total;
