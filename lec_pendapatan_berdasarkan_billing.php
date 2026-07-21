@@ -22,6 +22,16 @@ if ($result_pj) {
         $penjab_options[] = $row_pj;
     }
 }
+
+// Retrieve list of payment accounts (akun_bayar)
+$akun_bayar_options = [];
+$query_ab = "SELECT nama_bayar FROM akun_bayar ORDER BY nama_bayar ASC";
+$result_ab = mysqli_query($koneksi, $query_ab);
+if ($result_ab) {
+    while ($row_ab = mysqli_fetch_assoc($result_ab)) {
+        $akun_bayar_options[] = $row_ab['nama_bayar'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -446,12 +456,13 @@ if ($result_pj) {
                                         p.nm_pasien,
                                         p.nota_jual,
                                         p.ppn,
+                                        p.nama_bayar,
                                         COALESCE(SUM(d.total), 0) as total_obat_bhp
                                     FROM penjualan p
                                     LEFT JOIN detailjual d ON p.nota_jual = d.nota_jual
                                     WHERE p.tgl_jual BETWEEN ? AND ?
                                       AND p.status = 'Sudah Dibayar'
-                                    GROUP BY p.nota_jual, p.tgl_jual, p.no_rkm_medis, p.nm_pasien, p.ppn";
+                                    GROUP BY p.nota_jual, p.tgl_jual, p.no_rkm_medis, p.nm_pasien, p.ppn, p.nama_bayar";
                 $stmt_pj = mysqli_prepare($koneksi, $query_penjualan);
                 if ($stmt_pj) {
                     mysqli_stmt_bind_param($stmt_pj, "ss", $tgl_awal, $tgl_akhir);
@@ -468,7 +479,8 @@ if ($result_pj) {
                                 'png_jawab' => 'Penjualan Bebas',
                                 'nm_perawatan' => $r_pj['nota_jual'],
                                 'total_obat_bhp' => (float)$r_pj['total_obat_bhp'],
-                                'ppn' => (float)$r_pj['ppn']
+                                'ppn' => (float)$r_pj['ppn'],
+                                'nama_bayar' => $r_pj['nama_bayar']
                             ];
                         }
                     }
@@ -528,6 +540,9 @@ if ($result_pj) {
                                     <th class="text-right">Potongan</th>
                                     <th class="text-right">Sub Total</th>
                                     <th>Keterangan Potongan</th>
+                                    <?php foreach ($akun_bayar_options as $ab) { ?>
+                                        <th class="text-right"><?php echo htmlspecialchars($ab); ?></th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -536,14 +551,20 @@ if ($result_pj) {
                                 $totals = [
                                     'ralan' => 0, 'penunjang' => 0, 'operasi' => 0, 'lensa' => 0,
                                     'obat_bhp' => 0, 'ranap' => 0, 'narkose' => 0, 'laborat' => 0,
-                                    'ppn_obat' => 0, 'potongan' => 0, 'sub_total' => 0
+                                    'ppn_obat' => 0, 'potongan' => 0, 'sub_total' => 0,
+                                    'bayar' => []
                                 ];
                                 $current_date = null;
                                 $date_totals = [
                                     'ralan' => 0, 'penunjang' => 0, 'operasi' => 0, 'lensa' => 0,
                                     'obat_bhp' => 0, 'ranap' => 0, 'narkose' => 0, 'laborat' => 0,
-                                    'ppn_obat' => 0, 'potongan' => 0, 'sub_total' => 0
+                                    'ppn_obat' => 0, 'potongan' => 0, 'sub_total' => 0,
+                                    'bayar' => []
                                 ];
+                                foreach ($akun_bayar_options as $ab) {
+                                    $totals['bayar'][$ab] = 0;
+                                    $date_totals['bayar'][$ab] = 0;
+                                }
 
                                 // Prepare subqueries to avoid database latency/redundancy for billing rows
                                 // Query 1: Billing details for a specific no_rawat
@@ -582,7 +603,20 @@ if ($result_pj) {
                                 $query_potongan_ket_sub = "SELECT GROUP_CONCAT(nama_pengurangan SEPARATOR ', ') as nama_pengurangan FROM pengurangan_biaya WHERE no_rawat = ?";
                                 $stmt_potongan_ket_sub = mysqli_prepare($koneksi, $query_potongan_ket_sub);
 
+                                // Query 5: Payment account details for outpatient
+                                $query_nota_jl_sub = "SELECT nama_bayar, Sum(besar_bayar) as bayar FROM detail_nota_jalan WHERE no_rawat = ? GROUP BY nama_bayar";
+                                $stmt_nota_jl_sub = mysqli_prepare($koneksi, $query_nota_jl_sub);
+
+                                // Query 6: Payment account details for inpatient
+                                $query_nota_in_sub = "SELECT nama_bayar, Sum(besar_bayar) as bayar FROM detail_nota_inap WHERE no_rawat = ? GROUP BY nama_bayar";
+                                $stmt_nota_in_sub = mysqli_prepare($koneksi, $query_nota_in_sub);
+
                                 foreach ($combined_rows as $row) {
+                                    $row_bayar = [];
+                                    foreach ($akun_bayar_options as $ab) {
+                                        $row_bayar[$ab] = 0;
+                                    }
+
                                     if ($row['type'] === 'billing') {
                                         $no_rawat = $row['no_rawat'];
 
@@ -644,6 +678,32 @@ if ($result_pj) {
                                             }
                                         }
 
+                                        // 5. Fetch payment account details from detail_nota_jalan
+                                        if ($stmt_nota_jl_sub) {
+                                            mysqli_stmt_bind_param($stmt_nota_jl_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_nota_jl_sub);
+                                            $res_njl = mysqli_stmt_get_result($stmt_nota_jl_sub);
+                                            while ($r_njl = mysqli_fetch_assoc($res_njl)) {
+                                                $nm_b = $r_njl['nama_bayar'];
+                                                if (isset($row_bayar[$nm_b])) {
+                                                    $row_bayar[$nm_b] += (float)$r_njl['bayar'];
+                                                }
+                                            }
+                                        }
+
+                                        // 6. Fetch payment account details from detail_nota_inap
+                                        if ($stmt_nota_in_sub) {
+                                            mysqli_stmt_bind_param($stmt_nota_in_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_nota_in_sub);
+                                            $res_nin = mysqli_stmt_get_result($stmt_nota_in_sub);
+                                            while ($r_nin = mysqli_fetch_assoc($res_nin)) {
+                                                $nm_b = $r_nin['nama_bayar'];
+                                                if (isset($row_bayar[$nm_b])) {
+                                                    $row_bayar[$nm_b] += (float)$r_nin['bayar'];
+                                                }
+                                            }
+                                        }
+
                                         // Calculate columns based on rules
                                         $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
                                         $col_pelayanan_penunjang = $penunjang + $nct_total;
@@ -672,6 +732,11 @@ if ($result_pj) {
                                         $col_potongan = 0;
                                         $col_subtotal = $col_obat_bhp + $col_ppn_obat;
                                         $ket_potongan = '';
+
+                                        $nm_b = $row['nama_bayar'] ?? '';
+                                        if (isset($row_bayar[$nm_b])) {
+                                            $row_bayar[$nm_b] = $col_subtotal;
+                                        }
                                     }
 
                                     $tgl_byr = $row['tgl_byr'];
@@ -690,12 +755,21 @@ if ($result_pj) {
                                                 <td class='text-right'>" . formatRupiah($date_totals['ppn_obat']) . "</td>
                                                 <td class='text-right' style='color: var(--danger);'>" . formatRupiah($date_totals['potongan']) . "</td>
                                                 <td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['sub_total']) . "</td>
-                                                <td></td>
-                                              </tr>";
+                                                <td></td>";
+                                        foreach ($akun_bayar_options as $ab) {
+                                            echo "<td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['bayar'][$ab] ?? 0) . "</td>";
+                                        }
+                                        echo "</tr>";
                                               
                                         // Reset date totals
                                         foreach ($date_totals as $k => $v) {
-                                            $date_totals[$k] = 0;
+                                            if ($k === 'bayar') {
+                                                foreach ($akun_bayar_options as $ab) {
+                                                    $date_totals['bayar'][$ab] = 0;
+                                                }
+                                            } else {
+                                                $date_totals[$k] = 0;
+                                            }
                                         }
                                     }
                                     
@@ -726,6 +800,12 @@ if ($result_pj) {
                                     $totals['ppn_obat'] += $col_ppn_obat;
                                     $totals['potongan'] += $col_potongan;
                                     $totals['sub_total'] += $col_subtotal;
+
+                                    foreach ($akun_bayar_options as $ab) {
+                                        $val = $row_bayar[$ab] ?? 0;
+                                        $date_totals['bayar'][$ab] += $val;
+                                        $totals['bayar'][$ab] += $val;
+                                    }
                                 ?>
                                     <tr>
                                         <td class="text-center"><?php echo $no++; ?></td>
@@ -747,6 +827,9 @@ if ($result_pj) {
                                         <td class="text-right" style="color: var(--danger);"><?php echo formatRupiah($col_potongan); ?></td>
                                         <td class="text-right" style="font-weight: 600; color: var(--primary);"><?php echo formatRupiah($col_subtotal); ?></td>
                                         <td><?php echo htmlspecialchars($ket_potongan); ?></td>
+                                        <?php foreach ($akun_bayar_options as $ab) { ?>
+                                            <td class="text-right"><?php echo formatRupiah($row_bayar[$ab] ?? 0); ?></td>
+                                        <?php } ?>
                                     </tr>
                                 <?php
                                 }
@@ -765,14 +848,19 @@ if ($result_pj) {
                                             <td class='text-right'>" . formatRupiah($date_totals['ppn_obat']) . "</td>
                                             <td class='text-right' style='color: var(--danger);'>" . formatRupiah($date_totals['potongan']) . "</td>
                                             <td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['sub_total']) . "</td>
-                                            <td></td>
-                                          </tr>";
+                                            <td></td>";
+                                    foreach ($akun_bayar_options as $ab) {
+                                        echo "<td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['bayar'][$ab] ?? 0) . "</td>";
+                                    }
+                                    echo "</tr>";
                                 }
 
                                 if ($stmt_billing_sub) mysqli_stmt_close($stmt_billing_sub);
                                 if ($stmt_ralan_sub) mysqli_stmt_close($stmt_ralan_sub);
                                 if ($stmt_ranap_sub) mysqli_stmt_close($stmt_ranap_sub);
                                 if ($stmt_potongan_ket_sub) mysqli_stmt_close($stmt_potongan_ket_sub);
+                                if ($stmt_nota_jl_sub) mysqli_stmt_close($stmt_nota_jl_sub);
+                                if ($stmt_nota_in_sub) mysqli_stmt_close($stmt_nota_in_sub);
                                 ?>
                             </tbody>
                             <tfoot>
@@ -790,6 +878,9 @@ if ($result_pj) {
                                     <th class="text-right" style="color: white; background: linear-gradient(135deg, #ef4444, #dc2626);"><?php echo formatRupiah($totals['potongan']); ?></th>
                                     <th class="text-right" style="color: white; background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold;"><?php echo formatRupiah($totals['sub_total']); ?></th>
                                     <th></th>
+                                    <?php foreach ($akun_bayar_options as $ab) { ?>
+                                        <th class="text-right" style="color: white; background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold;"><?php echo formatRupiah($totals['bayar'][$ab] ?? 0); ?></th>
+                                    <?php } ?>
                                 </tr>
                             </tfoot>
                         </table>
