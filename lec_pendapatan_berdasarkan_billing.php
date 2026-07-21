@@ -409,6 +409,8 @@ if ($result_pj) {
             }
             $query_main .= " ORDER BY billing.tgl_byr ASC, reg_periksa.no_rawat ASC";
 
+            $combined_rows = [];
+
             $stmt_main = mysqli_prepare($koneksi, $query_main);
             if ($stmt_main) {
                 if (!empty($kd_pj)) {
@@ -420,7 +422,69 @@ if ($result_pj) {
                 mysqli_stmt_execute($stmt_main);
                 $result_main = mysqli_stmt_get_result($stmt_main);
 
-                if ($result_main && mysqli_num_rows($result_main) > 0) {
+                if ($result_main) {
+                    while ($row = mysqli_fetch_assoc($result_main)) {
+                        $combined_rows[] = [
+                            'type' => 'billing',
+                            'tgl_byr' => $row['tgl_byr'],
+                            'no_rawat' => $row['no_rawat'],
+                            'no_rkm_medis' => $row['no_rkm_medis'],
+                            'nm_pasien' => $row['nm_pasien'],
+                            'png_jawab' => $row['png_jawab'],
+                            'nm_perawatan' => $row['nm_perawatan']
+                        ];
+                    }
+                }
+                mysqli_stmt_close($stmt_main);
+            }
+
+            // Fetch Penjualan Bebas data if Penjab filter is empty or 'UMU' (Umum)
+            if (empty($kd_pj) || $kd_pj == 'UMU') {
+                $query_penjualan = "SELECT 
+                                        p.tgl_jual,
+                                        p.no_rkm_medis,
+                                        p.nm_pasien,
+                                        p.nota_jual,
+                                        p.ppn,
+                                        COALESCE(SUM(d.total), 0) as total_obat_bhp
+                                    FROM penjualan p
+                                    LEFT JOIN detailjual d ON p.nota_jual = d.nota_jual
+                                    WHERE p.tgl_jual BETWEEN ? AND ?
+                                      AND p.status = 'Sudah Dibayar'
+                                    GROUP BY p.nota_jual, p.tgl_jual, p.no_rkm_medis, p.nm_pasien, p.ppn";
+                $stmt_pj = mysqli_prepare($koneksi, $query_penjualan);
+                if ($stmt_pj) {
+                    mysqli_stmt_bind_param($stmt_pj, "ss", $tgl_awal, $tgl_akhir);
+                    mysqli_stmt_execute($stmt_pj);
+                    $res_pj = mysqli_stmt_get_result($stmt_pj);
+                    if ($res_pj) {
+                        while ($r_pj = mysqli_fetch_assoc($res_pj)) {
+                            $combined_rows[] = [
+                                'type' => 'penjualan',
+                                'tgl_byr' => $r_pj['tgl_jual'],
+                                'no_rawat' => '-',
+                                'no_rkm_medis' => (!empty($r_pj['no_rkm_medis']) && $r_pj['no_rkm_medis'] !== '-') ? $r_pj['no_rkm_medis'] : '-',
+                                'nm_pasien' => $r_pj['nm_pasien'],
+                                'png_jawab' => 'Penjualan Bebas',
+                                'nm_perawatan' => $r_pj['nota_jual'],
+                                'total_obat_bhp' => (float)$r_pj['total_obat_bhp'],
+                                'ppn' => (float)$r_pj['ppn']
+                            ];
+                        }
+                    }
+                    mysqli_stmt_close($stmt_pj);
+                }
+            }
+
+            // Sort combined rows by tgl_byr ASC, then nm_perawatan ASC
+            usort($combined_rows, function($a, $b) {
+                if ($a['tgl_byr'] === $b['tgl_byr']) {
+                    return strcmp($a['nm_perawatan'], $b['nm_perawatan']);
+                }
+                return strcmp($a['tgl_byr'], $b['tgl_byr']);
+            });
+
+            if (count($combined_rows) > 0) {
             ?>
                     <div class="table-responsive">
                         <!-- Custom pagination controls -->
@@ -481,7 +545,7 @@ if ($result_pj) {
                                     'ppn_obat' => 0, 'potongan' => 0, 'sub_total' => 0
                                 ];
 
-                                // Prepare subqueries to avoid database latency/redundancy
+                                // Prepare subqueries to avoid database latency/redundancy for billing rows
                                 // Query 1: Billing details for a specific no_rawat
                                 $query_billing_sub = "SELECT 
                                                         Sum(CASE WHEN status = 'registrasi' THEN totalbiaya ELSE 0 END) as registrasi_total,
@@ -517,80 +581,96 @@ if ($result_pj) {
                                 $query_potongan_ket_sub = "SELECT GROUP_CONCAT(nama_pengurangan SEPARATOR ', ') as nama_pengurangan FROM pengurangan_biaya WHERE no_rawat = ?";
                                 $stmt_potongan_ket_sub = mysqli_prepare($koneksi, $query_potongan_ket_sub);
 
-                                while ($row = mysqli_fetch_assoc($result_main)) {
-                                    $no_rawat = $row['no_rawat'];
+                                foreach ($combined_rows as $row) {
+                                    if ($row['type'] === 'billing') {
+                                        $no_rawat = $row['no_rawat'];
 
-                                    // 1. Fetch from billing table
-                                    $registrasi_total = 0; $operasi_total = 0; $lensa_total = 0;
-                                    $obat_bhp_total = 0; $kamar_total = 0; $narkose_total = 0;
-                                    $laborat_total = 0; $ppn_obat_total = 0; $potongan_total = 0;
+                                        // 1. Fetch from billing table
+                                        $registrasi_total = 0; $operasi_total = 0; $lensa_total = 0;
+                                        $obat_bhp_total = 0; $kamar_total = 0; $narkose_total = 0;
+                                        $laborat_total = 0; $ppn_obat_total = 0; $potongan_total = 0;
 
-                                    if ($stmt_billing_sub) {
-                                        mysqli_stmt_bind_param($stmt_billing_sub, "s", $no_rawat);
-                                        mysqli_stmt_execute($stmt_billing_sub);
-                                        $res_bill = mysqli_stmt_get_result($stmt_billing_sub);
-                                        if ($r_bill = mysqli_fetch_assoc($res_bill)) {
-                                            $registrasi_total = $r_bill['registrasi_total'] ?? 0;
-                                            $operasi_total = $r_bill['operasi_total'] ?? 0;
-                                            $lensa_total = $r_bill['lensa_total'] ?? 0;
-                                            $obat_bhp_total = $r_bill['obat_bhp_total'] ?? 0;
-                                            $kamar_total = $r_bill['kamar_total'] ?? 0;
-                                            $narkose_total = $r_bill['narkose_total'] ?? 0;
-                                            $laborat_total = $r_bill['laborat_total'] ?? 0;
-                                            $ppn_obat_total = $r_bill['ppn_obat_total'] ?? 0;
-                                            $potongan_total = $r_bill['potongan_total'] ?? 0;
+                                        if ($stmt_billing_sub) {
+                                            mysqli_stmt_bind_param($stmt_billing_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_billing_sub);
+                                            $res_bill = mysqli_stmt_get_result($stmt_billing_sub);
+                                            if ($r_bill = mysqli_fetch_assoc($res_bill)) {
+                                                $registrasi_total = $r_bill['registrasi_total'] ?? 0;
+                                                $operasi_total = $r_bill['operasi_total'] ?? 0;
+                                                $lensa_total = $r_bill['lensa_total'] ?? 0;
+                                                $obat_bhp_total = $r_bill['obat_bhp_total'] ?? 0;
+                                                $kamar_total = $r_bill['kamar_total'] ?? 0;
+                                                $narkose_total = $r_bill['narkose_total'] ?? 0;
+                                                $laborat_total = $r_bill['laborat_total'] ?? 0;
+                                                $ppn_obat_total = $r_bill['ppn_obat_total'] ?? 0;
+                                                $potongan_total = $r_bill['potongan_total'] ?? 0;
+                                            }
                                         }
-                                    }
 
-                                    // 2. Fetch from rawat_jl_drpr
-                                    $ralan_tindakan = 0;
-                                    $penunjang = 0;
-                                    if ($stmt_ralan_sub) {
-                                        mysqli_stmt_bind_param($stmt_ralan_sub, "s", $no_rawat);
-                                        mysqli_stmt_execute($stmt_ralan_sub);
-                                        $res_ralan = mysqli_stmt_get_result($stmt_ralan_sub);
-                                        if ($r_ralan = mysqli_fetch_assoc($res_ralan)) {
-                                            $ralan_tindakan = $r_ralan['ralan_tindakan'] ?? 0;
-                                            $penunjang = $r_ralan['penunjang'] ?? 0;
+                                        // 2. Fetch from rawat_jl_drpr
+                                        $ralan_tindakan = 0;
+                                        $penunjang = 0;
+                                        if ($stmt_ralan_sub) {
+                                            mysqli_stmt_bind_param($stmt_ralan_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_ralan_sub);
+                                            $res_ralan = mysqli_stmt_get_result($stmt_ralan_sub);
+                                            if ($r_ralan = mysqli_fetch_assoc($res_ralan)) {
+                                                $ralan_tindakan = $r_ralan['ralan_tindakan'] ?? 0;
+                                                $penunjang = $r_ralan['penunjang'] ?? 0;
+                                            }
                                         }
-                                    }
 
-                                    // 3. Fetch from rawat_inap_drpr
-                                    $ranap_tindakan = 0;
-                                    if ($stmt_ranap_sub) {
-                                        mysqli_stmt_bind_param($stmt_ranap_sub, "s", $no_rawat);
-                                        mysqli_stmt_execute($stmt_ranap_sub);
-                                        $res_ranap = mysqli_stmt_get_result($stmt_ranap_sub);
-                                        if ($r_ranap = mysqli_fetch_assoc($res_ranap)) {
-                                            $ranap_tindakan = $r_ranap['ranap_tindakan'] ?? 0;
+                                        // 3. Fetch from rawat_inap_drpr
+                                        $ranap_tindakan = 0;
+                                        if ($stmt_ranap_sub) {
+                                            mysqli_stmt_bind_param($stmt_ranap_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_ranap_sub);
+                                            $res_ranap = mysqli_stmt_get_result($stmt_ranap_sub);
+                                            if ($r_ranap = mysqli_fetch_assoc($res_ranap)) {
+                                                $ranap_tindakan = $r_ranap['ranap_tindakan'] ?? 0;
+                                            }
                                         }
-                                    }
 
-                                    // 4. Fetch discount description from pengurangan_biaya
-                                    $ket_potongan = '';
-                                    if ($stmt_potongan_ket_sub) {
-                                        mysqli_stmt_bind_param($stmt_potongan_ket_sub, "s", $no_rawat);
-                                        mysqli_stmt_execute($stmt_potongan_ket_sub);
-                                        $res_ket = mysqli_stmt_get_result($stmt_potongan_ket_sub);
-                                        if ($r_ket = mysqli_fetch_assoc($res_ket)) {
-                                            $ket_potongan = $r_ket['nama_pengurangan'] ?? '';
+                                        // 4. Fetch discount description from pengurangan_biaya
+                                        $ket_potongan = '';
+                                        if ($stmt_potongan_ket_sub) {
+                                            mysqli_stmt_bind_param($stmt_potongan_ket_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_potongan_ket_sub);
+                                            $res_ket = mysqli_stmt_get_result($stmt_potongan_ket_sub);
+                                            if ($r_ket = mysqli_fetch_assoc($res_ket)) {
+                                                $ket_potongan = $r_ket['nama_pengurangan'] ?? '';
+                                            }
                                         }
+
+                                        // Calculate columns based on rules
+                                        $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
+                                        $col_pelayanan_penunjang = $penunjang;
+                                        $col_operasi = $operasi_total;
+                                        $col_lensa = $lensa_total;
+                                        $col_obat_bhp = $obat_bhp_total;
+                                        $col_ranap = $kamar_total + $ranap_tindakan;
+                                        $col_narkose = $narkose_total;
+                                        $col_laboratorium = $laborat_total;
+                                        $col_ppn_obat = $ppn_obat_total;
+                                        $col_potongan = $potongan_total;
+
+                                        $col_subtotal = ($col_rawat_jalan + $col_pelayanan_penunjang + $col_operasi + $col_lensa + 
+                                                         $col_obat_bhp + $col_ranap + $col_narkose + $col_laboratorium + $col_ppn_obat) + $col_potongan;
+                                    } else {
+                                        // Penjualan Bebas Row
+                                        $col_rawat_jalan = 0;
+                                        $col_pelayanan_penunjang = 0;
+                                        $col_operasi = 0;
+                                        $col_lensa = 0;
+                                        $col_obat_bhp = $row['total_obat_bhp'];
+                                        $col_ranap = 0;
+                                        $col_narkose = 0;
+                                        $col_laboratorium = 0;
+                                        $col_ppn_obat = $row['ppn'];
+                                        $col_potongan = 0;
+                                        $col_subtotal = $col_obat_bhp + $col_ppn_obat;
+                                        $ket_potongan = '';
                                     }
-
-                                    // Calculate columns based on rules
-                                    $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
-                                    $col_pelayanan_penunjang = $penunjang;
-                                    $col_operasi = $operasi_total;
-                                    $col_lensa = $lensa_total;
-                                    $col_obat_bhp = $obat_bhp_total;
-                                    $col_ranap = $kamar_total + $ranap_tindakan;
-                                    $col_narkose = $narkose_total;
-                                    $col_laboratorium = $laborat_total;
-                                    $col_ppn_obat = $ppn_obat_total;
-                                    $col_potongan = $potongan_total;
-
-                                    $col_subtotal = ($col_rawat_jalan + $col_pelayanan_penunjang + $col_operasi + $col_lensa + 
-                                                     $col_obat_bhp + $col_ranap + $col_narkose + $col_laboratorium + $col_ppn_obat) + $col_potongan;
 
                                     $tgl_byr = $row['tgl_byr'];
                                     if ($current_date !== null && $current_date !== $tgl_byr) {
@@ -686,7 +766,7 @@ if ($result_pj) {
                                             <td></td>
                                           </tr>";
                                 }
- 
+
                                 if ($stmt_billing_sub) mysqli_stmt_close($stmt_billing_sub);
                                 if ($stmt_ralan_sub) mysqli_stmt_close($stmt_ralan_sub);
                                 if ($stmt_ranap_sub) mysqli_stmt_close($stmt_ranap_sub);
@@ -717,17 +797,9 @@ if ($result_pj) {
                     echo '<div class="no-data">
                             <i class="fas fa-folder-open"></i>
                             <h3>Data Tidak Ditemukan</h3>
-                            <p>Tidak ada transaksi billing yang sesuai pada periode tanggal dan penjab yang dipilih.</p>
+                            <p>Tidak ada transaksi billing atau penjualan bebas yang sesuai pada periode tanggal dan penjab yang dipilih.</p>
                           </div>';
                 }
-                mysqli_stmt_close($stmt_main);
-            } else {
-                echo '<div class="no-data">
-                        <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
-                        <h3>Terjadi Kesalahan</h3>
-                        <p>Gagal menyiapkan query database: ' . htmlspecialchars(mysqli_error($koneksi)) . '</p>
-                      </div>';
-            }
             mysqli_close($koneksi);
             ?>
         </div>
