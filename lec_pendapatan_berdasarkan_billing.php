@@ -585,8 +585,9 @@ if ($result_ab) {
 
                                 // Query 2: Outpatient treatments for a specific no_rawat
                                 $query_ralan_sub = "SELECT 
-                                                        Sum(CASE WHEN jns_perawatan.kd_kategori <> 'PNJ01' THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_tindakan,
-                                                        Sum(CASE WHEN jns_perawatan.kd_kategori = 'PNJ01' THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as penunjang
+                                                        Sum(CASE WHEN jns_perawatan.kd_kategori NOT IN ('PNJ01', 'KP042', 'BDH02') THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_tindakan,
+                                                        Sum(CASE WHEN jns_perawatan.kd_kategori = 'PNJ01' THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as penunjang,
+                                                        Sum(CASE WHEN jns_perawatan.kd_kategori IN ('KP042', 'BDH02') THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_operasi
                                                       FROM rawat_jl_drpr
                                                       INNER JOIN jns_perawatan ON rawat_jl_drpr.kd_jenis_prw = jns_perawatan.kd_jenis_prw
                                                       WHERE rawat_jl_drpr.no_rawat = ?";
@@ -646,6 +647,7 @@ if ($result_ab) {
                                         // 2. Fetch from rawat_jl_drpr
                                         $ralan_tindakan = 0;
                                         $penunjang = 0;
+                                        $ralan_operasi = 0;
                                         if ($stmt_ralan_sub) {
                                             mysqli_stmt_bind_param($stmt_ralan_sub, "s", $no_rawat);
                                             mysqli_stmt_execute($stmt_ralan_sub);
@@ -653,6 +655,7 @@ if ($result_ab) {
                                             if ($r_ralan = mysqli_fetch_assoc($res_ralan)) {
                                                 $ralan_tindakan = $r_ralan['ralan_tindakan'] ?? 0;
                                                 $penunjang = $r_ralan['penunjang'] ?? 0;
+                                                $ralan_operasi = $r_ralan['ralan_operasi'] ?? 0;
                                             }
                                         }
 
@@ -707,7 +710,7 @@ if ($result_ab) {
                                         // Calculate columns based on rules
                                         $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
                                         $col_pelayanan_penunjang = $penunjang + $nct_total;
-                                        $col_operasi = $operasi_total;
+                                        $col_operasi = $operasi_total + $ralan_operasi;
                                         $col_lensa = $lensa_total;
                                         $col_obat_bhp = $obat_bhp_total;
                                         $col_ranap = $kamar_total + $ranap_tindakan;
