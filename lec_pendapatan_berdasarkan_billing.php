@@ -585,9 +585,9 @@ if ($result_ab) {
 
                                 // Query 2: Outpatient treatments for a specific no_rawat
                                 $query_ralan_sub = "SELECT 
-                                                        Sum(CASE WHEN jns_perawatan.kd_kategori NOT IN ('PNJ01', 'KP042', 'BDH02') THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_tindakan,
+                                                        Sum(CASE WHEN jns_perawatan.kd_kategori NOT IN ('PNJ01', 'KP042') THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_tindakan,
                                                         Sum(CASE WHEN jns_perawatan.kd_kategori = 'PNJ01' THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as penunjang,
-                                                        Sum(CASE WHEN jns_perawatan.kd_kategori IN ('KP042', 'BDH02') THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_operasi
+                                                        Sum(CASE WHEN jns_perawatan.kd_kategori = 'KP042' THEN rawat_jl_drpr.biaya_rawat ELSE 0 END) as ralan_operasi
                                                       FROM rawat_jl_drpr
                                                       INNER JOIN jns_perawatan ON rawat_jl_drpr.kd_jenis_prw = jns_perawatan.kd_jenis_prw
                                                       WHERE rawat_jl_drpr.no_rawat = ?";
