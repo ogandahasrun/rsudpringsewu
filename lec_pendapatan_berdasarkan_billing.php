@@ -540,6 +540,8 @@ if ($result_ab) {
                                     <th class="text-right">Potongan</th>
                                     <th class="text-right">Sub Total</th>
                                     <th>Keterangan Potongan</th>
+                                    <th>Dokter</th>
+                                    <th>Nama Tindakan</th>
                                     <?php foreach ($akun_bayar_options as $ab) { ?>
                                         <th class="text-right"><?php echo htmlspecialchars($ab); ?></th>
                                     <?php } ?>
@@ -611,6 +613,26 @@ if ($result_ab) {
                                 // Query 6: Payment account details for inpatient
                                 $query_nota_in_sub = "SELECT nama_bayar, Sum(besar_bayar) as bayar FROM detail_nota_inap WHERE no_rawat = ? GROUP BY nama_bayar";
                                 $stmt_nota_in_sub = mysqli_prepare($koneksi, $query_nota_in_sub);
+
+                                // Query 7: Dokter
+                                $query_dokter_sub = "SELECT dokter.nm_dokter 
+                                                     FROM reg_periksa 
+                                                     INNER JOIN dokter ON reg_periksa.kd_dokter = dokter.kd_dokter 
+                                                     WHERE reg_periksa.no_rawat = ?";
+                                $stmt_dokter_sub = mysqli_prepare($koneksi, $query_dokter_sub);
+
+                                // Query 8: Tindakan Operasi from billing
+                                $query_tindakan_op_bill_sub = "SELECT GROUP_CONCAT(nm_perawatan SEPARATOR ', ') as tindakan_op 
+                                                               FROM billing 
+                                                               WHERE no_rawat = ? AND status = 'operasi' AND nm_perawatan NOT LIKE '%Pemeriksaan NCT%'";
+                                $stmt_tindakan_op_bill_sub = mysqli_prepare($koneksi, $query_tindakan_op_bill_sub);
+
+                                // Query 9: Tindakan Operasi from rawat_jl_drpr
+                                $query_tindakan_op_ralan_sub = "SELECT GROUP_CONCAT(jns_perawatan.nm_perawatan SEPARATOR ', ') as tindakan_op 
+                                                                FROM rawat_jl_drpr 
+                                                                INNER JOIN jns_perawatan ON rawat_jl_drpr.kd_jenis_prw = jns_perawatan.kd_jenis_prw 
+                                                                WHERE rawat_jl_drpr.no_rawat = ? AND jns_perawatan.kd_kategori = 'KP042'";
+                                $stmt_tindakan_op_ralan_sub = mysqli_prepare($koneksi, $query_tindakan_op_ralan_sub);
 
                                 foreach ($combined_rows as $row) {
                                     $row_bayar = [];
@@ -707,6 +729,42 @@ if ($result_ab) {
                                             }
                                         }
 
+                                        // 7. Fetch Dokter
+                                        $nm_dokter = '-';
+                                        if ($stmt_dokter_sub) {
+                                            mysqli_stmt_bind_param($stmt_dokter_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_dokter_sub);
+                                            $res_dokter = mysqli_stmt_get_result($stmt_dokter_sub);
+                                            if ($r_dokter = mysqli_fetch_assoc($res_dokter)) {
+                                                $nm_dokter = $r_dokter['nm_dokter'] ?? '-';
+                                            }
+                                        }
+
+                                        // 8 & 9. Fetch Tindakan Operasi
+                                        $tindakan_op_arr = [];
+                                        if ($stmt_tindakan_op_bill_sub) {
+                                            mysqli_stmt_bind_param($stmt_tindakan_op_bill_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_tindakan_op_bill_sub);
+                                            $res_topb = mysqli_stmt_get_result($stmt_tindakan_op_bill_sub);
+                                            if ($r_topb = mysqli_fetch_assoc($res_topb)) {
+                                                if (!empty($r_topb['tindakan_op'])) {
+                                                    $tindakan_op_arr[] = $r_topb['tindakan_op'];
+                                                }
+                                            }
+                                        }
+
+                                        if ($stmt_tindakan_op_ralan_sub) {
+                                            mysqli_stmt_bind_param($stmt_tindakan_op_ralan_sub, "s", $no_rawat);
+                                            mysqli_stmt_execute($stmt_tindakan_op_ralan_sub);
+                                            $res_topr = mysqli_stmt_get_result($stmt_tindakan_op_ralan_sub);
+                                            if ($r_topr = mysqli_fetch_assoc($res_topr)) {
+                                                if (!empty($r_topr['tindakan_op'])) {
+                                                    $tindakan_op_arr[] = $r_topr['tindakan_op'];
+                                                }
+                                            }
+                                        }
+                                        $tindakan_operasi_str = empty($tindakan_op_arr) ? '-' : implode(', ', $tindakan_op_arr);
+
                                         // Calculate columns based on rules
                                         $col_rawat_jalan = $registrasi_total + $ralan_tindakan;
                                         $col_pelayanan_penunjang = $penunjang + $nct_total;
@@ -735,6 +793,8 @@ if ($result_ab) {
                                         $col_potongan = 0;
                                         $col_subtotal = $col_obat_bhp + $col_ppn_obat;
                                         $ket_potongan = '';
+                                        $nm_dokter = '-';
+                                        $tindakan_operasi_str = '-';
 
                                         $nm_b = $row['nama_bayar'] ?? '';
                                         if (isset($row_bayar[$nm_b])) {
@@ -758,7 +818,7 @@ if ($result_ab) {
                                                 <td class='text-right'>" . formatRupiah($date_totals['ppn_obat']) . "</td>
                                                 <td class='text-right' style='color: var(--danger);'>" . formatRupiah($date_totals['potongan']) . "</td>
                                                 <td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['sub_total']) . "</td>
-                                                <td></td>";
+                                                <td></td><td></td><td></td>";
                                         foreach ($akun_bayar_options as $ab) {
                                             echo "<td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['bayar'][$ab] ?? 0) . "</td>";
                                         }
@@ -830,6 +890,8 @@ if ($result_ab) {
                                         <td class="text-right" style="color: var(--danger);"><?php echo formatRupiah($col_potongan); ?></td>
                                         <td class="text-right" style="font-weight: 600; color: var(--primary);"><?php echo formatRupiah($col_subtotal); ?></td>
                                         <td><?php echo htmlspecialchars($ket_potongan); ?></td>
+                                        <td><?php echo htmlspecialchars($nm_dokter); ?></td>
+                                        <td><?php echo htmlspecialchars($tindakan_operasi_str); ?></td>
                                         <?php foreach ($akun_bayar_options as $ab) { ?>
                                             <td class="text-right"><?php echo formatRupiah($row_bayar[$ab] ?? 0); ?></td>
                                         <?php } ?>
@@ -851,7 +913,7 @@ if ($result_ab) {
                                             <td class='text-right'>" . formatRupiah($date_totals['ppn_obat']) . "</td>
                                             <td class='text-right' style='color: var(--danger);'>" . formatRupiah($date_totals['potongan']) . "</td>
                                             <td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['sub_total']) . "</td>
-                                            <td></td>";
+                                            <td></td><td></td><td></td>";
                                     foreach ($akun_bayar_options as $ab) {
                                         echo "<td class='text-right' style='color: var(--primary);'>" . formatRupiah($date_totals['bayar'][$ab] ?? 0) . "</td>";
                                     }
@@ -864,6 +926,9 @@ if ($result_ab) {
                                 if ($stmt_potongan_ket_sub) mysqli_stmt_close($stmt_potongan_ket_sub);
                                 if ($stmt_nota_jl_sub) mysqli_stmt_close($stmt_nota_jl_sub);
                                 if ($stmt_nota_in_sub) mysqli_stmt_close($stmt_nota_in_sub);
+                                if ($stmt_dokter_sub) mysqli_stmt_close($stmt_dokter_sub);
+                                if ($stmt_tindakan_op_bill_sub) mysqli_stmt_close($stmt_tindakan_op_bill_sub);
+                                if ($stmt_tindakan_op_ralan_sub) mysqli_stmt_close($stmt_tindakan_op_ralan_sub);
                                 ?>
                             </tbody>
                             <tfoot>
@@ -880,7 +945,7 @@ if ($result_ab) {
                                     <th class="text-right"><?php echo formatRupiah($totals['ppn_obat']); ?></th>
                                     <th class="text-right" style="color: white; background: linear-gradient(135deg, #ef4444, #dc2626);"><?php echo formatRupiah($totals['potongan']); ?></th>
                                     <th class="text-right" style="color: white; background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold;"><?php echo formatRupiah($totals['sub_total']); ?></th>
-                                    <th></th>
+                                    <th></th><th></th><th></th>
                                     <?php foreach ($akun_bayar_options as $ab) { ?>
                                         <th class="text-right" style="color: white; background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold;"><?php echo formatRupiah($totals['bayar'][$ab] ?? 0); ?></th>
                                     <?php } ?>
