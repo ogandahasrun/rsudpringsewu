@@ -879,6 +879,7 @@ if ($result_ab) {
                         }
                     }
                 ],
+                stateSave: true,
                 paging: true,
                 pageLength: 50,
                 ordering: false, // disabled to keep chronological subtotal grouping intact

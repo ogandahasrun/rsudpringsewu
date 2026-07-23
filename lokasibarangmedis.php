@@ -497,6 +497,19 @@ $url_params = http_build_query([
                 lokasiInput.focus();
                 lokasiInput.select();
             }
+            
+            // Restore and save scroll position of the table container
+            const tableContainer = document.querySelector('.table-container');
+            if (tableContainer) {
+                const savedScrollTop = sessionStorage.getItem('lokasibarangmedis_scroll');
+                if (savedScrollTop !== null) {
+                    tableContainer.scrollTop = parseInt(savedScrollTop, 10);
+                }
+                
+                tableContainer.addEventListener('scroll', function() {
+                    sessionStorage.setItem('lokasibarangmedis_scroll', tableContainer.scrollTop);
+                });
+            }
         });
         
         // Show notification function
