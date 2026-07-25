@@ -261,6 +261,7 @@
         function resetForm() {
             document.getElementById('tanggal_awal').value = '<?php echo date('Y-m-d'); ?>';
             document.getElementById('tanggal_akhir').value = '<?php echo date('Y-m-d'); ?>';
+            document.getElementById('kd_pj').value = '';
         }
     </script>
 </head>
@@ -281,6 +282,11 @@
     // Default value
     $tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y-m-d');
     $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
+    $kd_pj = isset($_POST['kd_pj']) ? $_POST['kd_pj'] : '';
+
+    // Query daftar jenis bayar / penjab
+    $query_pj = "SELECT kd_pj, png_jawab FROM penjab ORDER BY png_jawab ASC";
+    $result_pj = mysqli_query($koneksi, $query_pj);
     ?>
 
             <form method="POST" class="filter-form">
@@ -306,6 +312,21 @@
                                required 
                                value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
                     </div>
+
+                    <div class="filter-group">
+                        <label for="kd_pj">💳 Jenis Bayar</label>
+                        <select id="kd_pj" name="kd_pj">
+                            <option value="">-- Semua Jenis Bayar --</option>
+                            <?php
+                            if ($result_pj && mysqli_num_rows($result_pj) > 0) {
+                                while ($row_pj = mysqli_fetch_assoc($result_pj)) {
+                                    $selected = ($kd_pj == $row_pj['kd_pj']) ? 'selected' : '';
+                                    echo "<option value='" . htmlspecialchars($row_pj['kd_pj']) . "' {$selected}>" . htmlspecialchars($row_pj['png_jawab']) . "</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
@@ -322,6 +343,12 @@
     if (isset($_POST['filter'])) {
         $tanggal_awal = mysqli_real_escape_string($koneksi, $_POST['tanggal_awal']);
         $tanggal_akhir = mysqli_real_escape_string($koneksi, $_POST['tanggal_akhir']);
+        $kd_pj = isset($_POST['kd_pj']) ? mysqli_real_escape_string($koneksi, $_POST['kd_pj']) : '';
+        
+        $where_pj = "";
+        if (!empty($kd_pj)) {
+            $where_pj = " AND rp.kd_pj = '$kd_pj' ";
+        }
         
         $query = "SELECT 
                     ob.tanggal,
@@ -329,12 +356,14 @@
                     rp.no_rawat,
                     pas.no_rkm_medis,
                     pas.nm_pasien,
+                    pj.png_jawab,
                     MAX(cb.tanggal) AS tanggal_close_bill
                 FROM 
                     trackersql ob
                 INNER JOIN reg_periksa rp 
                     ON rp.no_rawat = SUBSTRING_INDEX(SUBSTRING_INDEX(ob.sqle, \"no_rawat='\", -1), \"'\", 1)
                 INNER JOIN pasien pas ON rp.no_rkm_medis = pas.no_rkm_medis
+                LEFT JOIN penjab pj ON rp.kd_pj = pj.kd_pj
                 LEFT JOIN pegawai peg ON ob.usere = peg.nik
                 LEFT JOIN trackersql cb 
                     ON cb.sqle LIKE '%update reg_periksa set status_bayar=''Sudah Bayar''%'
@@ -344,7 +373,8 @@
                     ob.sqle LIKE '%delete from billing%'
                     AND ob.sqle LIKE '%no_rawat=''%'
                     AND ob.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
-                GROUP BY ob.tanggal, peg.nama, rp.no_rawat, pas.no_rkm_medis, pas.nm_pasien
+                    $where_pj
+                GROUP BY ob.tanggal, peg.nama, rp.no_rawat, pas.no_rkm_medis, pas.nm_pasien, pj.png_jawab
                 ORDER BY ob.tanggal DESC";
         $result = mysqli_query($koneksi, $query);
         if ($result) {
@@ -364,6 +394,7 @@
                     <th>NO RAWAT</th>
                     <th>NO RKM MEDIS</th>
                     <th>NAMA PASIEN</th>
+                    <th>JENIS BAYAR</th>
                     <th>NAMA PEGAWAI</th>
                 </tr>";
             $no = 1; 
@@ -372,6 +403,7 @@
                 $no_rawat      = htmlspecialchars($row['no_rawat']);
                 $no_rkm_medis  = htmlspecialchars($row['no_rkm_medis']);
                 $nm_pasien     = htmlspecialchars($row['nm_pasien']);
+                $png_jawab     = htmlspecialchars($row['png_jawab'] ?? '-');
                 $nama          = htmlspecialchars($row['nama']);
 
                 // Tanggal close bill & selisih waktu
@@ -418,6 +450,7 @@
                         <td>{$no_rawat}</td>
                         <td>{$no_rkm_medis}</td>
                         <td>{$nm_pasien}</td>
+                        <td>{$png_jawab}</td>
                         <td>{$nama}</td>
                     </tr>";
                 $no++;
