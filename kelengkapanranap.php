@@ -331,16 +331,11 @@
         $kamar_join = "LEFT JOIN (
                         SELECT kamar_inap.no_rawat,
                                MAX(kamar_inap.tgl_masuk) AS tgl_masuk,
-                               SUBSTRING_INDEX(
-                                   GROUP_CONCAT(bangsal.nm_bangsal ORDER BY kamar_inap.tgl_masuk DESC SEPARATOR '||'),
-                                   '||',
-                                   1
-                               ) AS kamar,
-                               SUBSTRING_INDEX(
-                                   GROUP_CONCAT(kamar_inap.lama ORDER BY kamar_inap.tgl_masuk DESC SEPARATOR '||'),
-                                   '||',
-                                   1
-                               ) AS lama
+                               GROUP_CONCAT(bangsal.nm_bangsal ORDER BY kamar_inap.tgl_masuk ASC SEPARATOR ' ➔ ') AS kamar,
+                               (DATEDIFF(
+                                   MAX(IF(kamar_inap.tgl_keluar = '0000-00-00', CURRENT_DATE(), kamar_inap.tgl_keluar)), 
+                                   MIN(kamar_inap.tgl_masuk)
+                               ) + 1) AS lama
                         FROM kamar_inap
                         INNER JOIN kamar ON kamar_inap.kd_kamar = kamar.kd_kamar
                         INNER JOIN bangsal ON kamar.kd_bangsal = bangsal.kd_bangsal
