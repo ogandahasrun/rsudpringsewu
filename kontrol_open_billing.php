@@ -149,19 +149,27 @@
             transform: translateY(-2px);
         }
         .table-responsive {
+            max-height: 70vh;
+            overflow-y: auto;
             overflow-x: auto;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-top: 20px;
             -webkit-overflow-scrolling: touch;
+            position: relative;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             background: white;
             min-width: 900px;
         }
         th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #343a40;
             background: linear-gradient(45deg, #343a40, #495057);
             color: white;
             padding: 15px 12px;
@@ -169,6 +177,7 @@
             font-weight: bold;
             font-size: 13px;
             white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
         td {
             padding: 12px;
@@ -258,10 +267,22 @@
             }
         }
 
+        function changePage(page) {
+            let elem = document.getElementById('halaman');
+            if (elem) {
+                elem.value = page;
+                document.getElementById('formFilter').submit();
+            }
+        }
+
         function resetForm() {
             document.getElementById('tanggal_awal').value = '<?php echo date('Y-m-d'); ?>';
             document.getElementById('tanggal_akhir').value = '<?php echo date('Y-m-d'); ?>';
             document.getElementById('kd_pj').value = '';
+            document.getElementById('limit').value = '50';
+            if (document.getElementById('halaman')) {
+                document.getElementById('halaman').value = '1';
+            }
         }
     </script>
 </head>
@@ -283,13 +304,18 @@
     $tanggal_awal = isset($_POST['tanggal_awal']) ? $_POST['tanggal_awal'] : date('Y-m-d');
     $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date('Y-m-d');
     $kd_pj = isset($_POST['kd_pj']) ? $_POST['kd_pj'] : '';
+    $limit = isset($_POST['limit']) ? $_POST['limit'] : '50';
+    $halaman = isset($_POST['halaman']) ? (int)$_POST['halaman'] : 1;
+    if ($halaman < 1) $halaman = 1;
 
     // Query daftar jenis bayar / penjab
     $query_pj = "SELECT kd_pj, png_jawab FROM penjab ORDER BY png_jawab ASC";
     $result_pj = mysqli_query($koneksi, $query_pj);
     ?>
 
-            <form method="POST" class="filter-form">
+            <form method="POST" class="filter-form" id="formFilter">
+                <input type="hidden" name="filter" value="1">
+                <input type="hidden" id="halaman" name="halaman" value="<?php echo htmlspecialchars($halaman); ?>">
                 <div class="filter-title">
                     🔍 Filter Log Hapus Billing
                 </div>
@@ -327,10 +353,20 @@
                             ?>
                         </select>
                     </div>
+
+                    <div class="filter-group">
+                        <label for="limit">🔢 Tampilkan Data</label>
+                        <select id="limit" name="limit" onchange="document.getElementById('halaman').value=1; this.form.submit();">
+                            <option value="50" <?php echo ($limit == '50') ? 'selected' : ''; ?>>50 Data</option>
+                            <option value="100" <?php echo ($limit == '100') ? 'selected' : ''; ?>>100 Data</option>
+                            <option value="200" <?php echo ($limit == '200') ? 'selected' : ''; ?>>200 Data</option>
+                            <option value="semua" <?php echo ($limit == 'semua') ? 'selected' : ''; ?>>Semua Data</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
-                    <button type="submit" name="filter" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary">
                         📊 Tampilkan Laporan
                     </button>
                     <button type="button" onclick="resetForm()" class="btn btn-secondary">
@@ -344,13 +380,16 @@
         $tanggal_awal = mysqli_real_escape_string($koneksi, $_POST['tanggal_awal']);
         $tanggal_akhir = mysqli_real_escape_string($koneksi, $_POST['tanggal_akhir']);
         $kd_pj = isset($_POST['kd_pj']) ? mysqli_real_escape_string($koneksi, $_POST['kd_pj']) : '';
+        $limit = isset($_POST['limit']) ? $_POST['limit'] : '50';
+        $halaman = isset($_POST['halaman']) ? (int)$_POST['halaman'] : 1;
+        if ($halaman < 1) $halaman = 1;
         
         $where_pj = "";
         if (!empty($kd_pj)) {
             $where_pj = " AND rp.kd_pj = '$kd_pj' ";
         }
         
-        $query = "SELECT 
+        $query_base = "SELECT 
                     ob.tanggal,
                     peg.nama,
                     rp.no_rawat,
@@ -376,13 +415,50 @@
                     $where_pj
                 GROUP BY ob.tanggal, peg.nama, rp.no_rawat, pas.no_rkm_medis, pas.nm_pasien, pj.png_jawab
                 ORDER BY ob.tanggal DESC";
-        $result = mysqli_query($koneksi, $query);
-        if ($result) {
-            $total_rows = mysqli_num_rows($result);
+        $result_all = mysqli_query($koneksi, $query_base);
+        if ($result_all) {
+            $total_rows = mysqli_num_rows($result_all);
+            
+            // Hitung Pagination
+            if ($limit === 'semua') {
+                $total_pages = 1;
+                $halaman = 1;
+                $query = $query_base;
+                $offset = 0;
+            } else {
+                $limit_val = (int)$limit;
+                if ($limit_val <= 0) $limit_val = 50;
+                $total_pages = (int)ceil($total_rows / $limit_val);
+                if ($total_pages < 1) $total_pages = 1;
+                if ($halaman > $total_pages) $halaman = $total_pages;
+                
+                $offset = ($halaman - 1) * $limit_val;
+                $query = $query_base . " LIMIT $offset, $limit_val";
+            }
+            
+            $result = mysqli_query($koneksi, $query);
             
             echo '<div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">';
-            echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> log hapus billing</div>';
+            echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> log hapus billing';
+            if ($limit !== 'semua' && $total_pages > 1) {
+                echo ' <span style="color: #6c757d; font-size: 13px;">(Halaman ' . $halaman . ' dari ' . $total_pages . ')</span>';
+            }
+            echo '</div>';
+            
+            echo '<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">';
+            if ($limit !== 'semua' && $total_pages > 1) {
+                echo '<div style="display: flex; align-items: center; gap: 6px;">';
+                echo '<label for="halaman_select" style="font-weight: bold; font-size: 13px; color: #495057;">📄 Pilih Halaman:</label>';
+                echo '<select id="halaman_select" onchange="changePage(this.value)" style="padding: 8px 12px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 13px; outline: none; background: white; cursor: pointer;">';
+                for ($i = 1; $i <= $total_pages; $i++) {
+                    $selected_page = ($i == $halaman) ? 'selected' : '';
+                    echo "<option value='{$i}' {$selected_page}>Halaman {$i}</option>";
+                }
+                echo '</select>';
+                echo '</div>';
+            }
             echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
+            echo '</div>';
             echo '</div>';
             
             echo "<div class='table-responsive'><table>
@@ -397,7 +473,7 @@
                     <th>JENIS BAYAR</th>
                     <th>NAMA PEGAWAI</th>
                 </tr>";
-            $no = 1; 
+            $no = $offset + 1; 
             while ($row = mysqli_fetch_assoc($result)) {
                 $tanggal       = htmlspecialchars($row['tanggal']);
                 $no_rawat      = htmlspecialchars($row['no_rawat']);
@@ -456,6 +532,21 @@
                 $no++;
             }
             echo "</table></div>";
+            
+            if ($limit !== 'semua' && $total_pages > 1) {
+                echo '<div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8f9fa; padding: 12px 20px; border-radius: 8px; border: 1px solid #e9ecef;">';
+                echo '<div style="font-size: 13px; color: #495057; font-weight: 500;">Menampilkan halaman <strong>' . $halaman . '</strong> dari <strong>' . $total_pages . '</strong> (Total ' . $total_rows . ' data)</div>';
+                echo '<div style="display: flex; align-items: center; gap: 6px;">';
+                echo '<label for="halaman_select_bottom" style="font-weight: bold; font-size: 13px; color: #495057;">📄 Pilih Halaman:</label>';
+                echo '<select id="halaman_select_bottom" onchange="changePage(this.value)" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 13px; outline: none; background: white; cursor: pointer;">';
+                for ($i = 1; $i <= $total_pages; $i++) {
+                    $selected_page = ($i == $halaman) ? 'selected' : '';
+                    echo "<option value='{$i}' {$selected_page}>Halaman {$i}</option>";
+                }
+                echo '</select>';
+                echo '</div>';
+                echo '</div>';
+            }
             
             if ($total_rows == 0) {
                 echo '<div class="no-data">📋 Tidak ada log hapus billing pada rentang tanggal yang dipilih</div>';
