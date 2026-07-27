@@ -174,6 +174,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-folder-open"></i>
                 <span>Kirim EpisodeOfCare SATUSEHAT</span>
             </a>
+            <a href="satu_sehat_kirim_encounter.php" title="Kirim Encounter SATUSEHAT">
+                <i class="fas fa-user-nurse"></i>
+                <span>Kirim Encounter SATUSEHAT</span>
+            </a>
         </div>
     </div>
     <footer>by IT rsudpringsewu</footer>
