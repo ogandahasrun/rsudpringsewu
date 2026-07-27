@@ -1040,20 +1040,26 @@ $default_datetime = date('Y-m-d\TH:i');
                 <div class="card-body-scrollable" id="tab-form-content">
                     <form id="encounter-form">
                         
-                        <!-- Bridging SIMRS Section -->
-                        <div class="section-divider">Bridging SIMRS & Identifier</div>
+                        <!-- Bridging SIMRS & Organization Section -->
+                        <div class="section-divider">Organisasi & Bridging SIMRS</div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="no_rawat">Nomor Rawat / Registrasi SIMRS</label>
-                                <input type="text" id="no_rawat" class="form-input" value="2024/06/14/000001" placeholder="Contoh: 2024/06/14/000001">
-                                <small style="color: var(--text-muted); font-size: 11px;">Nomor registrasi lokal. Hasil UUID Encounter akan disimpan ke tabel <code>satu_sehat_encounter</code>.</small>
+                                <label class="form-label" for="org_id">Organization ID (SATUSEHAT)</label>
+                                <input type="text" id="org_id" class="form-input" value="<?php echo htmlspecialchars($ORGANIZATIONID); ?>" placeholder="Contoh: 100028530" required oninput="updateOrgIdDisplay()">
+                                <small style="color: var(--text-muted); font-size: 11px;">Default Organization ID Fasyankes</small>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="identifier_value">Identifier Value (No. Kunjungan)</label>
-                                <input type="text" id="identifier_value" class="form-input" value="P20240001" placeholder="Contoh: P20240001" required>
-                                <small style="color: var(--text-muted); font-size: 11px;">Sistem: <code>http://sys-ids.kemkes.go.id/encounter/<?php echo htmlspecialchars($ORGANIZATIONID); ?></code></small>
+                                <label class="form-label" for="no_rawat">Nomor Rawat / Registrasi SIMRS</label>
+                                <input type="text" id="no_rawat" class="form-input" value="2026/07/27/000021" placeholder="Contoh: 2026/07/27/000021" oninput="syncNoRawatToIdentifier()">
+                                <small style="color: var(--text-muted); font-size: 11px;">Hasil UUID Encounter akan disimpan ke tabel <code>satu_sehat_encounter</code>.</small>
                             </div>
+                        </div>
+
+                        <div class="form-group full-width" style="margin-bottom: 20px;">
+                            <label class="form-label" for="identifier_value">Identifier Value (No. Kunjungan)</label>
+                            <input type="text" id="identifier_value" class="form-input" value="2026/07/27/000021" placeholder="Contoh: 2026/07/27/000021" required>
+                            <small style="color: var(--text-muted); font-size: 11px;">Sistem: <code>http://sys-ids.kemkes.go.id/encounter/<span id="org_id_system_display"><?php echo htmlspecialchars($ORGANIZATIONID); ?></span></code></small>
                         </div>
 
                         <!-- Status & Class Section -->
@@ -1105,12 +1111,12 @@ $default_datetime = date('Y-m-d\TH:i');
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="patient_id">ID Pasien SATUSEHAT (IHS ID / UUID)</label>
-                                <input type="text" id="patient_id" class="form-input" value="100000030009" placeholder="Contoh: 100000030009" required>
-                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Patient/100000030009</code></small>
+                                <input type="text" id="patient_id" class="form-input" value="P01766631757" placeholder="Contoh: P01766631757" required>
+                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Patient/P01766631757</code></small>
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="patient_name">Nama Pasien</label>
-                                <input type="text" id="patient_name" class="form-input" value="Budi Santoso" placeholder="Nama Pasien" required>
+                                <input type="text" id="patient_name" class="form-input" value="MIFTAHUL BAROROH" placeholder="Nama Pasien" required>
                             </div>
                         </div>
 
@@ -1131,12 +1137,12 @@ $default_datetime = date('Y-m-d\TH:i');
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="practitioner_id">ID Nakes SATUSEHAT (Practitioner ID)</label>
-                                <input type="text" id="practitioner_id" class="form-input" value="N10000001" placeholder="Contoh: N10000001" required>
-                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Practitioner/N10000001</code></small>
+                                <input type="text" id="practitioner_id" class="form-input" value="10005678482" placeholder="Contoh: 10005678482" required>
+                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Practitioner/10005678482</code></small>
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="practitioner_name">Nama Dokter / Nakes</label>
-                                <input type="text" id="practitioner_name" class="form-input" value="Dokter Bronsig" placeholder="Nama Dokter" required>
+                                <input type="text" id="practitioner_name" class="form-input" value="dr. Nindya Sari Diajeng Larasati, SpJP" placeholder="Nama Dokter" required>
                             </div>
                         </div>
 
@@ -1164,7 +1170,7 @@ $default_datetime = date('Y-m-d\TH:i');
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="start_time">Waktu Mulai (Period Start)</label>
-                                <input type="datetime-local" id="start_time" class="form-input" value="2022-06-14T07:00" required>
+                                <input type="datetime-local" id="start_time" class="form-input" value="2026-07-27T09:00" required>
                                 <small style="color: var(--text-muted); font-size: 11px;">Otomatis diformat ISO-8601 (+07:00 WIB)</small>
                             </div>
                             <div class="form-group">
@@ -1191,12 +1197,12 @@ $default_datetime = date('Y-m-d\TH:i');
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="location_id">Location UUID SATUSEHAT</label>
-                                <input type="text" id="location_id" class="form-input" value="b017aa54-f1df-4ec2-9d84-8823815d7228" placeholder="Contoh: b017aa54-f1df-4ec2-9d84-8823815d7228" required>
-                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Location/b017aa54...</code></small>
+                                <input type="text" id="location_id" class="form-input" value="08e56886-e262-4acc-a598-63e497248af7" placeholder="Contoh: 08e56886-e262-4acc-a598-63e497248af7" required>
+                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Location/08e56886...</code></small>
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="location_display">Deskripsi Lokasi / Poliklinik / Ruangan</label>
-                                <input type="text" id="location_display" class="form-input" value="Ruang 1A, Poliklinik Bedah Rawat Jalan Terpadu, Lantai 2, Gedung G" placeholder="Nama Ruangan/Poli" required>
+                                <input type="text" id="location_display" class="form-input" value="Poliklinik Jantung" placeholder="Nama Ruangan/Poli" required>
                             </div>
                         </div>
 
@@ -1205,8 +1211,8 @@ $default_datetime = date('Y-m-d\TH:i');
                         
                         <div class="form-group full-width">
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
-                                <input type="checkbox" id="include_diagnosis" checked onchange="updateJSONFromForm()" style="width: 16px; height: 16px;">
-                                Sertakan Elemen Diagnosis (Wajib di SATUSEHAT)
+                                <input type="checkbox" id="include_diagnosis" onchange="updateJSONFromForm()" style="width: 16px; height: 16px;">
+                                Sertakan Elemen Diagnosis (Opsional untuk Status Arrived)
                             </label>
                         </div>
 
@@ -1349,6 +1355,19 @@ $default_datetime = date('Y-m-d\TH:i');
             // Generate awal
             updateJSONFromForm();
         });
+
+        function updateOrgIdDisplay() {
+            const orgVal = document.getElementById('org_id').value.trim() || organizationId;
+            const displayElem = document.getElementById('org_id_system_display');
+            if (displayElem) displayElem.textContent = orgVal;
+            updateJSONFromForm();
+        }
+
+        function syncNoRawatToIdentifier() {
+            const noRawatVal = document.getElementById('no_rawat').value.trim();
+            document.getElementById('identifier_value').value = noRawatVal;
+            updateJSONFromForm();
+        }
 
         function updateClassDisplay() {
             const selectElem = document.getElementById('class_code');
@@ -1863,31 +1882,33 @@ $default_datetime = date('Y-m-d\TH:i');
         function resetFormToDefault() {
             if (!confirm('Kembalikan seluruh isi form ke contoh bawaan?')) return;
             
-            document.getElementById('no_rawat').value = "2024/06/14/000001";
-            document.getElementById('identifier_value').value = "P20240001";
+            document.getElementById('org_id').value = organizationId;
+            updateOrgIdDisplay();
+            document.getElementById('no_rawat').value = "2026/07/27/000021";
+            document.getElementById('identifier_value').value = "2026/07/27/000021";
             document.getElementById('status').value = "arrived";
             document.getElementById('class_code').value = "AMB";
             updateClassDisplay();
             
             document.getElementById('patient_nik_lookup').value = "";
-            document.getElementById('patient_id').value = "100000030009";
-            document.getElementById('patient_name').value = "Budi Santoso";
+            document.getElementById('patient_id').value = "P01766631757";
+            document.getElementById('patient_name').value = "MIFTAHUL BAROROH";
             
             document.getElementById('nakes_nik_lookup').value = "";
-            document.getElementById('practitioner_id').value = "N10000001";
-            document.getElementById('practitioner_name').value = "Dokter Bronsig";
+            document.getElementById('practitioner_id').value = "10005678482";
+            document.getElementById('practitioner_name').value = "dr. Nindya Sari Diajeng Larasati, SpJP";
             document.getElementById('participant_type_code').value = "ATND";
             updateParticipantTypeDisplay();
             
-            document.getElementById('start_time').value = "2022-06-14T07:00";
+            document.getElementById('start_time').value = "2026-07-27T09:00";
             document.getElementById('end_time').value = "";
             
             document.getElementById('location_id_lookup').value = "";
-            document.getElementById('location_id').value = "b017aa54-f1df-4ec2-9d84-8823815d7228";
-            document.getElementById('location_display').value = "Ruang 1A, Poliklinik Bedah Rawat Jalan Terpadu, Lantai 2, Gedung G";
+            document.getElementById('location_id').value = "08e56886-e262-4acc-a598-63e497248af7";
+            document.getElementById('location_display').value = "Poliklinik Jantung";
             
             if (document.getElementById('include_diagnosis')) {
-                document.getElementById('include_diagnosis').checked = true;
+                document.getElementById('include_diagnosis').checked = false;
                 document.getElementById('condition_id').value = "10000001";
                 document.getElementById('condition_display').value = "Kecelakaan lalu lintas";
                 document.getElementById('diagnosis_use_code').value = "DD";
