@@ -1200,6 +1200,52 @@ $default_datetime = date('Y-m-d\TH:i');
                             </div>
                         </div>
 
+                        <!-- Data Diagnosis (Condition) Section -->
+                        <div class="section-divider">Data Diagnosis / Kondisi (Diagnosis)</div>
+                        
+                        <div class="form-group full-width">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                                <input type="checkbox" id="include_diagnosis" checked onchange="updateJSONFromForm()" style="width: 16px; height: 16px;">
+                                Sertakan Elemen Diagnosis (Wajib di SATUSEHAT)
+                            </label>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="condition_id">ID Condition SATUSEHAT (Condition UUID)</label>
+                                <input type="text" id="condition_id" class="form-input" value="10000001" placeholder="Contoh: 10000001 atau UUID Condition" required>
+                                <small style="color: var(--text-muted); font-size: 11px;">Format ref: <code>Condition/10000001</code></small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="condition_display">Deskripsi Diagnosa / Nama Penyakit</label>
+                                <input type="text" id="condition_display" class="form-input" value="Kecelakaan lalu lintas" placeholder="Nama Diagnosa/Penyakit" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="diagnosis_use_code">Peran Diagnosa (Diagnosis Role / Use)</label>
+                                <select id="diagnosis_use_code" class="form-input" style="height: 44px; background-color: #fafafa;" onchange="updateDiagnosisUseDisplay()">
+                                    <option value="DD" data-display="Discharge diagnosis" selected>DD - Discharge diagnosis (Diagnosa Akhir / Utama)</option>
+                                    <option value="AD" data-display="Admission diagnosis">AD - Admission diagnosis (Diagnosa Masuk)</option>
+                                    <option value="CC" data-display="Chief complaint">CC - Chief complaint (Keluhan Utama)</option>
+                                    <option value="CM" data-display="Comorbidity diagnosis">CM - Comorbidity diagnosis (Diagnosa Penyerta)</option>
+                                    <option value="pre-op" data-display="Pre-operative diagnosis">pre-op - Pre-operative diagnosis (Diagnosa Pre-Op)</option>
+                                    <option value="post-op" data-display="Post-operative diagnosis">post-op - Post-operative diagnosis (Diagnosa Post-Op)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="diagnosis_use_display">Diagnosis Role Display</label>
+                                <input type="text" id="diagnosis_use_display" class="form-input" value="Discharge diagnosis" readonly style="background-color: #f1f5f9;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="diagnosis_rank">Rank Diagnosa (Peringkat)</label>
+                            <input type="number" id="diagnosis_rank" class="form-input" value="1" min="1" required style="width: 140px;">
+                            <small style="color: var(--text-muted); font-size: 11px;">1 untuk Diagnosa Utama, 2+ untuk Diagnosa Sekunder</small>
+                        </div>
+
                     </form>
                 </div>
 
@@ -1320,6 +1366,14 @@ $default_datetime = date('Y-m-d\TH:i');
             updateJSONFromForm();
         }
 
+        function updateDiagnosisUseDisplay() {
+            const selectElem = document.getElementById('diagnosis_use_code');
+            const selectedOption = selectElem.options[selectElem.selectedIndex];
+            const displayVal = selectedOption.getAttribute('data-display') || 'Discharge diagnosis';
+            document.getElementById('diagnosis_use_display').value = displayVal;
+            updateJSONFromForm();
+        }
+
         function switchTab(tab) {
             currentTab = tab;
             
@@ -1373,6 +1427,14 @@ $default_datetime = date('Y-m-d\TH:i');
             const locationDisplay = document.getElementById('location_display').value.trim();
             
             const identifierValue = document.getElementById('identifier_value').value.trim();
+
+            const includeDiagnosis = document.getElementById('include_diagnosis') ? document.getElementById('include_diagnosis').checked : true;
+            let conditionId = document.getElementById('condition_id') ? document.getElementById('condition_id').value.trim() : '';
+            conditionId = conditionId.replace(/^Condition\//i, '');
+            const conditionDisplay = document.getElementById('condition_display') ? document.getElementById('condition_display').value.trim() : '';
+            const diagnosisUseCode = document.getElementById('diagnosis_use_code') ? document.getElementById('diagnosis_use_code').value : 'DD';
+            const diagnosisUseDisplay = document.getElementById('diagnosis_use_display') ? document.getElementById('diagnosis_use_display').value : 'Discharge diagnosis';
+            const diagnosisRank = document.getElementById('diagnosis_rank') ? (parseInt(document.getElementById('diagnosis_rank').value) || 1) : 1;
 
             // Format datetime ISO 8601 dengan offset local +07:00 (WIB)
             let startFormatted = startTime;
@@ -1444,6 +1506,27 @@ $default_datetime = date('Y-m-d\TH:i');
                     }
                 ]
             };
+
+            if (includeDiagnosis && conditionId) {
+                jsonObject.diagnosis = [
+                    {
+                        "condition": {
+                            "reference": "Condition/" + conditionId,
+                            "display": conditionDisplay
+                        },
+                        "use": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/diagnosis-role",
+                                    "code": diagnosisUseCode,
+                                    "display": diagnosisUseDisplay
+                                }
+                            ]
+                        },
+                        "rank": diagnosisRank
+                    }
+                ];
+            }
 
             if (endFormatted) {
                 jsonObject.period.end = endFormatted;
@@ -1802,6 +1885,15 @@ $default_datetime = date('Y-m-d\TH:i');
             document.getElementById('location_id_lookup').value = "";
             document.getElementById('location_id').value = "b017aa54-f1df-4ec2-9d84-8823815d7228";
             document.getElementById('location_display').value = "Ruang 1A, Poliklinik Bedah Rawat Jalan Terpadu, Lantai 2, Gedung G";
+            
+            if (document.getElementById('include_diagnosis')) {
+                document.getElementById('include_diagnosis').checked = true;
+                document.getElementById('condition_id').value = "10000001";
+                document.getElementById('condition_display').value = "Kecelakaan lalu lintas";
+                document.getElementById('diagnosis_use_code').value = "DD";
+                updateDiagnosisUseDisplay();
+                document.getElementById('diagnosis_rank').value = "1";
+            }
             
             updateJSONFromForm();
         }
