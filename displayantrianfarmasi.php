@@ -311,6 +311,35 @@ if ($org_result && mysqli_num_rows($org_result) > 0) {
                 let namaTitle = toTitleCase(namaBersih);
                 kalimatFinal = `Pasien atas nama ${namaTitle}, silakan menuju loket farmasi.`;
             }
+
+            // Normalisasi kalimat agar nama tidak dieja oleh TTS (seperti RUMIYEM menjadi R-U-M-I-Y-E-M)
+            // Mengubah kata ALL CAPS menjadi Title Case, kecuali singkatan tertentu.
+            kalimatFinal = kalimatFinal.replace(/\b[A-Z]{2,}\b/g, function(word) {
+                const acronyms = ['BPJS', 'IGD', 'UGD', 'RSUD', 'THT', 'ICU', 'NICU', 'PICU', 'KIA', 'KB', 'EKG', 'EEG', 'USG', 'MRI', 'CT', 'SCAN', 'OK', 'VK', 'KTP', 'JKN'];
+                if (acronyms.includes(word)) return word;
+                return word.charAt(0) + word.slice(1).toLowerCase();
+            });
+
+            // Perbaiki singkatan sebutan agar dibaca lebih baik
+            kalimatFinal = kalimatFinal.replace(/\bTn\.?\b/g, 'Tuan ');
+            kalimatFinal = kalimatFinal.replace(/\bNy\.?\b/g, 'Nyonya ');
+            kalimatFinal = kalimatFinal.replace(/\bNn\.?\b/g, 'Nona ');
+            kalimatFinal = kalimatFinal.replace(/\bSdr\.?\b/g, 'Saudara ');
+            kalimatFinal = kalimatFinal.replace(/\bSdri\.?\b/g, 'Saudari ');
+            kalimatFinal = kalimatFinal.replace(/\bBy\.?\b/g, 'Bayi ');
+            
+            // Pindahkan sebutan (Tuan, Nyonya, dll) ke depan nama jika sebelumnya tertulis di belakang nama
+            // Contoh: "atas nama Rumiyem Tuan" -> "atas nama Tuan Rumiyem"
+            kalimatFinal = kalimatFinal.replace(/(atas nama\s+)(.+?)\s+(Tuan|Nyonya|Nona|Saudara|Saudari|Bayi)\b/ig, function(match, p1, p2, p3) {
+                // Format p3 agar huruf depannya besar, misalnya "Tuan", lalu digabung dengan namanya (p2)
+                let title = p3.charAt(0).toUpperCase() + p3.slice(1).toLowerCase();
+                return p1 + title + ' ' + p2;
+            });
+
+            kalimatFinal = kalimatFinal.replace(/\s+/g, ' ').trim();
+            // Perbaiki tanda baca koma yang mungkin kelebihan spasi
+            kalimatFinal = kalimatFinal.replace(/\s+,/g, ',');
+
             console.log('Trying to play speech:', kalimatFinal); // Debug log
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -365,13 +394,15 @@ if ($org_result && mysqli_num_rows($org_result) > 0) {
                         };
                         msg.onerror = function(e) {
                             console.error('Speech error:', e);
-                            alert('Error playing speech: ' + e.error);
+                            if (e.error !== 'interrupted') {
+                                // Hanya tampilkan alert jika errornya bukan karena disela/dibatalkan
+                                console.warn('Panggilan gagal diputar: ' + e.error);
+                            }
                         };
                         window.speechSynthesis.speak(msg);
                         console.log('Speech initiated');
                     } catch (error) {
                         console.error('Speech function error:', error);
-                        alert('Speech error: ' + error.message);
                     }
                 }, 100);
             } else {
