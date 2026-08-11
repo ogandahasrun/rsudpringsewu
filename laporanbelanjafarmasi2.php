@@ -450,18 +450,15 @@
                 while ($row = mysqli_fetch_assoc($result)) {
                     $total_keseluruhan += $row['subtotal'];
                     
-                    // Check if this is a new invoice
+                    // Track current faktur if needed for other purposes
                     if ($current_faktur != $row['no_faktur']) {
                         $current_faktur = $row['no_faktur'];
-                        $show_header = true;
-                    } else {
-                        $show_header = false;
                     }
                     
                     echo "<tr>";
-                    echo "<td>" . ($show_header ? date('d/m/Y', strtotime($row['tgl_faktur'])) : '') . "</td>";
-                    echo "<td>" . ($show_header ? htmlspecialchars($row['no_faktur']) : '') . "</td>";
-                    echo "<td>" . ($show_header ? htmlspecialchars($row['nama_suplier']) : '') . "</td>";
+                    echo "<td>" . date('d/m/Y', strtotime($row['tgl_faktur'])) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['no_faktur']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['nama_suplier']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['kode_brng']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['nama_brng']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
@@ -539,27 +536,52 @@
             });
             
             // Copy to clipboard
-            navigator.clipboard.writeText(tsvContent).then(function() {
-                // Show success message
+            if (navigator.clipboard && window.isSecureContext) {
+                // navigator.clipboard is available and context is secure (HTTPS/localhost)
+                navigator.clipboard.writeText(tsvContent).then(function() {
+                    showCopySuccess();
+                }).catch(function(err) {
+                    fallbackCopy(tsvContent);
+                });
+            } else {
+                // Fallback for HTTP connections or older browsers
+                fallbackCopy(tsvContent);
+            }
+
+            function showCopySuccess() {
                 const successMsg = document.getElementById('copy-success');
                 successMsg.style.display = 'block';
                 setTimeout(function() {
                     successMsg.style.display = 'none';
                 }, 3000);
-            }).catch(function(err) {
-                // Fallback method for older browsers
+            }
+
+            function fallbackCopy(text) {
                 const textArea = document.createElement('textarea');
-                textArea.value = tsvContent;
+                textArea.value = text;
+                
+                // Avoid scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
                 document.body.appendChild(textArea);
+                textArea.focus();
                 textArea.select();
+                
                 try {
-                    document.execCommand('copy');
-                    alert('Data berhasil dicopy ke clipboard!');
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showCopySuccess();
+                    } else {
+                        alert('Gagal copy data ke clipboard!');
+                    }
                 } catch (err) {
-                    alert('Gagal copy data ke clipboard');
+                    alert('Gagal copy data ke clipboard! Browser Anda tidak mendukung fitur ini.');
                 }
+                
                 document.body.removeChild(textArea);
-            });
+            }
         }
         
         // Add event listeners for auto-submit (optional)
