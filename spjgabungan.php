@@ -804,7 +804,7 @@ if (!empty($nopgdn)) {
 
             <table class="no-border-table">        
                 <tr><td>Berdasarkan Surat Pesanan Barang dan Jasa Nomor : <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; 
-                ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/SP/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?> untuk paket pekerjaan 
+                ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/SP/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?> untuk paket pekerjaan 
                         belanja Bahan Habis Pakai dengan ini menerangkan bahwa :</td></tr>
             </table>   
 
@@ -868,7 +868,7 @@ if (!empty($nopgdn)) {
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
             <h4 class="center-nomorsurat">Nomor Surat : 445/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>/BASTB/LL.04/
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
+                <?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
                 <tr><td>Pada hari ini .................., tanggal ....................... 
@@ -957,7 +957,7 @@ if (!empty($nopgdn)) {
             <h2 class="center-text">SURAT PERINTAH PENCATATAN ASET</h2>
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/SPPA.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
                 <tr><td>Pada hari ini .................., tanggal ....................... 
@@ -1051,7 +1051,7 @@ if (!empty($nopgdn)) {
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">SURAT PERMOHONAN PEMBAYARAN</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SPP.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SPP.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
                 <tr><td>Kepada Yth :</td></tr>
@@ -1071,11 +1071,11 @@ if (!empty($nopgdn)) {
                 <tr><td>1</td><td>Program</td><td>: Operasional Pelayanan Rumah Sakit</td></tr>
                 <tr><td>2</td><td>Kegiatan</td><td>: Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>3</td><td>Pekerjaan</td><td>: Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></td></tr>
+                <tr><td>4</td><td>Nomor PPBJ</td><td>: 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/PPBJ.1/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></td></tr>
                 <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
                 <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
                 echo "" . ucfirst($terbilang_total) . " rupiah";}?> </td></tr>
-                <tr><td>5</td><td>Nomor Surat Pesanan</td><td>: <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></td></tr>
+                <tr><td>5</td><td>Nomor Surat Pesanan</td><td>: <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></td></tr>
                 <tr><td></td><td>Nilai</td><td>: <?php if (isset($total_akhir)) {echo "Rp. " . number_format($total_akhir, 0, ',', '.') . " ";} ?></td></tr>
                 <tr><td></td><td></td><td>: <?php if (isset($total_akhir)) {$terbilang_total = terbilang($total_akhir);
                 echo "" . ucfirst($terbilang_total) . " rupiah";}?></td></tr>
@@ -1107,7 +1107,7 @@ if (!empty($nopgdn)) {
             </table>
 
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, 28 Februari 2026</p>
+                <p>Pringsewu, ...  <?php echo $bulan_tahun_indonesia; ?></p>
                 <p>Pejabat Pelaksana Teknis Kegiatan</p>
                 <p>Belanja bahan Habis Pakai (BAHP) Rumah Sakit</p>
                 <br>
@@ -1140,7 +1140,7 @@ if (!empty($nopgdn)) {
             <?php include 'header.php'; ?>
 
             <h2 class="center-text">BERITA ACARA SERAH TERIMA BARANG/JASA</h2>
-            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></h4>
+            <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
                 <table class="no-border-table">        
                 <tr><td>Pada hari ini .................., tanggal ....................... 
@@ -1221,7 +1221,7 @@ if (!empty($nopgdn)) {
             <?php include 'header.php'; ?>
 
             <h3 class="center-text">BERITA ACARA PEMERIKSAAN BARANG</h3>
-            <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $tahun; ?></h4>
+            <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
             <br></br>
             <table class="no-border-table">        
                 <tr><td>Pada hari ini .................., tanggal ....................... 
@@ -1232,7 +1232,7 @@ if (!empty($nopgdn)) {
             <table class="no-border-table">        
                 <tr><td>Kegiatan</td><td>:</td><td>Belanja Barang dan Jasa BLUD</td></tr>
                 <tr><td>Pekerjaan</td><td>:</td><td>Belanja Bahan Habis Pakai</td></tr>
-                <tr><td>No. Surat Pesanan</td><td>:</td><td><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?></td></tr>
+                <tr><td>No. Surat Pesanan</td><td>:</td><td><?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/SP/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></td></tr>
                 <tr><td>Pelaksana Pekerjaan</td><td>:</td><td></td></tr>
                 <tr><td>Nama Perusahaan</td><td>:</td><td><?php echo isset($datasuplier['nama_suplier']) ? $datasuplier['nama_suplier'] : ''; ?></td></tr>
                 <tr><td>Alamat Perusahaan</td><td>:</td><td><?php echo isset($datasuplier['alamat']) ? $datasuplier['alamat'] : ''; ?></td></tr>
@@ -1396,7 +1396,7 @@ if (!empty($nopgdn)) {
                 <tr>
                     <td style="text-align: center;">6</td>
                     <td>Tanggal</td>
-                    <td><?php echo $tanggal_awal_bulan; ?></td>
+                    <td>..... <?php echo $bulan_tahun_indonesia; ?></td>
                 </tr>
                 <tr>
                     <td style="text-align: center;">7</td>
