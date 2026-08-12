@@ -12,6 +12,7 @@ $tanggal_lengkap_akhir = "";
 $bulan_romawi = "";
 $tahun = "";
 $bulan_tahun_indonesia = "";
+$nama_bulan_indonesia = "";
 
 
 $nopgdn = isset($_GET['nopgdn']) ? $_GET['nopgdn'] : '';
@@ -114,18 +115,32 @@ if (!empty($nopgdn)) {
             ];
             $bulan_romawi = $angka_romawi_bulan[$bulan];
             $bulan_tahun_indonesia = $bulan_indonesia[$bulan] . ' ' . $tahun;
+            $nama_bulan_indonesia = $bulan_indonesia[$bulan];
             $tanggal_pertama = DateTime::createFromFormat('Y-m-d', $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '-01');
-            $hari = $tanggal_pertama->format('w');
-            $tanggal = ($hari == '0') ? 2 : 1;
-            if ($tanggal == 2) {
-                $tanggal_pertama->modify('+1 day');
+            while(true) {
+                $hari = $tanggal_pertama->format('w');
+                $tgl_str = $tanggal_pertama->format('Y-m-d');
+                $cek_libur = mysqli_query($koneksi, "SELECT tanggal FROM set_hari_libur WHERE tanggal = '$tgl_str'");
+                if ($hari == '0' || mysqli_num_rows($cek_libur) > 0) {
+                    $tanggal_pertama->modify('+1 day');
+                } else {
+                    break;
+                }
             }
+            $tanggal = $tanggal_pertama->format('j');
             $tanggal_awal_bulan = $tanggal . " " . $bulan_indonesia[$bulan] . " " . $tahun;
+
             $tanggal_terakhir = DateTime::createFromFormat('Y-m-d', $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '-01');
             $tanggal_terakhir->modify('last day of this month');
-            $hari_terakhir = $tanggal_terakhir->format('w');
-            if ($hari_terakhir == '0') {
-                $tanggal_terakhir->modify('-1 day');
+            while(true) {
+                $hari_terakhir = $tanggal_terakhir->format('w');
+                $tgl_str_akhir = $tanggal_terakhir->format('Y-m-d');
+                $cek_libur_akhir = mysqli_query($koneksi, "SELECT tanggal FROM set_hari_libur WHERE tanggal = '$tgl_str_akhir'");
+                if ($hari_terakhir == '0' || mysqli_num_rows($cek_libur_akhir) > 0) {
+                    $tanggal_terakhir->modify('-1 day');
+                } else {
+                    break;
+                }
             }
             $tgl_akhir = $tanggal_terakhir->format('j');
             $tanggal_akhir_bulan = $tgl_akhir . " " . $bulan_indonesia[$bulan] . " " . $tahun;
@@ -528,7 +543,7 @@ if (!empty($nopgdn)) {
             <table class="no-border-table">        
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    bulan <?php echo $nama_bulan_indonesia; ?>
                     tahun <?php echo ucwords(trim($tahun_terbilang)); ?> (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
@@ -682,7 +697,7 @@ if (!empty($nopgdn)) {
             <table class="no-border-table">        
                 <tr><td>Pada hari ini &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    bulan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    bulan <?php echo $nama_bulan_indonesia; ?>
                     tahun <?php echo ucwords(trim($tahun_terbilang)); ?> (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
             </table>            
 
@@ -778,9 +793,8 @@ if (!empty($nopgdn)) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.01/BASTP/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini .................., tanggal ....................... 
-                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
-                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
+                <tr><td>Pada hari ini 
+                <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : '.............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>
             </table>            
 
             <table class="no-border-table">        
@@ -871,9 +885,7 @@ if (!empty($nopgdn)) {
                 <?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini .................., tanggal ....................... 
-                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
-                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : '.............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>
             </table>            
 
             <table class="no-border-table">        
@@ -960,9 +972,7 @@ if (!empty($nopgdn)) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
             <table class="no-border-table">        
-                <tr><td>Pada hari ini .................., tanggal ....................... 
-                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
-                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : '.............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>
             </table>            
 
             <table class="no-border-table">        
@@ -1143,9 +1153,7 @@ if (!empty($nopgdn)) {
             <h4 class="center-nomorsurat">Nomor Surat : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BASTB.IF/<?php echo isset($pemesanan['kode_suplier']) ? $pemesanan['kode_suplier'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
 
                 <table class="no-border-table">        
-                <tr><td>Pada hari ini .................., tanggal ....................... 
-                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
-                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),</td></tr>
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : '.............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>
             </table>            
 
             <table class="no-border-table">        
@@ -1224,9 +1232,7 @@ if (!empty($nopgdn)) {
             <h4 class="center-nomorsurat">Nomor : 445/<?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/LL.04/<?php echo $bulan_romawi; ?>/<?php echo $tahun; ?></h4>
             <br></br>
             <table class="no-border-table">        
-                <tr><td>Pada hari ini .................., tanggal ....................... 
-                        bulan ....................... tahun <?php echo ucwords(trim($tahun_terbilang)); ?> 
-                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<?php echo $tahun; ?>),
+                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_akhir) ? $tanggal_lengkap_akhir : '.............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>
                     telah mengadakan pemeriksaan dan uji fungsi untuk :</td></tr>
             </table>            
             <table class="no-border-table">        
