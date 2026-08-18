@@ -1,6 +1,77 @@
 <?php
 include 'koneksi.php';
 
+// Proses upload CSV update jenis_barang & cara_belanja
+$msg_csv = '';
+if (isset($_POST['upload_csv']) && isset($_FILES['file_csv'])) {
+    $file = $_FILES['file_csv']['tmp_name'];
+    if ($file) {
+        $handle = fopen($file, "r");
+        if ($handle !== FALSE) {
+            // Deteksi pemisah koma atau titik koma
+            $first_line = fgets($handle);
+            $delimiter = (strpos($first_line, ';') !== false) ? ';' : ',';
+            rewind($handle);
+
+            $header = fgetcsv($handle, 1000, $delimiter);
+            if ($header) {
+                // Hapus BOM jika ada
+                $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
+                $headers_lower = array_map('strtolower', array_map('trim', $header));
+                
+                $idx_no = array_search('no_faktur', $headers_lower);
+                $idx_jb = array_search('jenis_barang', $headers_lower);
+                $idx_cb = array_search('cara_belanja', $headers_lower);
+
+                // Jika header tidak sesuai, asumsikan urutan: 0=no_faktur, 1=jenis_barang, 2=cara_belanja
+                $has_header = ($idx_no !== false && $idx_jb !== false && $idx_cb !== false);
+                if (!$has_header) {
+                    $idx_no = 0; $idx_jb = 1; $idx_cb = 2;
+                }
+                
+                $success = 0;
+                
+                // Jika baris pertama ternyata data (bukan header)
+                if (!$has_header) {
+                    $no_faktur = isset($header[$idx_no]) ? trim($header[$idx_no]) : '';
+                    $jenis_barang = isset($header[$idx_jb]) ? trim($header[$idx_jb]) : '';
+                    $cara_belanja = isset($header[$idx_cb]) ? trim($header[$idx_cb]) : '';
+                    
+                    if (!empty($no_faktur) && strtolower($no_faktur) != 'no_faktur') {
+                        $check = mysqli_query($koneksi, "SELECT no_faktur FROM pemesanan_cara_belanja WHERE no_faktur = '" . mysqli_real_escape_string($koneksi, $no_faktur) . "'");
+                        if (mysqli_num_rows($check) > 0) {
+                            mysqli_query($koneksi, "UPDATE pemesanan_cara_belanja SET jenis_barang = '" . mysqli_real_escape_string($koneksi, $jenis_barang) . "', cara_belanja = '" . mysqli_real_escape_string($koneksi, $cara_belanja) . "' WHERE no_faktur = '" . mysqli_real_escape_string($koneksi, $no_faktur) . "'");
+                        } else {
+                            mysqli_query($koneksi, "INSERT INTO pemesanan_cara_belanja (no_faktur, jenis_barang, cara_belanja) VALUES ('" . mysqli_real_escape_string($koneksi, $no_faktur) . "', '" . mysqli_real_escape_string($koneksi, $jenis_barang) . "', '" . mysqli_real_escape_string($koneksi, $cara_belanja) . "')");
+                        }
+                        $success++;
+                    }
+                }
+
+                while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE) {
+                    $no_faktur = isset($data[$idx_no]) ? trim($data[$idx_no]) : '';
+                    $jenis_barang = isset($data[$idx_jb]) ? trim($data[$idx_jb]) : '';
+                    $cara_belanja = isset($data[$idx_cb]) ? trim($data[$idx_cb]) : '';
+
+                    if (!empty($no_faktur)) {
+                        $check = mysqli_query($koneksi, "SELECT no_faktur FROM pemesanan_cara_belanja WHERE no_faktur = '" . mysqli_real_escape_string($koneksi, $no_faktur) . "'");
+                        if (mysqli_num_rows($check) > 0) {
+                            mysqli_query($koneksi, "UPDATE pemesanan_cara_belanja SET jenis_barang = '" . mysqli_real_escape_string($koneksi, $jenis_barang) . "', cara_belanja = '" . mysqli_real_escape_string($koneksi, $cara_belanja) . "' WHERE no_faktur = '" . mysqli_real_escape_string($koneksi, $no_faktur) . "'");
+                        } else {
+                            mysqli_query($koneksi, "INSERT INTO pemesanan_cara_belanja (no_faktur, jenis_barang, cara_belanja) VALUES ('" . mysqli_real_escape_string($koneksi, $no_faktur) . "', '" . mysqli_real_escape_string($koneksi, $jenis_barang) . "', '" . mysqli_real_escape_string($koneksi, $cara_belanja) . "')");
+                        }
+                        $success++;
+                    }
+                }
+                $msg_csv = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: 1px solid #c3e6cb;'>Upload CSV berhasil! $success baris data diperbarui.</div>";
+            }
+            fclose($handle);
+        } else {
+            $msg_csv = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: 1px solid #f5c6cb;'>Gagal membuka file CSV.</div>";
+        }
+    }
+}
+
 // Ambil daftar suplier untuk dropdown
 $suplier_options = [];
 $suplier_query = "SELECT nama_suplier FROM datasuplier ORDER BY nama_suplier";
@@ -15,6 +86,7 @@ $tgl_pesan_akhir = isset($_GET['tgl_pesan_akhir']) ? $_GET['tgl_pesan_akhir'] : 
 $tgl_faktur_awal = isset($_GET['tgl_faktur_awal']) ? $_GET['tgl_faktur_awal'] : '';
 $tgl_faktur_akhir = isset($_GET['tgl_faktur_akhir']) ? $_GET['tgl_faktur_akhir'] : '';
 $nama_suplier = isset($_GET['nama_suplier']) ? $_GET['nama_suplier'] : '';
+$filter_cara_belanja = isset($_GET['filter_cara_belanja']) ? $_GET['filter_cara_belanja'] : '';
 
 // Bangun WHERE clause
 $where = [];
@@ -26,6 +98,11 @@ if (!empty($tgl_faktur_awal) && !empty($tgl_faktur_akhir)) {
 }
 if (!empty($nama_suplier)) {
     $where[] = "datasuplier.nama_suplier = '" . mysqli_real_escape_string($koneksi, $nama_suplier) . "'";
+}
+if ($filter_cara_belanja === 'kosong') {
+    $where[] = "pemesanan.no_faktur NOT IN (SELECT no_faktur FROM pemesanan_cara_belanja WHERE cara_belanja != '')";
+} elseif (!empty($filter_cara_belanja)) {
+    $where[] = "pemesanan.no_faktur IN (SELECT no_faktur FROM pemesanan_cara_belanja WHERE cara_belanja = '" . mysqli_real_escape_string($koneksi, $filter_cara_belanja) . "')";
 }
 if (empty($where)) {
     // Default: tampilkan data tgl_pesan hari ini
@@ -412,7 +489,23 @@ if ($result && mysqli_num_rows($result) > 0) {
                 </option>
             <?php endforeach; ?>
         </select>
+        <label>Cara Belanja:</label>
+        <select name="filter_cara_belanja">
+            <option value="">Semua</option>
+            <option value="e-purchasing" <?php if ($filter_cara_belanja == 'e-purchasing') echo 'selected'; ?>>e-purchasing</option>
+            <option value="manual" <?php if ($filter_cara_belanja == 'manual') echo 'selected'; ?>>manual</option>
+            <option value="kosong" <?php if ($filter_cara_belanja == 'kosong') echo 'selected'; ?>>Belum Diisi</option>
+        </select>
         <button type="submit">Filter</button>
+    </form>
+
+    <?php if (!empty($msg_csv)) echo $msg_csv; ?>
+
+    <form method="post" enctype="multipart/form-data" class="filter-form" style="background: #e9ecef;">
+        <label>Upload CSV Update (Jenis Barang & Cara Belanja):</label>
+        <input type="file" name="file_csv" accept=".csv" required>
+        <button type="submit" name="upload_csv" style="background: #28a745;">Upload CSV</button>
+        <small style="margin-left: 10px; color: #666;">Format: no_faktur, jenis_barang, cara_belanja (koma/titik koma)</small>
     </form>
 
     <!-- Legend Status Foto -->
@@ -443,6 +536,7 @@ if ($result && mysqli_num_rows($result) > 0) {
             <th>Kode Satuan</th>
             <th>Upload/Lihat Foto</th>
             <th>Jenis Barang & Cara Belanja</th>
+            <th>Cetak SPJ</th>
         </tr>
         <?php if (!empty($data)): ?>
             <?php foreach ($data as $key => $rows): 
@@ -504,17 +598,73 @@ if ($result && mysqli_num_rows($result) > 0) {
                                 <span class="cb-status" style="font-size:11px;color:#28a745;display:none;">Tersimpan!</span>
                             </form>
                         </td>
+                        <td rowspan="<?= $rowspan ?>">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <button onclick="printSpj('spjekatalog.php', '<?= urlencode($row['no_faktur']) ?>')" style="background-color: #007bff; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">e-purchasing</button>
+                                <button onclick="printSpj('spjreguler.php', '<?= urlencode($row['no_faktur']) ?>')" style="background-color: #6c757d; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">reguler</button>
+                            </div>
+                        </td>
                     <?php endif; ?>
                 </tr>
                 <?php $first = false; endforeach; ?>
             <?php endforeach; ?>
         <?php else: ?>
-            <tr><td colspan="9" class="no-data">Tidak ada data ditemukan.</td></tr>
+            <tr><td colspan="10" class="no-data">Tidak ada data ditemukan.</td></tr>
         <?php endif; ?>
             </table>
         </div>
     </div>
     <script>
+    function printSpj(url, noFaktur) {
+        let iframe = document.getElementById('printFrame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.name = 'printFrame';
+            iframe.id = 'printFrame';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        
+        const btns = document.querySelectorAll('button[onclick^="printSpj"]');
+        btns.forEach(btn => btn.style.opacity = '0.5');
+
+        let form = document.getElementById('printForm');
+        if (!form) {
+            form = document.createElement('form');
+            form.id = 'printForm';
+            form.method = 'POST';
+            form.target = 'printFrame';
+            form.style.display = 'none';
+            
+            let inputNoFaktur = document.createElement('input');
+            inputNoFaktur.type = 'hidden';
+            inputNoFaktur.name = 'no_faktur';
+            inputNoFaktur.id = 'printFormNoFaktur';
+            form.appendChild(inputNoFaktur);
+            
+            let inputFilter = document.createElement('input');
+            inputFilter.type = 'hidden';
+            inputFilter.name = 'filter';
+            inputFilter.value = '1';
+            form.appendChild(inputFilter);
+            
+            document.body.appendChild(form);
+        }
+        
+        form.action = url;
+        document.getElementById('printFormNoFaktur').value = decodeURIComponent(noFaktur);
+        
+        iframe.onload = function() {
+            setTimeout(function() {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                btns.forEach(btn => btn.style.opacity = '1');
+            }, 500);
+        };
+        
+        form.submit();
+    }
+
     // AJAX simpan cara belanja
     function simpanCaraBelanja(form) {
         var fd = new FormData(form);
