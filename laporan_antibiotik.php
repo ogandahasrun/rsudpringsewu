@@ -47,6 +47,8 @@
         .persen-rendah { color: #721c24; font-weight: bold; }
         td.text-left { text-align: left; }
         .row-total td { background: linear-gradient(45deg, #343a40, #495057) !important; color: white; font-weight: bold; }
+        .row-kelompok td { background: linear-gradient(45deg, #2c3e50, #34495e) !important; color: #f1c40f; font-weight: bold; font-size: 14px; letter-spacing: 0.5px; }
+        .row-subtotal td { background: linear-gradient(45deg, #2980b9, #3498db) !important; color: white; font-weight: bold; }
         @media (max-width: 768px) { body { padding: 10px; } .header { padding: 20px 15px; } .header h1 { font-size: 1.5em; } .content { padding: 15px; } .filter-form { padding: 20px 15px; } .filter-grid { grid-template-columns: 1fr; gap: 15px; } .filter-actions { justify-content: stretch; } .btn { padding: 10px 15px; font-size: 13px; } th, td { padding: 8px 6px; font-size: 12px; } table { min-width: 720px; } }
         @media (max-width: 480px) { .header h1 { font-size: 1.3em; } .filter-title { font-size: 16px; } }
     </style>
@@ -55,7 +57,7 @@
     <div class="container">
         <div class="header">
             <h1>💊 Laporan Kepatuhan Penggunaan Antibiotik</h1>
-            <p>Evaluasi Kesesuaian Antibiotik Rawat Inap Berdasarkan Formularium Standar</p>
+            <p>Evaluasi Kesesuaian Antibiotik Rawat Inap Berdasarkan Formularium Standar (Per Kelompok Diagnosa)</p>
         </div>
         <div class="content">
             <div class="back-button">
@@ -89,16 +91,18 @@ $tanggal_akhir = isset($_POST['tanggal_akhir']) ? $_POST['tanggal_akhir'] : date
 
 <?php
 // ============================================================
-// LOGIKA UTAMA
+// LOGIKA UTAMA (DENGAN KELOMPOK DIAGNOSA)
 // ============================================================
 
-// 1. Ambil semua kd_penyakit yang ada di mapping
-$query_mapping_penyakit = "SELECT DISTINCT kd_penyakit FROM mapping_antibiotik_standar";
+// 1. Ambil semua kd_penyakit + kelompok_diagnosa yang ada di mapping
+$query_mapping_penyakit = "SELECT DISTINCT kd_penyakit, kelompok_diagnosa FROM mapping_antibiotik_standar ORDER BY kelompok_diagnosa, kd_penyakit";
 $result_mp = mysqli_query($koneksi, $query_mapping_penyakit);
 $daftar_diagnosa = [];
+$kelompok_per_diagnosa = []; // kd_penyakit => kelompok_diagnosa
 if ($result_mp && mysqli_num_rows($result_mp) > 0) {
     while ($row = mysqli_fetch_assoc($result_mp)) {
         $daftar_diagnosa[] = $row['kd_penyakit'];
+        $kelompok_per_diagnosa[$row['kd_penyakit']] = $row['kelompok_diagnosa'] ?: 'Lainnya';
     }
 }
 
@@ -144,7 +148,7 @@ if (count($daftar_diagnosa) === 0) {
 
     // 5. Kumpulkan data per diagnosa
     //    Untuk setiap pasien-diagnosa, cek obat AB yang diberikan
-    $rekap = []; // kd_penyakit => [nm_penyakit, total, standar, tidak_standar]
+    $rekap = []; // kd_penyakit => [nm_penyakit, total, standar, tidak_standar, kelompok_diagnosa]
 
     while ($row = mysqli_fetch_assoc($result_pasien)) {
         $no_rawat    = $row['no_rawat'];
@@ -154,10 +158,11 @@ if (count($daftar_diagnosa) === 0) {
         // Inisialisasi rekap untuk diagnosa ini
         if (!isset($rekap[$kd_penyakit])) {
             $rekap[$kd_penyakit] = [
-                'nm_penyakit'    => $nm_penyakit,
-                'total_pasien'   => 0,
-                'ab_standar'     => 0,
-                'ab_tidak_standar' => 0
+                'nm_penyakit'        => $nm_penyakit,
+                'total_pasien'       => 0,
+                'ab_standar'         => 0,
+                'ab_tidak_standar'   => 0,
+                'kelompok_diagnosa'  => isset($kelompok_per_diagnosa[$kd_penyakit]) ? $kelompok_per_diagnosa[$kd_penyakit] : 'Lainnya'
             ];
         }
 
@@ -197,7 +202,16 @@ if (count($daftar_diagnosa) === 0) {
         }
     }
 
-    // 6. Tampilkan tabel rekap
+    // 6. Kelompokkan rekap berdasarkan kelompok_diagnosa
+    $rekap_per_kelompok = []; // kelompok_diagnosa => [kd_penyakit => data]
+    foreach ($rekap as $kd => $data) {
+        $kelompok = $data['kelompok_diagnosa'];
+        $rekap_per_kelompok[$kelompok][$kd] = $data;
+    }
+    // Urutkan kelompok secara alfabet
+    ksort($rekap_per_kelompok);
+
+    // 7. Tampilkan tabel rekap per kelompok diagnosa
     if (count($rekap) > 0) {
         $grand_total   = 0;
         $grand_standar = 0;
@@ -225,22 +239,36 @@ if (count($daftar_diagnosa) === 0) {
                     <tbody>
 <?php
         $no = 1;
-        foreach ($rekap as $kd => $data) {
-            $total_ab = $data['ab_standar'] + $data['ab_tidak_standar'];
-            $persen   = $total_ab > 0 ? ($data['ab_standar'] / $total_ab) * 100 : 0;
+        foreach ($rekap_per_kelompok as $kelompok => $diagnosa_list) {
+            // Hitung jumlah diagnosa dalam kelompok ini
+            $jumlah_diagnosa_kelompok = count($diagnosa_list);
 
-            // Warna persentase
-            if ($persen >= 80) {
-                $persen_class = 'persen-tinggi';
-            } elseif ($persen >= 50) {
-                $persen_class = 'persen-sedang';
-            } else {
-                $persen_class = 'persen-rendah';
-            }
+            // Header baris kelompok
+?>
+                        <tr class="row-kelompok">
+                            <td colspan="7">📁 Kelompok: <?php echo htmlspecialchars($kelompok); ?> (<?php echo $jumlah_diagnosa_kelompok; ?> diagnosa)</td>
+                        </tr>
+<?php
+            $sub_total   = 0;
+            $sub_standar = 0;
+            $sub_tidak   = 0;
 
-            $grand_total   += $data['total_pasien'];
-            $grand_standar += $data['ab_standar'];
-            $grand_tidak   += $data['ab_tidak_standar'];
+            foreach ($diagnosa_list as $kd => $data) {
+                $total_ab = $data['ab_standar'] + $data['ab_tidak_standar'];
+                $persen   = $total_ab > 0 ? ($data['ab_standar'] / $total_ab) * 100 : 0;
+
+                // Warna persentase
+                if ($persen >= 80) {
+                    $persen_class = 'persen-tinggi';
+                } elseif ($persen >= 50) {
+                    $persen_class = 'persen-sedang';
+                } else {
+                    $persen_class = 'persen-rendah';
+                }
+
+                $sub_total   += $data['total_pasien'];
+                $sub_standar += $data['ab_standar'];
+                $sub_tidak   += $data['ab_tidak_standar'];
 ?>
                         <tr>
                             <td><?php echo $no++; ?></td>
@@ -252,14 +280,32 @@ if (count($daftar_diagnosa) === 0) {
                             <td class="<?php echo $persen_class; ?>"><?php echo number_format($persen, 2); ?>%</td>
                         </tr>
 <?php
+            }
+
+            // Subtotal per kelompok
+            $sub_total_ab = $sub_standar + $sub_tidak;
+            $sub_persen   = $sub_total_ab > 0 ? ($sub_standar / $sub_total_ab) * 100 : 0;
+
+            $grand_total   += $sub_total;
+            $grand_standar += $sub_standar;
+            $grand_tidak   += $sub_tidak;
+?>
+                        <tr class="row-subtotal">
+                            <td colspan="3">Subtotal <?php echo htmlspecialchars($kelompok); ?></td>
+                            <td><?php echo $sub_total; ?></td>
+                            <td><?php echo $sub_standar; ?></td>
+                            <td><?php echo $sub_tidak; ?></td>
+                            <td><?php echo number_format($sub_persen, 2); ?>%</td>
+                        </tr>
+<?php
         }
 
-        // Baris total
+        // Baris grand total
         $grand_total_ab = $grand_standar + $grand_tidak;
         $grand_persen   = $grand_total_ab > 0 ? ($grand_standar / $grand_total_ab) * 100 : 0;
 ?>
                         <tr class="row-total">
-                            <td colspan="3">TOTAL</td>
+                            <td colspan="3">GRAND TOTAL</td>
                             <td><?php echo $grand_total; ?></td>
                             <td><?php echo $grand_standar; ?></td>
                             <td><?php echo $grand_tidak; ?></td>
@@ -271,6 +317,8 @@ if (count($daftar_diagnosa) === 0) {
 
             <div class="summary-box summary-info">
                 <strong>📊 Periode Laporan:</strong> <?php echo date('d/m/Y', strtotime($tanggal_awal)) . ' - ' . date('d/m/Y', strtotime($tanggal_akhir)); ?>
+                <br>
+                <strong>📁 Jumlah Kelompok Diagnosa:</strong> <?php echo count($rekap_per_kelompok); ?> kelompok
                 <br>
                 <strong>📋 Jumlah Diagnosa:</strong> <?php echo count($rekap); ?> diagnosa
                 <br>
