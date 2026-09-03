@@ -4,7 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Morfologi Darah Tepi</title>
+    <title><?php
+    include 'koneksi.php';
+    // Get kd_jenis_prw early for title
+    $kd_jenis_prw = isset($_REQUEST['kd_jenis_prw']) ? $_REQUEST['kd_jenis_prw'] : '';
+    $nm_perawatan_title = 'Pemeriksaan Laboratorium';
+    if (!empty($kd_jenis_prw)) {
+        $kd_esc_title = mysqli_real_escape_string($koneksi, $kd_jenis_prw);
+        $q_title = mysqli_query($koneksi, "SELECT nm_perawatan FROM jns_perawatan_lab WHERE kd_jenis_prw = '$kd_esc_title' LIMIT 1");
+        if ($q_title && $r_title = mysqli_fetch_assoc($q_title)) {
+            $nm_perawatan_title = $r_title['nm_perawatan'];
+        }
+    }
+    echo htmlspecialchars($nm_perawatan_title);
+    ?></title>
     <style>
         * { box-sizing: border-box; }
         body, table, th, td, input, select, button { font-family: Tahoma, Geneva, Verdana, sans-serif; }
@@ -21,8 +34,8 @@
         .filter-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
         .filter-group { display: flex; flex-direction: column; gap: 8px; }
         .filter-group label { font-weight: bold; color: #495057; font-size: 14px; }
-        .filter-group input { padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
-        .filter-group input:focus { outline: none; border-color: #28a745; }
+        .filter-group input, .filter-group select { padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #28a745; box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1); }
         .filter-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
         .btn { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
@@ -324,6 +337,140 @@
             display: inline-block;
             box-shadow: 0 2px 4px rgba(22, 101, 52, 0.2);
         }
+
+        /* Searchable Select Dropdown */
+        .searchable-select {
+            position: relative;
+            width: 100%;
+        }
+        .searchable-select-trigger {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            min-height: 46px;
+            user-select: none;
+        }
+        .searchable-select-trigger:hover {
+            border-color: #c5ccd3;
+        }
+        .searchable-select-trigger.active {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+            border-radius: 8px 8px 0 0;
+        }
+        .searchable-select-trigger .ss-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #333;
+        }
+        .searchable-select-trigger .ss-text.placeholder {
+            color: #999;
+        }
+        .searchable-select-trigger .ss-arrow {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #6c757d;
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+        .searchable-select-trigger.active .ss-arrow {
+            transform: rotate(180deg);
+        }
+        .searchable-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #28a745;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            max-height: 300px;
+            overflow: hidden;
+            flex-direction: column;
+        }
+        .searchable-select-dropdown.open {
+            display: flex;
+        }
+        .ss-search-box {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            background: white;
+        }
+        .ss-search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .ss-search-box input:focus {
+            border-color: #28a745;
+        }
+        .ss-options {
+            overflow-y: auto;
+            max-height: 240px;
+        }
+        .ss-option {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.15s;
+            border-bottom: 1px solid #f8f9fa;
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+        }
+        .ss-option:hover {
+            background: #f0fdf4;
+        }
+        .ss-option.selected {
+            background: #e8f5e8;
+            font-weight: bold;
+            color: #15803d;
+        }
+        .ss-option .ss-kode {
+            color: #6c757d;
+            font-size: 11px;
+            font-weight: 600;
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .ss-option.selected .ss-kode {
+            background: #d4edda;
+            color: #155724;
+        }
+        .ss-option .ss-nama {
+            flex: 1;
+        }
+        .ss-no-match {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+        }
     </style>
 
 <script>
@@ -581,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <body>
 <div class="container">
     <div class="header">
-        <h1>🧬 MORFOLOGI DARAH TEPI</h1>
+        <h1>🧬 <?php echo htmlspecialchars(strtoupper($nm_perawatan_title)); ?></h1>
     </div>
     <div class="content">
         <div class="back-button">
@@ -589,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
     <?php
-    include 'koneksi.php';
+    // koneksi.php already included above for title
 
     // Get filter dates (default: today)
     $tgl_awal = date('Y-m-d');
@@ -599,6 +746,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (isset($_REQUEST['tgl_akhir']) && !empty($_REQUEST['tgl_akhir'])) {
         $tgl_akhir = $_REQUEST['tgl_akhir'];
+    }
+
+    // kd_jenis_prw sudah di-set di atas untuk title
+    // Ambil daftar semua jenis perawatan lab untuk dropdown
+    $list_jenis_prw = [];
+    $q_jenis = mysqli_query($koneksi, "SELECT kd_jenis_prw, nm_perawatan FROM jns_perawatan_lab ORDER BY nm_perawatan ASC");
+    if ($q_jenis) {
+        while ($rj = mysqli_fetch_assoc($q_jenis)) {
+            $list_jenis_prw[] = $rj;
+        }
     }
 
     $no_rawat = "";
@@ -619,11 +776,12 @@ document.addEventListener('DOMContentLoaded', function () {
             $id_template = mysqli_real_escape_string($koneksi, $id_template_arr[$i]);
             $nilai = mysqli_real_escape_string($koneksi, $nilai_arr[$i]);
 
+            $kd_prw_esc = mysqli_real_escape_string($koneksi, $kd_jenis_prw);
             $update_query = "UPDATE detail_periksa_lab
                              SET nilai = '$nilai'
                              WHERE no_rawat = '$no_rawat'
                                AND id_template = '$id_template'
-                               AND kd_jenis_prw = 'J000014'";
+                               AND kd_jenis_prw = '$kd_prw_esc'";
 
             mysqli_query($koneksi, $update_query);
         }
@@ -635,6 +793,7 @@ document.addEventListener('DOMContentLoaded', function () {
     $tgl_awal_esc = mysqli_real_escape_string($koneksi, $tgl_awal);
     $tgl_akhir_esc = mysqli_real_escape_string($koneksi, $tgl_akhir);
     
+    $kd_prw_esc = mysqli_real_escape_string($koneksi, $kd_jenis_prw);
     $query_pasien = "SELECT DISTINCT
                         detail_periksa_lab.no_rawat,
                         pasien.no_rkm_medis,
@@ -645,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
                      WHERE
                         detail_periksa_lab.tgl_periksa BETWEEN '$tgl_awal_esc' AND '$tgl_akhir_esc' AND
-                        detail_periksa_lab.kd_jenis_prw = 'J000014'
+                        detail_periksa_lab.kd_jenis_prw = '$kd_prw_esc'
                      ORDER BY
                         pasien.nm_pasien ASC";
     $result_pasien = mysqli_query($koneksi, $query_pasien);
@@ -659,6 +818,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Query template data if a patient is selected
     if (!empty($no_rawat)) {
         $no_rawat_esc = mysqli_real_escape_string($koneksi, $no_rawat);
+        $kd_prw_esc2 = mysqli_real_escape_string($koneksi, $kd_jenis_prw);
         $query = "SELECT
                     template_laboratorium.Pemeriksaan,
                     detail_periksa_lab.nilai,
@@ -671,7 +831,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     INNER JOIN detail_periksa_lab ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat
                     INNER JOIN template_laboratorium ON detail_periksa_lab.id_template = template_laboratorium.id_template
                   WHERE
-                    detail_periksa_lab.kd_jenis_prw = 'J000014' AND
+                    detail_periksa_lab.kd_jenis_prw = '$kd_prw_esc2' AND
                     reg_periksa.no_rawat = '$no_rawat_esc'
                   ORDER BY
                     template_laboratorium.urut";
@@ -690,9 +850,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     ?>
 
-    <form method="GET" class="filter-form">
-        <div class="filter-title">📅 Periode Pemeriksaan Morfologi Darah Tepi</div>
+    <form method="GET" class="filter-form" id="filterForm">
+        <div class="filter-title">📅 Filter Pemeriksaan Laboratorium</div>
         <div class="filter-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="filter-group">
+                <label for="kd_jenis_prw">Jenis Pemeriksaan Lab</label>
+                <input type="hidden" id="kd_jenis_prw" name="kd_jenis_prw" value="<?php echo htmlspecialchars($kd_jenis_prw); ?>">
+                <div class="searchable-select" id="ssJenisPerawatan">
+                    <div class="searchable-select-trigger" id="ssTrigger">
+                        <span class="ss-text <?php echo empty($kd_jenis_prw) ? 'placeholder' : ''; ?>" id="ssText">
+                            <?php
+                            if (!empty($kd_jenis_prw)) {
+                                echo htmlspecialchars($kd_jenis_prw . ' - ' . $nm_perawatan_title);
+                            } else {
+                                echo '-- Pilih Jenis Pemeriksaan --';
+                            }
+                            ?>
+                        </span>
+                        <span class="ss-arrow"></span>
+                    </div>
+                    <div class="searchable-select-dropdown" id="ssDropdown">
+                        <div class="ss-search-box">
+                            <input type="text" id="ssSearchInput" placeholder="Ketik untuk mencari..." autocomplete="off">
+                        </div>
+                        <div class="ss-options" id="ssOptions">
+                            <?php foreach ($list_jenis_prw as $jp): ?>
+                            <div class="ss-option <?php echo ($kd_jenis_prw === $jp['kd_jenis_prw']) ? 'selected' : ''; ?>"
+                                 data-value="<?php echo htmlspecialchars($jp['kd_jenis_prw']); ?>"
+                                 data-label="<?php echo htmlspecialchars($jp['kd_jenis_prw'] . ' - ' . $jp['nm_perawatan']); ?>">
+                                <span class="ss-kode"><?php echo htmlspecialchars($jp['kd_jenis_prw']); ?></span>
+                                <span class="ss-nama"><?php echo htmlspecialchars($jp['nm_perawatan']); ?></span>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="filter-group">
                 <label for="tgl_awal">Tanggal Awal</label>
                 <input type="date" id="tgl_awal" name="tgl_awal" required value="<?php echo htmlspecialchars($tgl_awal); ?>">
@@ -710,7 +903,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <!-- Table Daftar Pasien -->
     <div class="table-container" style="margin-bottom: 30px;">
         <div style="padding: 18px; background: linear-gradient(45deg, #343a40, #495057); color: white; font-weight: bold; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 8px; font-size: 14px;">
-            📋 Daftar Pasien Periode: <?php echo htmlspecialchars(date('d-m-Y', strtotime($tgl_awal))); ?> s.d. <?php echo htmlspecialchars(date('d-m-Y', strtotime($tgl_akhir))); ?>
+            📋 Daftar Pasien <?php echo htmlspecialchars($nm_perawatan_title); ?> — Periode: <?php echo htmlspecialchars(date('d-m-Y', strtotime($tgl_awal))); ?> s.d. <?php echo htmlspecialchars(date('d-m-Y', strtotime($tgl_akhir))); ?>
         </div>
         <table>
             <thead>
@@ -734,14 +927,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <?php if ($no_rawat === $p['no_rawat']) { ?>
                                     <span class="badge-active">Terpilih</span>
                                 <?php } else { ?>
-                                    <a href="?no_rawat=<?php echo urlencode($p['no_rawat']); ?>&tgl_awal=<?php echo urlencode($tgl_awal); ?>&tgl_akhir=<?php echo urlencode($tgl_akhir); ?>" class="btn-pilih">Pilih →</a>
+                                    <a href="?no_rawat=<?php echo urlencode($p['no_rawat']); ?>&tgl_awal=<?php echo urlencode($tgl_awal); ?>&tgl_akhir=<?php echo urlencode($tgl_akhir); ?>&kd_jenis_prw=<?php echo urlencode($kd_jenis_prw); ?>" class="btn-pilih">Pilih →</a>
                                 <?php } ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php } else { ?>
                     <tr>
-                        <td colspan="5" class="no-data">Tidak ada pasien pemeriksaan Morfologi Darah Tepi pada periode ini.</td>
+                        <td colspan="5" class="no-data">Tidak ada pasien pemeriksaan <?php echo htmlspecialchars($nm_perawatan_title); ?> pada periode ini.</td>
                     </tr>
                 <?php } ?>
             </tbody>
@@ -762,6 +955,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <input type="hidden" name="no_rawat" value="<?= htmlspecialchars($no_rawat) ?>">
             <input type="hidden" name="tgl_awal" value="<?= htmlspecialchars($tgl_awal) ?>">
             <input type="hidden" name="tgl_akhir" value="<?= htmlspecialchars($tgl_akhir) ?>">
+            <input type="hidden" name="kd_jenis_prw" value="<?= htmlspecialchars($kd_jenis_prw) ?>">
             <div class="table-container">
                 <table>
                     <thead>
@@ -833,5 +1027,139 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 </div>
+<script>
+// ============================
+// Searchable Select Component
+// ============================
+(function() {
+    const trigger = document.getElementById('ssTrigger');
+    const dropdown = document.getElementById('ssDropdown');
+    const searchInput = document.getElementById('ssSearchInput');
+    const optionsContainer = document.getElementById('ssOptions');
+    const hiddenInput = document.getElementById('kd_jenis_prw');
+    const ssText = document.getElementById('ssText');
+    const filterForm = document.getElementById('filterForm');
+
+    if (!trigger) return;
+
+    // Toggle dropdown
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = dropdown.classList.contains('open');
+        if (isOpen) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    });
+
+    function openDropdown() {
+        dropdown.classList.add('open');
+        trigger.classList.add('active');
+        searchInput.value = '';
+        filterOptions('');
+        setTimeout(() => searchInput.focus(), 50);
+    }
+
+    function closeDropdown() {
+        dropdown.classList.remove('open');
+        trigger.classList.remove('active');
+    }
+
+    // Search/filter
+    searchInput.addEventListener('input', function() {
+        filterOptions(this.value.toLowerCase());
+    });
+
+    // Prevent form submit on Enter in search box
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            // Select first visible option
+            const firstVisible = optionsContainer.querySelector('.ss-option:not([style*="display: none"])');
+            if (firstVisible) {
+                selectOption(firstVisible);
+            }
+        }
+        if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    function filterOptions(query) {
+        const options = optionsContainer.querySelectorAll('.ss-option');
+        let hasMatch = false;
+        options.forEach(opt => {
+            const label = opt.getAttribute('data-label').toLowerCase();
+            if (label.includes(query)) {
+                opt.style.display = '';
+                hasMatch = true;
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+        // Show/hide no match message
+        let noMatch = optionsContainer.querySelector('.ss-no-match');
+        if (!hasMatch) {
+            if (!noMatch) {
+                noMatch = document.createElement('div');
+                noMatch.className = 'ss-no-match';
+                noMatch.textContent = 'Tidak ditemukan';
+                optionsContainer.appendChild(noMatch);
+            }
+            noMatch.style.display = '';
+        } else if (noMatch) {
+            noMatch.style.display = 'none';
+        }
+    }
+
+    // Click option
+    optionsContainer.addEventListener('click', function(e) {
+        const opt = e.target.closest('.ss-option');
+        if (opt) {
+            selectOption(opt);
+        }
+    });
+
+    function selectOption(opt) {
+        const value = opt.getAttribute('data-value');
+        const label = opt.getAttribute('data-label');
+
+        // Update hidden input
+        hiddenInput.value = value;
+
+        // Update trigger text
+        ssText.textContent = label;
+        ssText.classList.remove('placeholder');
+
+        // Update selected state
+        optionsContainer.querySelectorAll('.ss-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+
+        closeDropdown();
+    }
+
+    // Close on click outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#ssJenisPerawatan')) {
+            closeDropdown();
+        }
+    });
+
+    // Validate: require jenis pemeriksaan before submit
+    filterForm.addEventListener('submit', function(e) {
+        if (!hiddenInput.value) {
+            e.preventDefault();
+            alert('⚠️ Silakan pilih Jenis Pemeriksaan Lab terlebih dahulu.');
+            trigger.style.borderColor = '#dc3545';
+            trigger.style.boxShadow = '0 0 0 3px rgba(220, 53, 69, 0.15)';
+            setTimeout(() => {
+                trigger.style.borderColor = '';
+                trigger.style.boxShadow = '';
+            }, 2000);
+        }
+    });
+})();
+</script>
 </body>
 </html>
