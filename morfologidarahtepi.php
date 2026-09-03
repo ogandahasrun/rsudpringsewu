@@ -1,11 +1,54 @@
+<?php
+// AJAX Search Handler - must be before any HTML output
+include 'koneksi.php';
+if (isset($_GET['ajax_search_pasien'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    $q = isset($_GET['q']) ? trim($_GET['q']) : '';
+    $kd = isset($_GET['kd_jenis_prw']) ? mysqli_real_escape_string($koneksi, $_GET['kd_jenis_prw']) : '';
+    $ta = isset($_GET['tgl_awal']) ? mysqli_real_escape_string($koneksi, $_GET['tgl_awal']) : date('Y-m-d');
+    $tk = isset($_GET['tgl_akhir']) ? mysqli_real_escape_string($koneksi, $_GET['tgl_akhir']) : date('Y-m-d');
 
+    if (empty($q) || strlen($q) < 2 || empty($kd)) {
+        echo json_encode(['status' => 'ok', 'results' => []]);
+        exit;
+    }
+
+    $q_esc = mysqli_real_escape_string($koneksi, $q);
+    $sql = "SELECT DISTINCT
+                detail_periksa_lab.no_rawat,
+                pasien.no_rkm_medis,
+                pasien.nm_pasien
+            FROM detail_periksa_lab
+                INNER JOIN reg_periksa ON detail_periksa_lab.no_rawat = reg_periksa.no_rawat
+                INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
+            WHERE
+                detail_periksa_lab.tgl_periksa BETWEEN '$ta' AND '$tk'
+                AND detail_periksa_lab.kd_jenis_prw = '$kd'
+                AND (
+                    pasien.no_rkm_medis LIKE '%$q_esc%'
+                    OR pasien.nm_pasien LIKE '%$q_esc%'
+                    OR detail_periksa_lab.no_rawat LIKE '%$q_esc%'
+                )
+            ORDER BY pasien.nm_pasien ASC
+            LIMIT 20";
+    $res = mysqli_query($koneksi, $sql);
+    $results = [];
+    if ($res) {
+        while ($row = mysqli_fetch_assoc($res)) {
+            $results[] = $row;
+        }
+    }
+    echo json_encode(['status' => 'ok', 'results' => $results]);
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php
-    include 'koneksi.php';
+    // koneksi.php already included above for AJAX handler
     // Get kd_jenis_prw early for title
     $kd_jenis_prw = isset($_REQUEST['kd_jenis_prw']) ? $_REQUEST['kd_jenis_prw'] : '';
     $nm_perawatan_title = 'Pemeriksaan Laboratorium';
@@ -336,6 +379,206 @@
             font-weight: bold;
             display: inline-block;
             box-shadow: 0 2px 4px rgba(22, 101, 52, 0.2);
+        }
+
+        /* CSS untuk Fitur Pencarian Pasien */
+        .patient-search-box {
+            padding: 14px 18px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .patient-search-box .search-icon {
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+        }
+        .patient-search-input-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+        .patient-search-input-wrapper input {
+            width: 100%;
+            padding: 10px 36px 10px 14px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .patient-search-input-wrapper input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.12);
+        }
+        .patient-search-input-wrapper input::placeholder {
+            color: #adb5bd;
+        }
+        .patient-search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #dee2e6;
+            border: none;
+            color: #495057;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+        .patient-search-clear:hover {
+            background: #adb5bd;
+            color: white;
+        }
+        .patient-search-clear.visible {
+            display: flex;
+        }
+        .patient-search-result-count {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .patient-search-result-count .count-num {
+            color: #28a745;
+            font-weight: 700;
+        }
+        .patient-row-hidden {
+            display: none !important;
+        }
+        .patient-search-no-result {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 25px;
+            font-size: 14px;
+            display: none;
+        }
+        .patient-search-highlight {
+            background-color: #fff3cd;
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* AJAX Search Dropdown Results */
+        .ajax-search-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+            z-index: 1000;
+            max-height: 280px;
+            overflow-y: auto;
+            display: none;
+        }
+        .ajax-search-dropdown.open {
+            display: block;
+        }
+        .ajax-search-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ajax-search-item:last-child {
+            border-bottom: none;
+        }
+        .ajax-search-item:hover {
+            background: #f0fdf4;
+        }
+        .ajax-search-item .asi-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .ajax-search-item .asi-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .ajax-search-item .asi-nama {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ajax-search-item .asi-detail {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+            display: flex;
+            gap: 12px;
+        }
+        .ajax-search-item .asi-detail span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ajax-search-item .asi-badge {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .ajax-search-item .asi-go {
+            color: #28a745;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .ajax-search-item:hover .asi-go {
+            opacity: 1;
+        }
+        .ajax-search-loading,
+        .ajax-search-empty {
+            padding: 18px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            font-style: italic;
+        }
+        .ajax-search-empty svg {
+            display: block;
+            margin: 0 auto 8px;
+        }
+        .patient-search-input-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
         }
 
         /* Searchable Select Dropdown */
@@ -901,11 +1144,32 @@ document.addEventListener('DOMContentLoaded', function () {
     </form>
 
     <!-- Table Daftar Pasien -->
-    <div class="table-container" style="margin-bottom: 30px;">
+    <div class="table-container" style="margin-bottom: 30px;" id="patientTableContainer">
         <div style="padding: 18px; background: linear-gradient(45deg, #343a40, #495057); color: white; font-weight: bold; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 8px; font-size: 14px;">
             📋 Daftar Pasien <?php echo htmlspecialchars($nm_perawatan_title); ?> — Periode: <?php echo htmlspecialchars(date('d-m-Y', strtotime($tgl_awal))); ?> s.d. <?php echo htmlspecialchars(date('d-m-Y', strtotime($tgl_akhir))); ?>
         </div>
-        <table>
+        <div class="patient-search-box">
+            <span class="search-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+            <div class="patient-search-input-wrapper" style="position: relative;">
+                <input type="text" id="patientSearchInput" placeholder="Ketik No. Rawat, No. RM, atau Nama Pasien..." autocomplete="off"
+                    data-kd-jenis-prw="<?php echo htmlspecialchars($kd_jenis_prw); ?>"
+                    data-tgl-awal="<?php echo htmlspecialchars($tgl_awal); ?>"
+                    data-tgl-akhir="<?php echo htmlspecialchars($tgl_akhir); ?>"
+                    data-has-local="<?php echo !empty($list_pasien) ? '1' : '0'; ?>">
+                <button type="button" class="patient-search-clear" id="patientSearchClear" title="Hapus pencarian">&times;</button>
+                <div class="ajax-search-dropdown" id="ajaxSearchDropdown"></div>
+            </div>
+            <span class="patient-search-result-count" id="patientSearchCount">
+                <?php if (!empty($list_pasien)) { ?>
+                <span class="count-num"><?php echo count($list_pasien); ?></span> pasien ditemukan
+                <?php } else { ?>
+                <span style="color: #adb5bd;">Ketik minimal 2 karakter untuk mencari</span>
+                <?php } ?>
+            </span>
+        </div>
+        <table id="patientTable">
             <thead>
                 <tr>
                     <th style="width: 5%;">No</th>
@@ -915,14 +1179,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     <th style="width: 20%; text-align: center;">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="patientTableBody">
                 <?php if (!empty($list_pasien)) { ?>
                     <?php foreach ($list_pasien as $idx => $p): ?>
-                        <tr class="<?php echo ($no_rawat === $p['no_rawat']) ? 'active-row' : ''; ?>">
-                            <td><?php echo $idx + 1; ?></td>
-                            <td><?php echo htmlspecialchars($p['no_rawat']); ?></td>
-                            <td><?php echo htmlspecialchars($p['no_rkm_medis']); ?></td>
-                            <td><strong><?php echo htmlspecialchars($p['nm_pasien']); ?></strong></td>
+                        <tr class="patient-row <?php echo ($no_rawat === $p['no_rawat']) ? 'active-row' : ''; ?>"
+                            data-no-rawat="<?php echo htmlspecialchars(strtolower($p['no_rawat'])); ?>"
+                            data-no-rm="<?php echo htmlspecialchars(strtolower($p['no_rkm_medis'])); ?>"
+                            data-nama="<?php echo htmlspecialchars(strtolower($p['nm_pasien'])); ?>">
+                            <td class="col-no"><?php echo $idx + 1; ?></td>
+                            <td class="col-rawat"><?php echo htmlspecialchars($p['no_rawat']); ?></td>
+                            <td class="col-rm"><?php echo htmlspecialchars($p['no_rkm_medis']); ?></td>
+                            <td class="col-nama"><strong><?php echo htmlspecialchars($p['nm_pasien']); ?></strong></td>
                             <td style="text-align: center;">
                                 <?php if ($no_rawat === $p['no_rawat']) { ?>
                                     <span class="badge-active">Terpilih</span>
@@ -939,6 +1206,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 <?php } ?>
             </tbody>
         </table>
+        <div class="patient-search-no-result" id="patientSearchNoResult">
+            🔍 Tidak ada pasien yang cocok dengan pencarian Anda.
+        </div>
     </div>
 
     <?php
@@ -1159,6 +1429,235 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 2000);
         }
     });
+})();
+
+// ============================
+// Patient Search/Filter Feature (Hybrid: Local + AJAX)
+// ============================
+(function() {
+    const searchInput = document.getElementById('patientSearchInput');
+    const clearBtn = document.getElementById('patientSearchClear');
+    const countEl = document.getElementById('patientSearchCount');
+    const noResultEl = document.getElementById('patientSearchNoResult');
+    const tbody = document.getElementById('patientTableBody');
+    const dropdown = document.getElementById('ajaxSearchDropdown');
+
+    if (!searchInput) return;
+
+    const kdJenisPrw = searchInput.getAttribute('data-kd-jenis-prw') || '';
+    const tglAwal = searchInput.getAttribute('data-tgl-awal') || '';
+    const tglAkhir = searchInput.getAttribute('data-tgl-akhir') || '';
+    const hasLocal = searchInput.getAttribute('data-has-local') === '1';
+
+    const rows = tbody ? tbody.querySelectorAll('.patient-row') : [];
+    const totalLocal = rows.length;
+
+    // Store original HTML for each searchable cell (local rows)
+    rows.forEach(row => {
+        row._origRawat = row.querySelector('.col-rawat').innerHTML;
+        row._origRM = row.querySelector('.col-rm').innerHTML;
+        row._origNama = row.querySelector('.col-nama').innerHTML;
+    });
+
+    let debounceTimer = null;
+    let ajaxController = null;
+
+    searchInput.addEventListener('input', function() {
+        const val = this.value;
+        clearTimeout(debounceTimer);
+
+        // Toggle clear button
+        if (val.trim().length > 0) {
+            clearBtn.classList.add('visible');
+        } else {
+            clearBtn.classList.remove('visible');
+            closeDropdown();
+        }
+
+        debounceTimer = setTimeout(() => {
+            const query = val.trim();
+            // Always do local filter if rows exist
+            if (totalLocal > 0) {
+                filterLocal(query);
+            }
+            // Always do AJAX search (shows dropdown with results)
+            if (query.length >= 2 && kdJenisPrw) {
+                searchAjax(query);
+            } else {
+                closeDropdown();
+            }
+        }, 250);
+    });
+
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        clearBtn.classList.remove('visible');
+        if (totalLocal > 0) filterLocal('');
+        closeDropdown();
+        searchInput.focus();
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            clearBtn.classList.remove('visible');
+            if (totalLocal > 0) filterLocal('');
+            closeDropdown();
+        }
+    });
+
+    // Close dropdown on click outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.patient-search-input-wrapper')) {
+            closeDropdown();
+        }
+    });
+
+    function closeDropdown() {
+        if (dropdown) {
+            dropdown.classList.remove('open');
+            dropdown.innerHTML = '';
+        }
+    }
+
+    // ===== AJAX Search =====
+    function searchAjax(query) {
+        // Cancel previous request
+        if (ajaxController) ajaxController.abort();
+        ajaxController = new AbortController();
+
+        // Show loading
+        dropdown.innerHTML = '<div class="ajax-search-loading">⏳ Mencari pasien...</div>';
+        dropdown.classList.add('open');
+
+        const url = `morfologidarahtepi.php?ajax_search_pasien=1&q=${encodeURIComponent(query)}&kd_jenis_prw=${encodeURIComponent(kdJenisPrw)}&tgl_awal=${encodeURIComponent(tglAwal)}&tgl_akhir=${encodeURIComponent(tglAkhir)}`;
+
+        fetch(url, { signal: ajaxController.signal })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok' && data.results.length > 0) {
+                    renderDropdown(data.results, query);
+                } else {
+                    dropdown.innerHTML = `<div class="ajax-search-empty">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                        Tidak ditemukan pasien yang cocok pada periode ini
+                    </div>`;
+                }
+            })
+            .catch(err => {
+                if (err.name !== 'AbortError') {
+                    dropdown.innerHTML = '<div class="ajax-search-empty" style="color:#ef4444;">Gagal mencari data.</div>';
+                }
+            });
+    }
+
+    function renderDropdown(results, query) {
+        dropdown.innerHTML = '';
+        results.forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'ajax-search-item';
+            const initials = r.nm_pasien.substring(0, 2).toUpperCase();
+            item.innerHTML = `
+                <div class="asi-icon">${escapeHtml(initials)}</div>
+                <div class="asi-info">
+                    <div class="asi-nama">${highlightInline(escapeHtml(r.nm_pasien), query)}</div>
+                    <div class="asi-detail">
+                        <span><span class="asi-badge">RM</span> ${highlightInline(escapeHtml(r.no_rkm_medis), query)}</span>
+                        <span><span class="asi-badge">Rawat</span> ${highlightInline(escapeHtml(r.no_rawat), query)}</span>
+                    </div>
+                </div>
+                <span class="asi-go">Pilih →</span>
+            `;
+            item.addEventListener('click', function() {
+                const url = `?no_rawat=${encodeURIComponent(r.no_rawat)}&tgl_awal=${encodeURIComponent(tglAwal)}&tgl_akhir=${encodeURIComponent(tglAkhir)}&kd_jenis_prw=${encodeURIComponent(kdJenisPrw)}`;
+                window.location.href = url;
+            });
+            dropdown.appendChild(item);
+        });
+        dropdown.classList.add('open');
+    }
+
+    function highlightInline(text, query) {
+        if (!query) return text;
+        const lower = text.toLowerCase();
+        const qLower = query.toLowerCase();
+        const idx = lower.indexOf(qLower);
+        if (idx === -1) return text;
+        return text.substring(0, idx) + '<span class="patient-search-highlight">' + text.substring(idx, idx + query.length) + '</span>' + text.substring(idx + query.length);
+    }
+
+    // ===== Local Filter =====
+    function filterLocal(query) {
+        query = query.toLowerCase();
+        let visibleCount = 0;
+        let runningNumber = 0;
+
+        rows.forEach(row => {
+            const noRawat = row.getAttribute('data-no-rawat');
+            const noRM = row.getAttribute('data-no-rm');
+            const nama = row.getAttribute('data-nama');
+
+            const matches = !query ||
+                noRawat.includes(query) ||
+                noRM.includes(query) ||
+                nama.includes(query);
+
+            if (matches) {
+                row.classList.remove('patient-row-hidden');
+                visibleCount++;
+                runningNumber++;
+                row.querySelector('.col-no').textContent = runningNumber;
+
+                if (query) {
+                    row.querySelector('.col-rawat').innerHTML = highlightText(row._origRawat, query);
+                    row.querySelector('.col-rm').innerHTML = highlightText(row._origRM, query);
+                    row.querySelector('.col-nama').innerHTML = highlightText(row._origNama, query);
+                } else {
+                    row.querySelector('.col-rawat').innerHTML = row._origRawat;
+                    row.querySelector('.col-rm').innerHTML = row._origRM;
+                    row.querySelector('.col-nama').innerHTML = row._origNama;
+                }
+            } else {
+                row.classList.add('patient-row-hidden');
+            }
+        });
+
+        if (countEl) {
+            if (query) {
+                countEl.innerHTML = '<span class="count-num">' + visibleCount + '</span> dari ' + totalLocal + ' pasien';
+            } else {
+                countEl.innerHTML = '<span class="count-num">' + totalLocal + '</span> pasien ditemukan';
+            }
+        }
+
+        if (noResultEl) {
+            noResultEl.style.display = (visibleCount === 0 && query) ? 'block' : 'none';
+        }
+    }
+
+    function highlightText(original, query) {
+        if (!query) return original;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = original;
+        const textContent = tempDiv.textContent || tempDiv.innerText;
+        const lowerText = textContent.toLowerCase();
+        const idx = lowerText.indexOf(query.toLowerCase());
+        if (idx === -1) return original;
+
+        const before = textContent.substring(0, idx);
+        const match = textContent.substring(idx, idx + query.length);
+        const after = textContent.substring(idx + query.length);
+
+        const hasStrong = original.indexOf('<strong>') !== -1;
+        const result = escapeHtml(before) + '<span class="patient-search-highlight">' + escapeHtml(match) + '</span>' + escapeHtml(after);
+        return hasStrong ? '<strong>' + result + '</strong>' : result;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 })();
 </script>
 </body>
