@@ -1,6 +1,5 @@
 <?php 
 $koneksi = mysqli_connect("host","user","password","database");
-// Check connection
 if (mysqli_connect_errno()){
 	echo "Koneksi database gagal : " . mysqli_connect_error();
 }else{
@@ -19,6 +18,13 @@ $CONSIDVCLAIM = "your_consumer_id_here"; // Consumer ID dari BPJS
 $SECRETKEYVCLAIM = "your_secret_key_here"; // Secret Key dari BPJS
 $USERKEYVCLAIM = "your_user_key_here"; // User Key dari BPJS
 
+// KONFIGURASI BPJS APLICARE API
+$URLAPLICARE = "https://new-api.bpjs-kesehatan.go.id/aplicaresws"; // URL API BPJS (ganti dengan production jika sudah live)
+$CONSIDAPLICARE = ""; // Consumer ID dari BPJS
+$SECRETKEYAPLICARE = ""; // Secret Key dari BPJS
+$USERKEYAPLICARE = ""; // User Key dari BPJS
+$KODEPPKAPLICARE = ""; // Kode PPK untuk APLICARE
+
 // KONFIGURASI MOBILE JKN AUTH
 $URLAUTHMJKN = "https://localhost/auth"; // URL Auth Mobile JKN
 $USERNAMEAUTHMJKN = "usermjkn"; // Username untuk Auth
@@ -30,5 +36,11 @@ $URLFHIRSATUSEHAT = "https://api-satusehat.kemkes.go.id/fhir-r4/v1";
 $ORGANIZATIONID = "zzz";
 $CLIENTID = "zzz";
 $CLIENTSECRET = "zzz";
+
+// KONFIGURASI E-KLAIM
+$URLEKLAIM = '';
+$KODERS = '';
+$TYPEKELAS = '';
+$ENCRYPTIONKEY = ''
 
 ?>
