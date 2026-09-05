@@ -224,6 +224,23 @@
             font-family: monospace;
             font-size: 11px;
         }
+        .badge-ralan {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        .badge-ranap {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .badge-status {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .badge-asal {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
 
         /* Mobile Styles */
         @media (max-width: 768px) {
@@ -328,16 +345,6 @@
     $limit = isset($_POST['limit']) ? $_POST['limit'] : '50';
     $halaman = isset($_POST['halaman']) ? (int)$_POST['halaman'] : 1;
     if ($halaman < 1) $halaman = 1;
-
-    // Ambil daftar penjab untuk lookup nama jenis bayar
-    $penjab_map = [];
-    $query_penjab = "SELECT kd_pj, png_jawab FROM penjab";
-    $result_penjab = mysqli_query($koneksi, $query_penjab);
-    if ($result_penjab) {
-        while ($pj = mysqli_fetch_assoc($result_penjab)) {
-            $penjab_map[$pj['kd_pj']] = $pj['png_jawab'];
-        }
-    }
     ?>
 
             <form method="POST" class="filter-form" id="formFilter">
@@ -395,30 +402,24 @@
         $halaman = isset($_POST['halaman']) ? (int)$_POST['halaman'] : 1;
         if ($halaman < 1) $halaman = 1;
         
-        $query_base = "SELECT
-                    trackersql.tanggal,
-                    trackersql.sqle,
-                    pegawai.nik,
-                    pegawai.nama
-                FROM
-                    trackersql
-                INNER JOIN pegawai ON trackersql.usere = pegawai.nik
-                WHERE
-                    trackersql.sqle LIKE '%update reg_periksa set  kd_pj=%'
-                    AND trackersql.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
-                ORDER BY trackersql.tanggal DESC";
+        // 1. Query hitung total data secara efisien (tanpa JOIN dan tanpa ORDER BY)
+        $query_count = "SELECT COUNT(*) AS total
+                        FROM trackersql
+                        WHERE trackersql.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
+                          AND trackersql.sqle LIKE '%update reg_periksa set  kd_pj=%'";
 
-        $result_all = mysqli_query($koneksi, $query_base);
+        $result_count = mysqli_query($koneksi, $query_count);
 
-        if ($result_all) {
-            $total_rows = mysqli_num_rows($result_all);
+        if ($result_count) {
+            $row_count = mysqli_fetch_assoc($result_count);
+            $total_rows = (int)($row_count['total'] ?? 0);
             
             // Hitung Pagination
             if ($limit === 'semua') {
                 $total_pages = 1;
                 $halaman = 1;
-                $query = $query_base;
                 $offset = 0;
+                $limit_clause = "";
             } else {
                 $limit_val = (int)$limit;
                 if ($limit_val <= 0) $limit_val = 50;
@@ -427,10 +428,8 @@
                 if ($halaman > $total_pages) $halaman = $total_pages;
                 
                 $offset = ($halaman - 1) * $limit_val;
-                $query = $query_base . " LIMIT $offset, $limit_val";
+                $limit_clause = " LIMIT $offset, $limit_val";
             }
-            
-            $result = mysqli_query($koneksi, $query);
             
             echo '<div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">';
             echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #e65100;">' . $total_rows . '</span> perubahan jenis bayar';
@@ -455,127 +454,271 @@
             echo '</div>';
             echo '</div>';
             
-            // Kumpulkan semua data dan parse sqle terlebih dahulu
-            $rows_data = [];
-            $all_no_rawat = [];
-            while ($row = mysqli_fetch_assoc($result)) {
-                $sqle = $row['sqle'];
-                
-                // Parse kode jenis bayar baru dari sqle
-                $kd_pj_baru = '-';
-                $nama_penjab_baru = '-';
-                if (preg_match('/\|([A-Za-z0-9_]+)\|/', $sqle, $matches_pj)) {
-                    $kd_pj_baru = $matches_pj[1];
-                    if (isset($penjab_map[$kd_pj_baru])) {
-                        $nama_penjab_baru = $penjab_map[$kd_pj_baru];
-                    } else {
-                        $nama_penjab_baru = $kd_pj_baru;
+            if ($total_rows > 0) {
+                // Ambil daftar penjab hanya saat ada data yang perlu ditampilkan
+                $penjab_map = [];
+                $query_penjab = "SELECT kd_pj, png_jawab FROM penjab";
+                $result_penjab = mysqli_query($koneksi, $query_penjab);
+                if ($result_penjab) {
+                    while ($pj = mysqli_fetch_assoc($result_penjab)) {
+                        $penjab_map[$pj['kd_pj']] = $pj['png_jawab'];
                     }
                 }
 
-                // Parse no_rawat dari sqle
-                $no_rawat = '-';
-                if (preg_match('/\|[A-Za-z0-9_]+\|(\d{4}\/\d{2}\/\d{2}\/\d+)/', $sqle, $matches_nr)) {
-                    $no_rawat = $matches_nr[1];
-                    $all_no_rawat[] = $no_rawat;
-                }
+                // 2. Query ambil data hanya sejumlah limit yang dibutuhkan
+                $query_data = "SELECT
+                            trackersql.tanggal,
+                            trackersql.sqle,
+                            COALESCE(pegawai.nama, trackersql.usere) AS nama
+                        FROM
+                            trackersql
+                        LEFT JOIN pegawai ON trackersql.usere = pegawai.nik
+                        WHERE
+                            trackersql.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'
+                            AND trackersql.sqle LIKE '%update reg_periksa set  kd_pj=%'
+                        ORDER BY trackersql.tanggal DESC" . $limit_clause;
 
-                // Parse IP address dari sqle
-                $ip_address = '-';
-                if (preg_match('/^([\d\.]+)\s/', $sqle, $matches_ip)) {
-                    $ip_address = $matches_ip[1];
-                }
+                $result = mysqli_query($koneksi, $query_data);
 
-                $rows_data[] = [
-                    'tanggal' => $row['tanggal'],
-                    'nama_petugas' => $row['nama'],
-                    'nama_penjab_baru' => $nama_penjab_baru,
-                    'no_rawat' => $no_rawat,
-                    'ip_address' => $ip_address,
-                ];
-            }
+                // Kumpulkan data dan parse sqle
+                $rows_data = [];
+                $all_no_rawat = [];
+                if ($result) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $sqle = $row['sqle'];
+                        
+                        // Parse kode jenis bayar baru dari sqle
+                        $kd_pj_baru = '-';
+                        $nama_penjab_baru = '-';
+                        if (preg_match('/\|([A-Za-z0-9_]+)\|/', $sqle, $matches_pj)) {
+                            $kd_pj_baru = $matches_pj[1];
+                            if (isset($penjab_map[$kd_pj_baru])) {
+                                $nama_penjab_baru = $penjab_map[$kd_pj_baru];
+                            } else {
+                                $nama_penjab_baru = $kd_pj_baru;
+                            }
+                        }
 
-            // Batch query: ambil data pasien berdasarkan no_rawat
-            $pasien_map = [];
-            if (!empty($all_no_rawat)) {
-                $no_rawat_escaped_arr = array_map(function($nr) use ($koneksi) {
-                    return "'" . mysqli_real_escape_string($koneksi, $nr) . "'";
-                }, array_unique($all_no_rawat));
-                $in_clause = implode(',', $no_rawat_escaped_arr);
-                $query_pasien = "SELECT rp.no_rawat, rp.no_rkm_medis, p.nm_pasien 
-                                 FROM reg_periksa rp 
-                                 INNER JOIN pasien p ON rp.no_rkm_medis = p.no_rkm_medis 
-                                 WHERE rp.no_rawat IN ($in_clause)";
-                $result_pasien = mysqli_query($koneksi, $query_pasien);
-                if ($result_pasien) {
-                    while ($rp = mysqli_fetch_assoc($result_pasien)) {
-                        $pasien_map[$rp['no_rawat']] = [
-                            'no_rkm_medis' => $rp['no_rkm_medis'],
-                            'nm_pasien' => $rp['nm_pasien'],
+                        // Parse no_rawat dari sqle
+                        $no_rawat = '-';
+                        if (preg_match('/\|[A-Za-z0-9_]+\|(\d{4}\/\d{2}\/\d{2}\/\d+)/', $sqle, $matches_nr)) {
+                            $no_rawat = $matches_nr[1];
+                            $all_no_rawat[] = $no_rawat;
+                        }
+
+                        // Parse IP address dari sqle
+                        $ip_address = '-';
+                        if (preg_match('/^([\d\.]+)\s/', $sqle, $matches_ip)) {
+                            $ip_address = $matches_ip[1];
+                        }
+
+                        $rows_data[] = [
+                            'tanggal' => $row['tanggal'],
+                            'nama_petugas' => $row['nama'],
+                            'kd_pj_baru' => $kd_pj_baru,
+                            'nama_penjab_baru' => $nama_penjab_baru,
+                            'no_rawat' => $no_rawat,
+                            'ip_address' => $ip_address,
                         ];
                     }
                 }
-            }
 
-            echo "<div class='table-responsive'><table>
-                <tr>
-                    <th>No</th>
-                    <th>TANGGAL</th>
-                    <th>GANTI JENIS BAYAR JADI</th>
-                    <th>NO RAWAT</th>
-                    <th>NO RKM MEDIS</th>
-                    <th>NAMA PASIEN</th>
-                    <th>IP ADDRESS</th>
-                    <th>NAMA PETUGAS</th>
-                </tr>";
+                // 1. Batch query: ambil data pasien berdasarkan no_rawat
+                $pasien_map = [];
+                $update_old_pj_map = [];
+                $unique_no_rawat = array_values(array_unique(array_filter($all_no_rawat, function($v) {
+                    return $v !== '-' && !empty($v);
+                })));
 
-            $no = isset($offset) ? $offset + 1 : 1;
-            foreach ($rows_data as $rd) {
-                $tanggal = htmlspecialchars($rd['tanggal']);
-                $nama_petugas = htmlspecialchars($rd['nama_petugas']);
-                $nama_penjab_escaped = htmlspecialchars($rd['nama_penjab_baru']);
-                $no_rawat_escaped = htmlspecialchars($rd['no_rawat']);
-                $ip_escaped = htmlspecialchars($rd['ip_address']);
+                if (!empty($unique_no_rawat)) {
+                    $no_rawat_escaped_arr = array_map(function($nr) use ($koneksi) {
+                        return "'" . mysqli_real_escape_string($koneksi, $nr) . "'";
+                    }, $unique_no_rawat);
+                    $in_clause = implode(',', $no_rawat_escaped_arr);
+                    $query_pasien = "SELECT rp.no_rawat, rp.no_rkm_medis, rp.status_lanjut, p.nm_pasien 
+                                     FROM reg_periksa rp 
+                                     INNER JOIN pasien p ON rp.no_rkm_medis = p.no_rkm_medis 
+                                     WHERE rp.no_rawat IN ($in_clause)";
+                    $result_pasien = mysqli_query($koneksi, $query_pasien);
+                    if ($result_pasien) {
+                        while ($rp = mysqli_fetch_assoc($result_pasien)) {
+                            $pasien_map[$rp['no_rawat']] = [
+                                'no_rkm_medis' => $rp['no_rkm_medis'],
+                                'nm_pasien' => $rp['nm_pasien'],
+                                'status_lanjut' => $rp['status_lanjut'] ?? '-',
+                            ];
+                        }
+                    }
 
-                // Ambil data pasien dari map
-                $no_rkm_medis = '-';
-                $nm_pasien = '-';
-                if ($rd['no_rawat'] !== '-' && isset($pasien_map[$rd['no_rawat']])) {
-                    $no_rkm_medis = htmlspecialchars($pasien_map[$rd['no_rawat']]['no_rkm_medis']);
-                    $nm_pasien = htmlspecialchars($pasien_map[$rd['no_rawat']]['nm_pasien']);
+                    // 2. Batch query: rekonstruksi timeline riwayat jenis bayar awal dari trackersql
+                    $min_date = $tanggal_awal;
+                    foreach ($unique_no_rawat as $nr) {
+                        if (preg_match('/^(\d{4})\/(\d{2})\/(\d{2})/', $nr, $m_date)) {
+                            $tgl_nr = $m_date[1] . '-' . $m_date[2] . '-' . $m_date[3];
+                            if ($tgl_nr < $min_date) {
+                                $min_date = $tgl_nr;
+                            }
+                        }
+                    }
+
+                    $history_start_date = $min_date . ' 00:00:00';
+                    $history_end_date = $tanggal_akhir . ' 23:59:59';
+
+                    $nr_like_arr = array_map(function($nr) use ($koneksi) {
+                        $nr_esc = mysqli_real_escape_string($koneksi, $nr);
+                        return "trackersql.sqle LIKE '%$nr_esc%'";
+                    }, $unique_no_rawat);
+                    $nr_sql = implode(' OR ', $nr_like_arr);
+
+                    $query_history = "SELECT trackersql.tanggal, trackersql.sqle 
+                                      FROM trackersql 
+                                      WHERE trackersql.tanggal BETWEEN '$history_start_date' AND '$history_end_date'
+                                        AND (
+                                          trackersql.sqle LIKE '%update reg_periksa set  kd_pj=%' 
+                                          OR trackersql.sqle LIKE '%insert into reg_periksa values%'
+                                        )
+                                        AND ($nr_sql)
+                                      ORDER BY trackersql.tanggal ASC";
+
+                    $res_history = mysqli_query($koneksi, $query_history);
+                    $timeline = [];
+                    if ($res_history) {
+                        while ($h = mysqli_fetch_assoc($res_history)) {
+                            $h_sqle = $h['sqle'];
+                            $h_tgl = $h['tanggal'];
+
+                            $found_nr = null;
+                            if (preg_match('/(\d{4}\/\d{2}\/\d{2}\/\d+)/', $h_sqle, $m_nr)) {
+                                $found_nr = $m_nr[1];
+                            }
+
+                            if ($found_nr && in_array($found_nr, $unique_no_rawat)) {
+                                if (stripos($h_sqle, 'insert into reg_periksa') !== false) {
+                                    $init_pj = null;
+                                    if (preg_match('/\|(?:Ralan|Ranap)\|([A-Za-z0-9_-]+)\|/i', $h_sqle, $m_pj)) {
+                                        $init_pj = $m_pj[1];
+                                    } else {
+                                        $parts = explode('|', $h_sqle);
+                                        if (isset($parts[15]) && !empty($parts[15])) {
+                                            $init_pj = trim($parts[15]);
+                                        }
+                                    }
+                                    if ($init_pj) {
+                                        $timeline[$found_nr][] = [
+                                            'type' => 'INSERT',
+                                            'tanggal' => $h_tgl,
+                                            'kd_pj' => $init_pj,
+                                        ];
+                                    }
+                                } elseif (stripos($h_sqle, 'update reg_periksa set  kd_pj=') !== false) {
+                                    if (preg_match('/\|([A-Za-z0-9_]+)\|/', $h_sqle, $m_pj)) {
+                                        $timeline[$found_nr][] = [
+                                            'type' => 'UPDATE',
+                                            'tanggal' => $h_tgl,
+                                            'kd_pj' => $m_pj[1],
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Susun riwayat per no_rawat secara kronologis
+                    foreach ($timeline as $nr => $events) {
+                        $current_state = '-';
+                        foreach ($events as $ev) {
+                            if ($ev['type'] === 'INSERT') {
+                                $current_state = $ev['kd_pj'];
+                            } elseif ($ev['type'] === 'UPDATE') {
+                                $key = $nr . '@' . $ev['tanggal'];
+                                $update_old_pj_map[$key] = $current_state;
+                                $current_state = $ev['kd_pj'];
+                            }
+                        }
+                    }
                 }
 
-                echo "<tr>
-                        <td>{$no}</td>
-                        <td>{$tanggal}</td>
-                        <td><span class='badge badge-jenis'>🔄 {$nama_penjab_escaped}</span></td>
-                        <td><span class='badge badge-norawat'>{$no_rawat_escaped}</span></td>
-                        <td>{$no_rkm_medis}</td>
-                        <td>{$nm_pasien}</td>
-                        <td><span class='badge badge-ip'>{$ip_escaped}</span></td>
-                        <td>{$nama_petugas}</td>
+                echo "<div class='table-responsive'><table>
+                    <tr>
+                        <th>No</th>
+                        <th>TANGGAL</th>
+                        <th>JENIS BAYAR AWAL</th>
+                        <th>GANTI JADI</th>
+                        <th>NO RAWAT</th>
+                        <th>STATUS</th>
+                        <th>NO RKM MEDIS</th>
+                        <th>NAMA PASIEN</th>
+                        <th>IP ADDRESS</th>
+                        <th>NAMA PETUGAS</th>
                     </tr>";
-                $no++;
-            }
-            echo "</table></div>";
-            
-            // Pagination bawah
-            if ($limit !== 'semua' && $total_pages > 1) {
-                echo '<div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8f9fa; padding: 12px 20px; border-radius: 8px; border: 1px solid #e9ecef;">';
-                echo '<div style="font-size: 13px; color: #495057; font-weight: 500;">Menampilkan halaman <strong>' . $halaman . '</strong> dari <strong>' . $total_pages . '</strong> (Total ' . $total_rows . ' data)</div>';
-                echo '<div style="display: flex; align-items: center; gap: 6px;">';
-                echo '<label for="halaman_select_bottom" style="font-weight: bold; font-size: 13px; color: #495057;">📄 Pilih Halaman:</label>';
-                echo '<select id="halaman_select_bottom" onchange="changePage(this.value)" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 13px; outline: none; background: white; cursor: pointer;">';
-                for ($i = 1; $i <= $total_pages; $i++) {
-                    $selected_page = ($i == $halaman) ? 'selected' : '';
-                    echo "<option value='{$i}' {$selected_page}>Halaman {$i}</option>";
+
+                $no = isset($offset) ? $offset + 1 : 1;
+                foreach ($rows_data as $rd) {
+                    $tanggal = htmlspecialchars($rd['tanggal']);
+                    $nama_petugas = htmlspecialchars($rd['nama_petugas']);
+                    $nama_penjab_baru_escaped = htmlspecialchars($rd['nama_penjab_baru']);
+                    $no_rawat_escaped = htmlspecialchars($rd['no_rawat']);
+                    $ip_escaped = htmlspecialchars($rd['ip_address']);
+
+                    // Cari Jenis Bayar Awal dari map riwayat
+                    $key = $rd['no_rawat'] . '@' . $rd['tanggal'];
+                    $kd_pj_lama = $update_old_pj_map[$key] ?? '-';
+                    $nama_penjab_lama = ($kd_pj_lama !== '-' && isset($penjab_map[$kd_pj_lama])) ? $penjab_map[$kd_pj_lama] : $kd_pj_lama;
+                    $nama_penjab_lama_escaped = htmlspecialchars($nama_penjab_lama);
+                    $badge_lama_html = ($nama_penjab_lama_escaped !== '-') 
+                        ? "<span class='badge badge-asal'>{$nama_penjab_lama_escaped}</span>" 
+                        : "<span style='color: #94a3b8;'>-</span>";
+
+                    // Ambil data pasien dari map
+                    $no_rkm_medis = '-';
+                    $nm_pasien = '-';
+                    $status_lanjut_html = '-';
+                    if ($rd['no_rawat'] !== '-' && isset($pasien_map[$rd['no_rawat']])) {
+                        $no_rkm_medis = htmlspecialchars($pasien_map[$rd['no_rawat']]['no_rkm_medis']);
+                        $nm_pasien = htmlspecialchars($pasien_map[$rd['no_rawat']]['nm_pasien']);
+                        $raw_status = $pasien_map[$rd['no_rawat']]['status_lanjut'];
+                        
+                        if (strcasecmp($raw_status, 'Ranap') === 0) {
+                            $status_lanjut_html = "<span class='badge badge-ranap'>🏥 Ranap</span>";
+                        } elseif (strcasecmp($raw_status, 'Ralan') === 0) {
+                            $status_lanjut_html = "<span class='badge badge-ralan'>🚶 Ralan</span>";
+                        } elseif (!empty($raw_status) && $raw_status !== '-') {
+                            $status_lanjut_html = "<span class='badge badge-status'>" . htmlspecialchars($raw_status) . "</span>";
+                        }
+                    }
+
+                    echo "<tr>
+                            <td>{$no}</td>
+                            <td>{$tanggal}</td>
+                            <td>{$badge_lama_html}</td>
+                            <td><span class='badge badge-jenis'>🔄 {$nama_penjab_baru_escaped}</span></td>
+                            <td><span class='badge badge-norawat'>{$no_rawat_escaped}</span></td>
+                            <td>{$status_lanjut_html}</td>
+                            <td>{$no_rkm_medis}</td>
+                            <td>{$nm_pasien}</td>
+                            <td><span class='badge badge-ip'>{$ip_escaped}</span></td>
+                            <td>{$nama_petugas}</td>
+                        </tr>";
+                    $no++;
                 }
-                echo '</select>';
-                echo '</div>';
-                echo '</div>';
-            }
-            
-            if ($total_rows == 0) {
+                echo "</table></div>";
+                
+                // Pagination bawah
+                if ($limit !== 'semua' && $total_pages > 1) {
+                    echo '<div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8f9fa; padding: 12px 20px; border-radius: 8px; border: 1px solid #e9ecef;">';
+                    echo '<div style="font-size: 13px; color: #495057; font-weight: 500;">Menampilkan halaman <strong>' . $halaman . '</strong> dari <strong>' . $total_pages . '</strong> (Total ' . $total_rows . ' data)</div>';
+                    echo '<div style="display: flex; align-items: center; gap: 6px;">';
+                    echo '<label for="halaman_select_bottom" style="font-weight: bold; font-size: 13px; color: #495057;">📄 Pilih Halaman:</label>';
+                    echo '<select id="halaman_select_bottom" onchange="changePage(this.value)" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 13px; outline: none; background: white; cursor: pointer;">';
+                    for ($i = 1; $i <= $total_pages; $i++) {
+                        $selected_page = ($i == $halaman) ? 'selected' : '';
+                        echo "<option value='{$i}' {$selected_page}>Halaman {$i}</option>";
+                    }
+                    echo '</select>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+            } else {
                 echo '<div class="no-data">📋 Tidak ada data perubahan jenis bayar pada rentang tanggal yang dipilih</div>';
             }
         } else {
