@@ -358,22 +358,22 @@ include 'koneksi.php';
 
         $query = "SELECT 
                     rspsw_umbal.bulanklaim,
-                    lec_umbal.tgl_registrasi AS tgl_sep,
-                    lec_umbal.no_sep,
+                    reg_periksa.tgl_registrasi AS tgl_sep,
+                    rspsw_umbal.no_sep,
                     reg_periksa.no_rawat,
                     reg_periksa.tgl_registrasi AS tgl_registrasi,
-                    lec_umbal.norm,
-                    lec_umbal.nm_pasien,
+                    reg_periksa.no_rkm_medis AS norm,
+                    pasien.nm_pasien,
                     rspsw_umbal.disetujui,
-                    lec_umbal.status,
+                    reg_periksa.status_lanjut AS status,
                     COALESCE(non_obat.total_non_obat, 0) AS biaya_non_obat,
                     COALESCE(obat.total_obat, 0) AS biaya_obat,
                     COALESCE(ppn_obat.total_ppn_obat, 0) AS ppn_obat,
                     COALESCE(total_billing.total_biaya, 0) AS total_biaya
                 FROM 
-                    lec_umbal
-                    LEFT JOIN rspsw_umbal ON lec_umbal.no_sep = rspsw_umbal.no_sep
-                    INNER JOIN reg_periksa ON lec_umbal.no_rawat = reg_periksa.no_rawat
+                    rspsw_umbal
+                    INNER JOIN reg_periksa ON rspsw_umbal.no_rawat = reg_periksa.no_rawat
+                    INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
                     LEFT JOIN (
                         SELECT 
                             no_rawat,
@@ -381,7 +381,7 @@ include 'koneksi.php';
                         FROM billing
                         WHERE status <> 'obat'
                         GROUP BY no_rawat
-                    ) AS non_obat ON lec_umbal.no_rawat = non_obat.no_rawat
+                    ) AS non_obat ON reg_periksa.no_rawat = non_obat.no_rawat
                     LEFT JOIN (
                         SELECT 
                             no_rawat,
@@ -389,7 +389,7 @@ include 'koneksi.php';
                         FROM billing
                         WHERE status = 'obat' AND nm_perawatan <> 'PPN Obat'
                         GROUP BY no_rawat
-                    ) AS obat ON lec_umbal.no_rawat = obat.no_rawat
+                    ) AS obat ON reg_periksa.no_rawat = obat.no_rawat
                     LEFT JOIN (
                         SELECT 
                             no_rawat,
@@ -397,17 +397,17 @@ include 'koneksi.php';
                         FROM billing
                         WHERE nm_perawatan = 'PPN Obat'
                         GROUP BY no_rawat
-                    ) AS ppn_obat ON lec_umbal.no_rawat = ppn_obat.no_rawat
+                    ) AS ppn_obat ON reg_periksa.no_rawat = ppn_obat.no_rawat
                     LEFT JOIN (
                         SELECT 
                             no_rawat,
                             SUM(totalbiaya) AS total_biaya
                         FROM billing
                         GROUP BY no_rawat
-                    ) AS total_billing ON lec_umbal.no_rawat = total_billing.no_rawat
+                    ) AS total_billing ON reg_periksa.no_rawat = total_billing.no_rawat
                 WHERE
                     rspsw_umbal.bulanklaim = '$bulanklaim'
-                ORDER BY lec_umbal.no_sep";
+                ORDER BY rspsw_umbal.no_sep";
 
         $result = mysqli_query($koneksi, $query);
 
