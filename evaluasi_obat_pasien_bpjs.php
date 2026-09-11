@@ -216,7 +216,7 @@
             width: 100%;
             border-collapse: collapse;
             background: white;
-            min-width: 1400px;
+            min-width: 1550px;
         }
         th {
             background: linear-gradient(45deg, #1a5276, #1f618d);
@@ -555,7 +555,7 @@ if (isset($_POST['filter'])) {
             }
 
             // ============================================================
-            // QUERY DISETUJUI (rspsw_umbal.disetujui)
+            // QUERY DISETUJUI BPJS (rspsw_umbal.disetujui)
             // ============================================================
             $disetujui_data = [];
             $q_disetujui = "SELECT
@@ -572,32 +572,54 @@ if (isset($_POST['filter'])) {
             }
 
             // ============================================================
+            // QUERY DISETUJUI APOL (apol_umbal.disetujui)
+            // Relasi: apol_umbal.no_sep -> bridging_sep.no_sep -> no_rawat
+            // ============================================================
+            $disetujui_apol = [];
+            $q_apol = "SELECT
+                bridging_sep.no_rawat,
+                apol_umbal.disetujui
+            FROM apol_umbal
+            INNER JOIN bridging_sep ON apol_umbal.no_sep = bridging_sep.no_sep
+            WHERE bridging_sep.no_rawat IN ($in_clause)";
+            $res_apol = mysqli_query($koneksi, $q_apol);
+            if ($res_apol) {
+                while ($r = mysqli_fetch_assoc($res_apol)) {
+                    $disetujui_apol[$r['no_rawat']] = floatval($r['disetujui']);
+                }
+            }
+
+            // ============================================================
             // HITUNG GRAND TOTAL untuk Summary Cards
             // ============================================================
-            $grand_biaya_obat   = 0;
-            $grand_retur_obat   = 0;
-            $grand_bersih_obat  = 0;
-            $grand_disetujui    = 0;
-            $grand_selisih      = 0;
-            $cnt_untung         = 0; // disetujui >= obat bersih
-            $cnt_rugi           = 0; // obat bersih > disetujui
+            $grand_biaya_obat    = 0;
+            $grand_retur_obat    = 0;
+            $grand_bersih_obat   = 0;
+            $grand_disetujui     = 0;
+            $grand_disetujui_apol = 0;
+            $grand_selisih       = 0;
+            $cnt_untung          = 0; // (disetujui BPJS + APOL) >= obat bersih
+            $cnt_rugi            = 0; // obat bersih > (disetujui BPJS + APOL)
 
             foreach ($data_pasien as $row) {
                 $nr = $row['no_rawat'];
-                $val_obat    = isset($biaya_obat[$nr])   ? $biaya_obat[$nr]   : 0;
-                $val_retur   = isset($retur_obat[$nr])   ? $retur_obat[$nr]   : 0;
+                $val_obat    = isset($biaya_obat[$nr])      ? $biaya_obat[$nr]      : 0;
+                $val_retur   = isset($retur_obat[$nr])      ? $retur_obat[$nr]      : 0;
                 // Retur sudah negatif, jadi: bersih = obat + retur (retur negatif)
                 $val_bersih  = $val_obat + $val_retur;
-                $val_dis     = isset($disetujui_data[$nr]) ? $disetujui_data[$nr] : 0;
-                $val_selisih = $val_dis - $val_bersih;
+                $val_dis     = isset($disetujui_data[$nr])  ? $disetujui_data[$nr]  : 0;
+                $val_apol    = isset($disetujui_apol[$nr])  ? $disetujui_apol[$nr]  : 0;
+                // Selisih = (Disetujui BPJS + Disetujui APOL) - Biaya Bersih Obat
+                $val_selisih = ($val_dis + $val_apol) - $val_bersih;
 
-                $grand_biaya_obat  += $val_obat;
-                $grand_retur_obat  += $val_retur;
-                $grand_bersih_obat += $val_bersih;
-                $grand_disetujui   += $val_dis;
-                $grand_selisih     += $val_selisih;
+                $grand_biaya_obat     += $val_obat;
+                $grand_retur_obat     += $val_retur;
+                $grand_bersih_obat    += $val_bersih;
+                $grand_disetujui      += $val_dis;
+                $grand_disetujui_apol += $val_apol;
+                $grand_selisih        += $val_selisih;
 
-                if ($val_dis >= $val_bersih) $cnt_untung++;
+                if (($val_dis + $val_apol) >= $val_bersih) $cnt_untung++;
                 else $cnt_rugi++;
             }
 
@@ -624,6 +646,10 @@ if (isset($_POST['filter'])) {
             echo '<div class="summary-card card-green">'
                . '<div class="label">Total Disetujui BPJS</div>'
                . '<div class="value">Rp ' . number_format($grand_disetujui, 0, ',', '.') . '</div>'
+               . '</div>';
+            echo '<div class="summary-card card-blue">'
+               . '<div class="label">Total Disetujui APOL</div>'
+               . '<div class="value">Rp ' . number_format($grand_disetujui_apol, 0, ',', '.') . '</div>'
                . '</div>';
 
             $selisih_class = $grand_selisih >= 0 ? 'card-green' : 'card-red';
@@ -658,6 +684,7 @@ if (isset($_POST['filter'])) {
                     <th>Retur Obat</th>
                     <th>Biaya Bersih Obat</th>
                     <th>Disetujui BPJS</th>
+                    <th>Disetujui APOL</th>
                     <th>Selisih</th>
                 </tr>
                 </thead>
@@ -668,16 +695,17 @@ if (isset($_POST['filter'])) {
             foreach ($data_pasien as $row) {
                 $nr = $row['no_rawat'];
 
-                $val_obat   = isset($biaya_obat[$nr])   ? $biaya_obat[$nr]   : 0;
-                $val_retur  = isset($retur_obat[$nr])   ? $retur_obat[$nr]   : 0;
+                $val_obat   = isset($biaya_obat[$nr])      ? $biaya_obat[$nr]      : 0;
+                $val_retur  = isset($retur_obat[$nr])      ? $retur_obat[$nr]      : 0;
                 // Retur sudah negatif; biaya bersih = biaya obat + retur (nilai minus)
                 $val_bersih = $val_obat + $val_retur;
-                $val_dis    = isset($disetujui_data[$nr]) ? $disetujui_data[$nr] : 0;
+                $val_dis    = isset($disetujui_data[$nr])  ? $disetujui_data[$nr]  : 0;
+                $val_apol   = isset($disetujui_apol[$nr])  ? $disetujui_apol[$nr]  : 0;
 
-                // Selisih = disetujui - obat bersih
-                // Positif  → disetujui lebih besar  → BPJS cover lebih, HIJAU
-                // Negatif  → obat bersih lebih besar → obat melebihi klaim, MERAH
-                $val_selisih = $val_dis - $val_bersih;
+                // Selisih = (Disetujui BPJS + Disetujui APOL) - Biaya Bersih Obat
+                // Positif  → total disetujui lebih besar → HIJAU
+                // Negatif  → obat bersih lebih besar → MERAH
+                $val_selisih = ($val_dis + $val_apol) - $val_bersih;
 
                 if ($val_selisih > 0) {
                     $selisih_html = "<span class='selisih-positif'>+" . number_format($val_selisih, 0, ',', '.') . "</span>";
@@ -699,13 +727,14 @@ if (isset($_POST['filter'])) {
                     <td class='angka'>" . number_format($val_retur, 0, ',', '.') . "</td>
                     <td class='angka' style='font-weight:bold;'>" . number_format($val_bersih, 0, ',', '.') . "</td>
                     <td class='angka' style='font-weight:bold;'>" . number_format($val_dis, 0, ',', '.') . "</td>
+                    <td class='angka' style='font-weight:bold;'>" . number_format($val_apol, 0, ',', '.') . "</td>
                     <td class='center'>{$selisih_html}</td>
                 </tr>";
                 $no++;
             }
 
             // GRAND TOTAL ROW
-            $grand_selisih_row = $grand_disetujui - $grand_bersih_obat;
+            $grand_selisih_row = ($grand_disetujui + $grand_disetujui_apol) - $grand_bersih_obat;
             if ($grand_selisih_row > 0) {
                 $grand_selisih_html = "<span class='selisih-positif'>+" . number_format($grand_selisih_row, 0, ',', '.') . "</span>";
             } elseif ($grand_selisih_row < 0) {
@@ -720,6 +749,7 @@ if (isset($_POST['filter'])) {
                 <td class='angka'>" . number_format($grand_retur_obat, 0, ',', '.') . "</td>
                 <td class='angka' style='font-size:12px;'>" . number_format($grand_bersih_obat, 0, ',', '.') . "</td>
                 <td class='angka' style='font-size:12px;'>" . number_format($grand_disetujui, 0, ',', '.') . "</td>
+                <td class='angka' style='font-size:12px;'>" . number_format($grand_disetujui_apol, 0, ',', '.') . "</td>
                 <td class='center'>{$grand_selisih_html}</td>
             </tr>";
 
