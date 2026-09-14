@@ -331,6 +331,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <a href="obatfastmoving.php" class="menu-item">
                     <i class="fas fa-fire fa-2x" style="margin-bottom:10px;color:#f97316;"></i>
                     <span style="color:#222;font-weight:bold;">Obat Fast Moving</span>
+                </a>
+                <a href="verifikasi_resep_dokter.php" class="menu-item">
+                    <i class="fas fa-check-double fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
+                    <span style="color:#222;font-weight:bold;">Verifikasi Resep Dokter</span>
                 </a>                                
             </div>
 
