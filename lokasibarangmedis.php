@@ -19,14 +19,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     $original_kd_bangsal = isset($_POST['original_kd_bangsal']) ? mysqli_real_escape_string($koneksi, $_POST['original_kd_bangsal']) : '';
     
     if (!empty($original_kd_bangsal) && $original_kd_bangsal !== $kd_bangsal) {
-        // Jika user mengubah bangsal, kita harus mengupdate baris composite key yang lama
-        $update_query = "UPDATE lokasi_barang_medis 
-                        SET kd_bangsal = '$kd_bangsal', lokasi = '$lokasi', stok_minimal_bangsal = '$stok_minimal_bangsal' 
-                        WHERE kode_brng = '$kode_brng' AND kd_bangsal = '$original_kd_bangsal'";
-        if (mysqli_query($koneksi, $update_query)) {
-            $message = "✅ Data berhasil diperbarui!";
+        // Cek apakah data lama memang sudah ada di database
+        $check_existing = mysqli_query($koneksi, "SELECT 1 FROM lokasi_barang_medis WHERE kode_brng = '$kode_brng' AND kd_bangsal = '$original_kd_bangsal'");
+        if ($check_existing && mysqli_num_rows($check_existing) > 0) {
+            // Jika data lama ada dan bangsal diubah, update baris composite key
+            $update_query = "UPDATE lokasi_barang_medis 
+                            SET kd_bangsal = '$kd_bangsal', lokasi = '$lokasi', stok_minimal_bangsal = '$stok_minimal_bangsal' 
+                            WHERE kode_brng = '$kode_brng' AND kd_bangsal = '$original_kd_bangsal'";
+            if (mysqli_query($koneksi, $update_query)) {
+                $message = "✅ Data berhasil diperbarui!";
+            } else {
+                $message = "❌ Gagal memperbarui data: " . mysqli_error($koneksi);
+            }
         } else {
-            $message = "❌ Gagal memperbarui data: " . mysqli_error($koneksi);
+            // Data lama belum tersimpan (input baru tapi bangsal diubah dari form modal)
+            $insert_query = "INSERT INTO lokasi_barang_medis (kode_brng, kd_bangsal, lokasi, stok_minimal_bangsal) 
+                            VALUES ('$kode_brng', '$kd_bangsal', '$lokasi', '$stok_minimal_bangsal') 
+                            ON DUPLICATE KEY UPDATE 
+                            lokasi = VALUES(lokasi),
+                            stok_minimal_bangsal = VALUES(stok_minimal_bangsal)";
+            if (mysqli_query($koneksi, $insert_query)) {
+                $message = "✅ Data berhasil disimpan!";
+            } else {
+                $message = "❌ Gagal menyimpan data: " . mysqli_error($koneksi);
+            }
         }
     } else {
         // Simpan baru atau update (jika bangsal sama)
@@ -211,7 +227,7 @@ $url_params = http_build_query([
                 <?php if ($edit_mode): ?>
                     <div class="modal-overlay">
                         <div class="form-card">
-                            <div class="form-card-header">✏️ Edit Lokasi & Stok Min</div>
+                            <div class="form-card-header"><?php echo !empty($edit_lokasi) ? '✏️ Edit Lokasi & Stok Min' : '➕ Atur Lokasi & Stok Min'; ?></div>
                             <div class="form-card-body">
                                 <form method="POST" action="lokasibarangmedis.php?<?php echo $url_params; ?>">
                                     <input type="hidden" name="action" value="simpan">
@@ -308,19 +324,36 @@ $url_params = http_build_query([
             // ...existing code...
             
             if (!empty($search) || !empty($show_all) || !empty($filter_bangsal) || !empty($filter_lokasi)) {
-                // Query data barang dengan lokasi medis dan stok
-                $query = "SELECT 
-                            databarang.kode_brng,
-                            databarang.nama_brng,
-                            databarang.kode_sat,
-                            COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') as kd_bangsal,
-                            COALESCE(lokasi_barang_medis.lokasi, '') as lokasi,
-                            COALESCE(lokasi_barang_medis.stok_minimal_bangsal, 0) as stok_minimal_bangsal,
-                            COALESCE(gudangbarang.stok, 0) as stok
-                        FROM databarang
-                        LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng
-                        LEFT JOIN gudangbarang ON databarang.kode_brng = gudangbarang.kode_brng 
-                            AND COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') = gudangbarang.kd_bangsal";
+                // Build query data barang dengan lokasi medis dan stok
+                if (!empty($filter_bangsal)) {
+                    $bangsal_escaped = mysqli_real_escape_string($koneksi, $filter_bangsal);
+                    $query = "SELECT 
+                                databarang.kode_brng,
+                                databarang.nama_brng,
+                                databarang.kode_sat,
+                                '$bangsal_escaped' as kd_bangsal,
+                                COALESCE(lokasi_barang_medis.lokasi, '') as lokasi,
+                                COALESCE(lokasi_barang_medis.stok_minimal_bangsal, 0) as stok_minimal_bangsal,
+                                COALESCE(gudangbarang.stok, 0) as stok
+                            FROM databarang
+                            LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng 
+                                AND lokasi_barang_medis.kd_bangsal = '$bangsal_escaped'
+                            LEFT JOIN gudangbarang ON databarang.kode_brng = gudangbarang.kode_brng 
+                                AND gudangbarang.kd_bangsal = '$bangsal_escaped'";
+                } else {
+                    $query = "SELECT 
+                                databarang.kode_brng,
+                                databarang.nama_brng,
+                                databarang.kode_sat,
+                                COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') as kd_bangsal,
+                                COALESCE(lokasi_barang_medis.lokasi, '') as lokasi,
+                                COALESCE(lokasi_barang_medis.stok_minimal_bangsal, 0) as stok_minimal_bangsal,
+                                COALESCE(gudangbarang.stok, 0) as stok
+                            FROM databarang
+                            LEFT JOIN lokasi_barang_medis ON databarang.kode_brng = lokasi_barang_medis.kode_brng
+                            LEFT JOIN gudangbarang ON databarang.kode_brng = gudangbarang.kode_brng 
+                                AND COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') = gudangbarang.kd_bangsal";
+                }
                 
                 // Build WHERE conditions
                 $where_conditions = [];
@@ -335,12 +368,6 @@ $url_params = http_build_query([
                     $where_conditions[] = "lokasi_barang_medis.lokasi IS NOT NULL AND lokasi_barang_medis.lokasi != ''";
                 } elseif ($show_all == 'no_location') {
                     $where_conditions[] = "(lokasi_barang_medis.lokasi IS NULL OR lokasi_barang_medis.lokasi = '')";
-                }
-                
-                // Filter berdasarkan kd_bangsal
-                if (!empty($filter_bangsal)) {
-                    $bangsal_escaped = mysqli_real_escape_string($koneksi, $filter_bangsal);
-                    $where_conditions[] = "COALESCE(lokasi_barang_medis.kd_bangsal, 'GO') = '$bangsal_escaped'";
                 }
                 
                 // Filter berdasarkan lokasi
