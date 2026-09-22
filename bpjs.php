@@ -134,6 +134,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-key"></i>
                 <span>Signature Generator</span>
             </a>
+            <a href="uji_koneksi_bpjs.php" title="Uji Koneksi BPJS">
+                <i class="fas fa-network-wired"></i>
+                <span>Uji Koneksi BPJS</span>
+            </a>
+            <a href="buat_sep.php" title="Buat SEP BPJS">
+                <i class="fas fa-file-invoice-medical"></i>
+                <span>Buat SEP</span>
+            </a>
             <a href="batalantreanbpjs.php" title="Batal Antrian BPJS">
                 <i class="fas fa-ban"></i>
                 <span>Batal Antrian</span>

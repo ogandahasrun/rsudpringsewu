@@ -25,6 +25,12 @@ $SECRETKEYAPLICARE = ""; // Secret Key dari BPJS
 $USERKEYAPLICARE = ""; // User Key dari BPJS
 $KODEPPKAPLICARE = ""; // Kode PPK untuk APLICARE
 
+// KONFIGURASI BPJS I-CARE API
+$URLICARE = "https://apijkn.bpjs-kesehatan.go.id/wsihs"; // URL API BPJS I-Care
+$CONSIDICARE = ""; // Consumer ID dari BPJS
+$SECRETKEYICARE = ""; // Secret Key dari BPJS
+$USERKEYICARE = ""; // User Key dari BPJS
+
 // KONFIGURASI MOBILE JKN AUTH
 $URLAUTHMJKN = "https://localhost/auth"; // URL Auth Mobile JKN
 $USERNAMEAUTHMJKN = "usermjkn"; // Username untuk Auth

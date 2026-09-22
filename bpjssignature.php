@@ -168,6 +168,52 @@ function getAplicareHeaders($userkey = null) {
 }
 
 /**
+ * Generate ICare Signature
+ * 
+ * @param string $consid - Consumer ID (default dari config)
+ * @param string $secretkey - Secret Key (default dari config)
+ * @return array - Array berisi X-cons-id, X-timestamp, dan X-signature
+ */
+function generateICareSignature($consid = null, $secretkey = null) {
+    global $CONSIDICARE, $SECRETKEYICARE, $CONSIDVCLAIM, $SECRETKEYVCLAIM;
+    
+    $data = $consid ?? $CONSIDICARE ?? $CONSIDVCLAIM;
+    $secretKey = $secretkey ?? $SECRETKEYICARE ?? $SECRETKEYVCLAIM;
+    
+    date_default_timezone_set('UTC');
+    $tStamp = strval(time() - strtotime('1970-01-01 00:00:00'));
+    $signature = hash_hmac('sha256', $data . "&" . $tStamp, $secretKey, true);
+    $encodedSignature = base64_encode($signature);
+    
+    return array(
+        'x-cons-id' => $data,
+        'x-timestamp' => $tStamp,
+        'x-signature' => $encodedSignature
+    );
+}
+
+/**
+ * Generate ICare Headers untuk cURL
+ * 
+ * @param string $userkey - User Key (default dari config)
+ * @return array - Array header siap pakai untuk cURL
+ */
+function getICareHeaders($userkey = null) {
+    global $USERKEYICARE, $USERKEYVCLAIM;
+    
+    $signature = generateICareSignature();
+    $user_key = $userkey ?? $USERKEYICARE ?? $USERKEYVCLAIM;
+    
+    return array(
+        'X-cons-id: ' . $signature['x-cons-id'],
+        'X-timestamp: ' . $signature['x-timestamp'],
+        'X-signature: ' . $signature['x-signature'],
+        'user_key: ' . $user_key,
+        'Content-Type: application/json'
+    );
+}
+
+/**
  * Decrypt VClaim API Response
  * 
  * @param string $encryptedResponse - The encrypted response string from API
