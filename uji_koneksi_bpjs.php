@@ -1001,7 +1001,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_uji'])) {
             <img src="<?php echo htmlspecialchars($logo_src); ?>" alt="Logo" class="header-logo">
             <div class="header-title">
                 <h1>Uji Koneksi Web Service BPJS</h1>
-                <p><?php echo htmlspecialchars($nama_instansi); ?> &bull; Diagnostik Terintegrasi Sesuai Setting <code>koneksi.php</code></p>
+                <p><?php echo htmlspecialchars($nama_instansi); ?></p>
             </div>
         </div>
     </div>
