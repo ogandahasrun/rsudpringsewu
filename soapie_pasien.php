@@ -13,7 +13,23 @@ if (empty($nip)) {
 $tgl_awal = isset($_GET['tgl_awal']) ? $_GET['tgl_awal'] : date('Y-m-d');
 $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : date('Y-m-d');
 $status_lanjut = isset($_GET['status_lanjut']) ? $_GET['status_lanjut'] : 'Ranap';
+$kd_bangsal = isset($_GET['kd_bangsal']) ? $_GET['kd_bangsal'] : '';
 $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+
+// Ambil daftar bangsal untuk pilihan filter
+$list_bangsal = [];
+$query_bangsal = "SELECT DISTINCT bangsal.kd_bangsal, bangsal.nm_bangsal 
+                  FROM bangsal 
+                  INNER JOIN kamar ON bangsal.kd_bangsal = kamar.kd_bangsal 
+                  WHERE kamar.statusdata = '1' 
+                  ORDER BY bangsal.nm_bangsal ASC";
+$res_bangsal = mysqli_query($koneksi, $query_bangsal);
+if ($res_bangsal) {
+    while ($rb = mysqli_fetch_assoc($res_bangsal)) {
+        $list_bangsal[] = $rb;
+    }
+}
+
 
 // Proses Simpan Data SOAPIE Baru (Copy & Edit)
 $pesan = '';
@@ -58,6 +74,17 @@ if (!empty($keyword)) {
     $search_condition = " AND (pasien.nm_pasien LIKE '%$keyword_esc%' OR reg_periksa.no_rawat LIKE '%$keyword_esc%' OR pasien.no_rkm_medis LIKE '%$keyword_esc%') ";
 }
 
+$bangsal_condition = "";
+if (!empty($kd_bangsal)) {
+    $kd_bangsal_esc = mysqli_real_escape_string($koneksi, $kd_bangsal);
+    $bangsal_condition = " AND (SELECT kamar.kd_bangsal 
+                                FROM kamar_inap 
+                                INNER JOIN kamar ON kamar_inap.kd_kamar = kamar.kd_kamar 
+                                WHERE kamar_inap.no_rawat = reg_periksa.no_rawat 
+                                ORDER BY kamar_inap.tgl_masuk DESC, kamar_inap.jam_masuk DESC 
+                                LIMIT 1) = '$kd_bangsal_esc' ";
+}
+
 $query_tampil = "SELECT
     reg_periksa.no_rawat,
     pasien.no_rkm_medis,
@@ -80,13 +107,25 @@ $query_tampil = "SELECT
     pemeriksaan_ranap.rtl,
     pemeriksaan_ranap.instruksi,
     pemeriksaan_ranap.evaluasi,
-    pegawai.nama AS nama_petugas
+    pegawai.nama AS nama_petugas,
+    (SELECT bangsal.nm_bangsal 
+     FROM kamar_inap 
+     INNER JOIN kamar ON kamar_inap.kd_kamar = kamar.kd_kamar 
+     INNER JOIN bangsal ON kamar.kd_bangsal = bangsal.kd_bangsal 
+     WHERE kamar_inap.no_rawat = reg_periksa.no_rawat 
+     ORDER BY kamar_inap.tgl_masuk DESC, kamar_inap.jam_masuk DESC 
+     LIMIT 1) AS nm_bangsal,
+    (SELECT kamar_inap.kd_kamar 
+     FROM kamar_inap 
+     WHERE kamar_inap.no_rawat = reg_periksa.no_rawat 
+     ORDER BY kamar_inap.tgl_masuk DESC, kamar_inap.jam_masuk DESC 
+     LIMIT 1) AS kd_kamar
     FROM pemeriksaan_ranap
     INNER JOIN reg_periksa ON pemeriksaan_ranap.no_rawat = reg_periksa.no_rawat
     INNER JOIN pasien ON reg_periksa.no_rkm_medis = pasien.no_rkm_medis
     INNER JOIN pegawai ON pemeriksaan_ranap.nip = pegawai.nik
     WHERE pemeriksaan_ranap.tgl_perawatan BETWEEN '$tgl_awal' AND '$tgl_akhir' 
-    AND reg_periksa.status_lanjut = '$status_lanjut' $search_condition
+    AND reg_periksa.status_lanjut = '$status_lanjut' $bangsal_condition $search_condition
     ORDER BY pemeriksaan_ranap.tgl_perawatan DESC, pemeriksaan_ranap.jam_rawat DESC";
 
 $result = mysqli_query($koneksi, $query_tampil);
@@ -161,6 +200,18 @@ $result = mysqli_query($koneksi, $query_tampil);
         </div>
         
         <div class="filter-group">
+            <label>Bangsal</label>
+            <select name="kd_bangsal">
+                <option value="">-- Semua Bangsal --</option>
+                <?php foreach ($list_bangsal as $b): ?>
+                    <option value="<?php echo htmlspecialchars($b['kd_bangsal']); ?>" <?php if($kd_bangsal == $b['kd_bangsal']) echo 'selected'; ?>>
+                        <?php echo htmlspecialchars($b['nm_bangsal']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <div class="filter-group">
             <label>Pencarian</label>
             <input type="text" name="keyword" value="<?php echo htmlspecialchars($keyword); ?>" placeholder="Nama / No RM / No Rawat">
         </div>
@@ -177,6 +228,7 @@ $result = mysqli_query($koneksi, $query_tampil);
                     <th>No. Rawat</th>
                     <th>No. RM</th>
                     <th>Nama Pasien</th>
+                    <th>Bangsal / Kamar</th>
                     <th>Tgl / Jam</th>
                     <th>Petugas (Asal)</th>
                     <th>Keluhan (S)</th>
@@ -197,6 +249,12 @@ $result = mysqli_query($koneksi, $query_tampil);
                             <td style="font-family: monospace; font-weight: bold;"><?php echo htmlspecialchars($row['no_rawat']); ?></td>
                             <td style="font-family: monospace;"><?php echo htmlspecialchars($row['no_rkm_medis']); ?></td>
                             <td><?php echo htmlspecialchars($row['nm_pasien']); ?></td>
+                            <td>
+                                <strong><?php echo htmlspecialchars(!empty($row['nm_bangsal']) ? $row['nm_bangsal'] : '-'); ?></strong>
+                                <?php if (!empty($row['kd_kamar'])): ?>
+                                    <br><small style="color: #6c757d; font-family: monospace;"><?php echo htmlspecialchars($row['kd_kamar']); ?></small>
+                                <?php endif; ?>
+                            </td>
                             <td><?php echo htmlspecialchars($row['tgl_perawatan'] . ' ' . $row['jam_rawat']); ?></td>
                             <td><?php echo htmlspecialchars($row['nama_petugas']); ?></td>
                             <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?php echo htmlspecialchars($row['keluhan']); ?>"><?php echo htmlspecialchars($row['keluhan']); ?></td>
@@ -210,7 +268,7 @@ $result = mysqli_query($koneksi, $query_tampil);
                         <?php
                     }
                 } else {
-                    echo "<tr><td colspan='10' style='text-align:center; padding: 30px; color: #6c757d; font-style: italic;'>Tidak ada data SOAPIE pada kriteria yang dipilih.</td></tr>";
+                    echo "<tr><td colspan='11' style='text-align:center; padding: 30px; color: #6c757d; font-style: italic;'>Tidak ada data SOAPIE pada kriteria yang dipilih.</td></tr>";
                 }
                 ?>
             </tbody>
@@ -225,7 +283,7 @@ $result = mysqli_query($koneksi, $query_tampil);
         <h3 class="modal-title">Copy & Edit SOAPIE Pasien</h3>
         
         <div class="alert-info">
-            <span style="font-size: 18px;">ℹ️</span> Anda akan menyalin data SOAPIE pasien <strong><span id="mdl_nm_pasien"></span></strong> (<span id="mdl_no_rm_display"></span>). <br>
+            <span style="font-size: 18px;">ℹ️</span> Anda akan menyalin data SOAPIE pasien <strong><span id="mdl_nm_pasien"></span></strong> (<span id="mdl_no_rm_display"></span>)<span id="mdl_bangsal_display"></span>. <br>
             Data yang disimpan akan tercatat sebagai record baru dengan tanggal & jam saat ini, atas nama Petugas (NIK): <strong><?php echo htmlspecialchars($nip); ?></strong>.
         </div>
         
@@ -328,6 +386,8 @@ $result = mysqli_query($koneksi, $query_tampil);
         // Info Header Modal
         document.getElementById('mdl_nm_pasien').innerText = data.nm_pasien;
         document.getElementById('mdl_no_rm_display').innerText = data.no_rkm_medis;
+        var bangsalText = data.nm_bangsal ? ' - Bangsal: ' + data.nm_bangsal + (data.kd_kamar ? ' (' + data.kd_kamar + ')' : '') : '';
+        document.getElementById('mdl_bangsal_display').innerText = bangsalText;
         
         // Isi form dengan data
         document.getElementById('mdl_no_rawat').value = data.no_rawat;

@@ -138,6 +138,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <i class="fas fa-network-wired"></i>
                 <span>Uji Koneksi BPJS</span>
             </a>
+            <a href="uji_bridging_apotek.php" title="Uji Bridging Apotek Online (Apol)">
+                <i class="fas fa-prescription-bottle-medical"></i>
+                <span>Uji Apotek Online</span>
+            </a>
             <a href="buat_sep.php" title="Buat SEP BPJS">
                 <i class="fas fa-file-invoice-medical"></i>
                 <span>Buat SEP</span>

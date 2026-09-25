@@ -1,7 +1,7 @@
 <?php
 /**
  * Halaman Uji Koneksi API BPJS (Multi-Service & Manual Tester)
- * Mendukung: VClaim, Antrean Mobile JKN, Aplicare, I-Care JKN, dan Auth Mobile JKN
+ * Mendukung: VClaim, Antrean Mobile JKN, Aplicare, I-Care JKN, Apotek Online (Apol), dan Auth Mobile JKN
  * Berdasarkan Konfigurasi koneksi.php
  * RSUD Pringsewu
  */
@@ -105,6 +105,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'test_service') {
             $method = 'POST';
             $payload = json_encode(['param' => '0000000000000', 'kodedokter' => 0]);
             $needDecrypt = false;
+            break;
+
+        // --------------------------------------------------------------------
+        // APOTEK ONLINE (APOL)
+        // --------------------------------------------------------------------
+        case 'apotek':
+            $res['service_name'] = 'BPJS Apotek Online (Apol)';
+            $url = $URLAPOTEK ?? '';
+            $consid = $CONSIDAPOTEK ?? '';
+            $secret = $SECRETKEYAPOTEK ?? '';
+            $userkey = $USERKEYAPOTEK ?? '';
+            $endpoint = '/referensi/dpho';
+            $method = 'GET';
+            $payload = null;
+            $needDecrypt = true;
             break;
 
         // --------------------------------------------------------------------
@@ -993,6 +1008,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_uji'])) {
             <a href="bpjs.php" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Menu BPJS
             </a>
+            <a href="uji_bridging_apotek.php" class="btn-back" style="margin-left:8px; border-color:#059669; color:#059669;" title="Buka Tester Khusus Apotek Online">
+                <i class="fas fa-prescription-bottle-medical"></i> Konsol Apotek Online (Apol)
+            </a>
             <div class="server-time">
                 <i class="fas fa-clock"></i> Server UTC: <?php echo gmdate('Y-m-d H:i:s'); ?> | Local: <?php echo date('H:i:s'); ?>
             </div>
@@ -1029,7 +1047,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_uji'])) {
             <div class="kpi-card total">
                 <div class="kpi-icon"><i class="fas fa-server"></i></div>
                 <div class="kpi-info">
-                    <div class="kpi-val" id="kpiTotal">5</div>
+                    <div class="kpi-val" id="kpiTotal">6</div>
                     <div class="kpi-lbl">Total Layanan</div>
                 </div>
             </div>
@@ -1279,7 +1297,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_uji'])) {
                 </div>
             </div>
 
-            <!-- 5. MOBILE JKN AUTH (RS LOCAL) -->
+            <!-- 5. BPJS APOTEK ONLINE (APOL) -->
+            <?php 
+                $envApotek = (isset($URLAPOTEK) && stripos($URLAPOTEK, 'dev') !== false) ? 'dev' : 'prod';
+            ?>
+            <div class="service-card status-idle" id="card-apotek">
+                <div>
+                    <div class="service-top">
+                        <div class="service-title-wrap">
+                            <div class="service-avatar" style="color:#059669;background:#ecfdf5;"><i class="fas fa-prescription-bottle-medical"></i></div>
+                            <div>
+                                <div class="service-name">BPJS Apotek Online (Apol)</div>
+                                <div style="font-size:11px;color:var(--gray-600)">
+                                    DPHO, Resep & Obat Kronis
+                                    <?php if (!empty($KODEIFAPOTEK)): ?>
+                                        &bull; IF: <code><?php echo htmlspecialchars($KODEIFAPOTEK); ?></code>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="env-badge <?php echo $envApotek; ?>">
+                            <?php echo strtoupper($envApotek); ?>
+                        </span>
+                    </div>
+
+                    <div class="service-url-box" title="<?php echo htmlspecialchars($URLAPOTEK ?? '-'); ?>">
+                        <i class="fas fa-link"></i> <?php echo htmlspecialchars($URLAPOTEK ?? 'Belum disetting'); ?>
+                    </div>
+
+                    <div class="service-status-box">
+                        <div class="status-title-row">
+                            <i class="fas fa-circle-pause"></i> <span class="status-title-text">Belum Diuji</span>
+                        </div>
+                        <div class="status-desc-row">Klik tombol "Uji Sekarang" untuk memeriksa koneksi Apotek Online.</div>
+                    </div>
+
+                    <div class="service-meta-tags">
+                        <span class="meta-pill pill-latency"><i class="fas fa-gauge"></i> Latency: -</span>
+                        <span class="meta-pill pill-http"><i class="fas fa-globe"></i> HTTP: -</span>
+                        <span class="meta-pill pill-code"><i class="fas fa-tag"></i> Code: -</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="service-actions">
+                        <button type="button" class="btn-card-test" onclick="testSingleService('apotek')">
+                            <i class="fas fa-play"></i> Uji Apotek
+                        </button>
+                        <button type="button" class="btn-card-detail" onclick="toggleDetail('apotek')">
+                            <i class="fas fa-code"></i> Detail
+                        </button>
+                        <a href="uji_bridging_apotek.php" class="btn-card-detail" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Buka Konsol Lengkap Bridging Apotek">
+                            <i class="fas fa-arrow-up-right-from-square"></i> Konsol
+                        </a>
+                    </div>
+
+                    <div class="detail-panel" id="detail-apotek">
+                        <strong>Target Endpoint:</strong> <code>/referensi/dpho</code><br>
+                        <?php if (!empty($KODEIFAPOTEK)): ?>
+                            <span style="font-size:12px;color:var(--gray-600);">Kode IF: <strong><?php echo htmlspecialchars($KODEIFAPOTEK); ?></strong></span><br>
+                        <?php endif; ?>
+                        <div style="margin-top:6px;"><strong>Respon / Dekripsi:</strong></div>
+                        <pre class="json-viewer" id="json-apotek">Belum ada data.</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. MOBILE JKN AUTH (RS LOCAL) -->
             <div class="service-card status-idle" id="card-auth">
                 <div>
                     <div class="service-top">
@@ -1361,6 +1445,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_uji'])) {
                 </button>
                 <button type="button" class="btn-preset" onclick="loadManualPreset('icare')">
                     <i class="fas fa-laptop-medical"></i> I-Care koneksi.php
+                </button>
+                <button type="button" class="btn-preset" onclick="loadManualPreset('apotek')">
+                    <i class="fas fa-prescription-bottle-medical"></i> Apotek (Apol) koneksi.php
                 </button>
             </div>
 
@@ -1500,6 +1587,14 @@ const PRESETS = {
         userkey: '<?php echo addslashes($USERKEYICARE ?? ""); ?>',
         endpoint: '/api/rs/validate',
         method: 'POST'
+    },
+    apotek: {
+        url: '<?php echo addslashes($URLAPOTEK ?? ""); ?>',
+        consid: '<?php echo addslashes($CONSIDAPOTEK ?? ""); ?>',
+        secret: '<?php echo addslashes($SECRETKEYAPOTEK ?? ""); ?>',
+        userkey: '<?php echo addslashes($USERKEYAPOTEK ?? ""); ?>',
+        endpoint: '/referensi/dpho',
+        method: 'GET'
     }
 };
 
@@ -1543,7 +1638,7 @@ function toggleDetail(service) {
 // ----------------------------------------------------------------------------
 // ASYNCHRONOUS ENGINE DIAGNOSTIK MULTI-SERVICE
 // ----------------------------------------------------------------------------
-const SERVICES = ['vclaim', 'antrean', 'aplicare', 'icare', 'auth'];
+const SERVICES = ['vclaim', 'antrean', 'aplicare', 'icare', 'apotek', 'auth'];
 let resultsTracker = {};
 
 function updateKPIs() {

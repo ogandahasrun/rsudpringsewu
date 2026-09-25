@@ -36,6 +36,13 @@ $URLAUTHMJKN = "https://localhost/auth"; // URL Auth Mobile JKN
 $USERNAMEAUTHMJKN = "usermjkn"; // Username untuk Auth
 $PASSWORDAUTHMJKN = "passwordmjkn"; // Password untuk Auth
 
+// KONFIGURASI BPJS APOTEK ONLINE (APOL)
+$URLAPOTEK = "https://apijkn-dev.bpjs-kesehatan.go.id/apotek-rest-dev"; // URL API Apotek BPJS Dev (Prod: https://apijkn.bpjs-kesehatan.go.id/apotek-rest)
+$CONSIDAPOTEK = "your_consumer_id_here"; // Consumer ID dari BPJS Apotek
+$SECRETKEYAPOTEK = "your_secret_key_here"; // Secret Key dari BPJS Apotek
+$USERKEYAPOTEK = "your_user_key_here"; // User Key dari BPJS Apotek
+$KODEIFAPOTEK = "0511A001"; // Kode PPK / Instalasi Farmasi RSUD Pringsewu
+
 //KONFIGURASI SATU SEHAT
 $URLAUTHSATUSEHAT = "https://api-satusehat.kemkes.go.id/oauth2/v1";
 $URLFHIRSATUSEHAT = "https://api-satusehat.kemkes.go.id/fhir-r4/v1";
