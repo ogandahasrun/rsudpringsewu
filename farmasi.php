@@ -335,6 +335,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <a href="verifikasi_resep_dokter.php" class="menu-item">
                     <i class="fas fa-check-double fa-2x" style="margin-bottom:10px;color:#0d9488;"></i>
                     <span style="color:#222;font-weight:bold;">Verifikasi Resep Dokter</span>
+                </a>
+                <a href="jadwal_jaga_farmasi.php" class="menu-item">
+                    <i class="fas fa-calendar-check fa-2x" style="margin-bottom:10px;color:#059669;"></i>
+                    <span style="color:#222;font-weight:bold;">Jadwal Jaga Farmasi</span>
                 </a>                                
             </div>
 
