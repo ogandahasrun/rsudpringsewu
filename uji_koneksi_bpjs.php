@@ -128,6 +128,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'test_service') {
         case 'auth':
             $res['service_name'] = 'Auth Mobile JKN (Lokal)';
             $url = $URLAUTHMJKN ?? '';
+            $authUsername = $USERNAMEAUTHMJKN ?? '';
+            $authPassword = $PASSWORDAUTHMJKN ?? '';
             $consid = '';
             $secret = '';
             $userkey = '';
@@ -148,7 +150,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'test_service') {
     $res['env'] = (stripos($url, 'dev') !== false) ? 'DEVELOPMENT' : 'PRODUCTION';
 
     // Cek kelengkapan konfigurasi
-    if (empty($url) || ($service !== 'auth' && (empty($consid) || empty($secret) || empty($userkey)))) {
+    $isConfigMissing = false;
+    if ($service === 'auth') {
+        $isConfigMissing = empty($url) || empty($authUsername) || empty($authPassword);
+    } else {
+        $isConfigMissing = empty($url) || empty($consid) || empty($secret) || empty($userkey);
+    }
+
+    if ($isConfigMissing) {
         $res['status_title'] = 'Konfigurasi Belum Lengkap';
         $res['status_message'] = "Variabel konfigurasi untuk {$res['service_name']} di koneksi.php belum diisi lengkap.";
         $res['execution_time'] = round((microtime(true) - $startTime) * 1000);
@@ -172,7 +181,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'test_service') {
             'Content-Type: application/json'
         ];
     } else {
-        $headers = ['Content-Type: application/json'];
+        $headers = [
+            'x-username: ' . $authUsername,
+            'x-password: ' . $authPassword,
+            'Content-Type: application/json'
+        ];
     }
     $res['headers_sent'] = $headers;
 
@@ -1406,6 +1419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn_uji'])) {
 
                     <div class="detail-panel" id="detail-auth">
                         <strong>Target URL:</strong> <code><?php echo htmlspecialchars($URLAUTHMJKN ?? '-'); ?></code><br>
+                        <strong>Username:</strong> <code><?php echo htmlspecialchars($USERNAMEAUTHMJKN ?? '-'); ?></code><br>
                         <div style="margin-top:6px;"><strong>Respon Data:</strong></div>
                         <pre class="json-viewer" id="json-auth">Belum ada data.</pre>
                     </div>
