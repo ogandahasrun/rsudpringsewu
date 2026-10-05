@@ -442,7 +442,7 @@
 
             <!-- Tanda Tangan -->
             <div class="signature" style="text-align: center;">
-                <p>Pringsewu, <?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.............................'; ?></p>
+                <p>Pringsewu, ............................. <?php echo !empty($tahun) ? $tahun : '.....'; ?></p>
                 <p>Pejabat Pengadaan Obat/ BMHP E-Katalog/Non E-Katalog</p>
                 <br>
                 <br>
@@ -466,7 +466,7 @@
                 <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/<?php echo !empty($tahun) ? $tahun : '.....'; ?></h4>
 
             <table class="no-border-table">
-                <tr><td>Pada hari ini <?php echo !empty($tanggal_lengkap_awal) ? $tanggal_lengkap_awal : 'Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Lima (..../.../2025)'; ?>,</td></tr>
+                <tr><td>Pada hari ini .............. tanggal .............. bulan .............. tahun Dua Ribu Dua Puluh Enam (..../.../2026)</td></tr>
             </table>
 
             <table class="no-border-table">
@@ -483,7 +483,7 @@
                 <tr><td>Berdasarkan Laporan Hasil Pengadaan e Purchasing</td></tr>
                 <tr><td>Nomor : 445 / <?php echo isset($pemesanan['no_order']) ? $pemesanan['no_order'] : ''; ?>.01/ PPBJ / LL.04 /
                         <?php echo !empty($bulan_romawi) ? $bulan_romawi : '..........'; ?>/ <?php echo !empty($tahun) ? $tahun : '.....'; ?></td></tr>
-                <tr><td>Tanggal : <?php echo !empty($tanggal_awal_bulan) ? $tanggal_awal_bulan : '.........'; ?></td></tr>    
+                <tr><td>Tanggal : ..............................</td></tr>    
                 <tr><td>bersama ini memerintahkan kepada :</td></tr>    
             </table>
             <table class="no-border-table">        
@@ -527,7 +527,7 @@
             ?>
 
             <table class="no-border-table">
-                <tr><td>2. Waktu penyelesaian pekerjaan</td><td>: 28 (dua puluh delapan) hari kalender terhitung mulai tanggal Surat
+                <tr><td>2. Waktu penyelesaian pekerjaan</td><td>: 30 (tiga puluh) hari kalender terhitung mulai tanggal Surat
                 Perintah Kerja ini</td></tr>
                 <tr><td>3. Alamat pelaksanaan pekerjaan</td><td>: Jl. Lintas Barat Pekon Fajar Agung Barat Kecamatan Pringsewu</td></tr>
                 <tr><td>4. Pembayaran</td><td>: Pembayaran dilakukan dengan cara transfer</td></tr>
