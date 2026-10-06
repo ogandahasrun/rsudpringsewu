@@ -339,7 +339,11 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                 <a href="jadwal_jaga_farmasi.php" class="menu-item">
                     <i class="fas fa-calendar-check fa-2x" style="margin-bottom:10px;color:#059669;"></i>
                     <span style="color:#222;font-weight:bold;">Jadwal Jaga Farmasi</span>
-                </a>                                
+                </a>
+                <a href="evaluasi_pengajuan_barang_farmasi.php" class="menu-item">
+                    <i class="fas fa-balance-scale-right fa-2x" style="margin-bottom:10px;color:#7c3aed;"></i>
+                    <span style="color:#222;font-weight:bold;">Evaluasi Pengajuan Barang</span>
+                </a>
             </div>
 
             <a href="logout.php" class="logout">Logout</a>
