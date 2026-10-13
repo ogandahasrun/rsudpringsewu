@@ -1313,6 +1313,9 @@ if ($action === 'export_excel') {
                 </div>
             </div>
             <div class="header-actions">
+                <a href="farmasi.php" class="btn-header" title="Kembali ke Menu Farmasi">
+                    <i class="fa-solid fa-arrow-left"></i> Menu Farmasi
+                </a>
                 <a href="?action=export_excel&tgl_awal=<?php echo urlencode($tgl_awal); ?>&tgl_akhir=<?php echo urlencode($tgl_akhir); ?>&status_filter=<?php echo urlencode($status_filter); ?>&pemberi_filter=<?php echo urlencode($pemberi_filter); ?>" 
                    class="btn-header" title="Download data dalam format Excel">
                     <i class="fa-solid fa-file-excel"></i> Export Excel

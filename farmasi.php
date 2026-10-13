@@ -344,6 +344,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                     <i class="fas fa-balance-scale-right fa-2x" style="margin-bottom:10px;color:#7c3aed;"></i>
                     <span style="color:#222;font-weight:bold;">Evaluasi Pengajuan Barang</span>
                 </a>
+                <a href="kontrol_pinjam_barang_farmasi.php" class="menu-item">
+                    <i class="fas fa-hand-holding-medical fa-2x" style="margin-bottom:10px;color:#0f766e;"></i>
+                    <span style="color:#222;font-weight:bold;">Kontrol Pinjam Barang</span>
+                </a>
             </div>
 
             <a href="logout.php" class="logout">Logout</a>
