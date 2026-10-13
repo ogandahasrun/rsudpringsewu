@@ -32,13 +32,42 @@
         .btn-secondary { background: #6c757d; color: white; box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3); }
         .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); }
         .table-responsive { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; background: white; min-width: 900px; }
+        table { width: 100%; border-collapse: collapse; background: white; min-width: 1000px; }
         th { background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; }
         td { padding: 12px; border-bottom: 1px solid #e9ecef; font-size: 13px; }
         tr:nth-child(even) td { background: #f8f9fa; }
         tr:hover td { background: #e3f2fd; }
         .no-data { text-align: center; color: #666; font-style: italic; padding: 40px; background: #f8f9fa; }
-        @media (max-width: 768px) { body { padding: 10px; } .header { padding: 20px 15px; } .header h1 { font-size: 1.5em; } .content { padding: 15px; } .filter-form { padding: 20px 15px; } .filter-grid { grid-template-columns: 1fr; gap: 15px; } .filter-actions { justify-content: stretch; } .btn { padding: 10px 15px; font-size: 13px; } th, td { padding: 8px 6px; font-size: 12px; } table { min-width: 700px; } }
+
+        /* WhatsApp Button Styling */
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .whatsapp-btn:hover {
+            background: #1DA851;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+        .whatsapp-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (max-width: 768px) { body { padding: 10px; } .header { padding: 20px 15px; } .header h1 { font-size: 1.5em; } .content { padding: 15px; } .filter-form { padding: 20px 15px; } .filter-grid { grid-template-columns: 1fr; gap: 15px; } .filter-actions { justify-content: stretch; } .btn { padding: 10px 15px; font-size: 13px; } th, td { padding: 8px 6px; font-size: 12px; } table { min-width: 800px; } }
         @media (max-width: 480px) { .header h1 { font-size: 1.3em; } .filter-title { font-size: 16px; } }
     </style>
     <script>
@@ -63,6 +92,59 @@
             document.getElementById('tanggal_akhir').value = '<?php echo date('Y-m-d'); ?>';
             document.getElementById('nm_poli').value = '';
             document.getElementById('nm_dokter_bpjs').value = '';
+        }
+
+        // Buka WhatsApp Web / API untuk pengingat jadwal kontrol pasien
+        function openWhatsApp(nohp, namaPasien, tglRencana, nmPoli, nmDokter, noSurat) {
+            if (!nohp || nohp.trim() === '') {
+                alert('❌ Nomor HP tidak tersedia');
+                return;
+            }
+            
+            // Format nomor HP untuk WhatsApp (hapus karakter non-digit)
+            let cleanNumber = nohp.replace(/\D/g, '');
+            
+            // Cek jika nomor tidak valid (hanya 0 atau kurang dari 9 digit)
+            if (/^0+$/.test(cleanNumber) || cleanNumber.length < 9) {
+                alert('❌ Nomor HP tidak valid (' + nohp + ')');
+                return;
+            }
+            
+            // Jika nomor dimulai dengan 0, ganti dengan 62 (kode negara Indonesia)
+            if (cleanNumber.startsWith('0')) {
+                cleanNumber = '62' + cleanNumber.substring(1);
+            }
+            // Jika tidak dimulai dengan 62, tambahkan 62 di depan
+            else if (!cleanNumber.startsWith('62')) {
+                cleanNumber = '62' + cleanNumber;
+            }
+
+            // Format tanggal kontrol jika berformat YYYY-MM-DD menjadi DD-MM-YYYY
+            let tglFormatted = tglRencana;
+            if (tglRencana && tglRencana.includes('-')) {
+                const parts = tglRencana.split('-');
+                if (parts.length === 3) {
+                    tglFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+            
+            // Pesan Pengingat Kontrol RSUD Pringsewu
+            let message = `Halo *${namaPasien}*,\n\nKami dari *RSUD Pringsewu* ingin mengingatkan bahwa Anda memiliki jadwal kontrol kembali ke Rumah Sakit pada:\n\n` +
+                          `📅 *Hari/Tanggal:* ${tglFormatted}\n` +
+                          `🏥 *Poli Tujuan:* ${nmPoli}\n` +
+                          `👨‍⚕️ *Dokter:* ${nmDokter}\n` +
+                          `📝 *No. Surat Kontrol:* ${noSurat}\n\n` +
+                          `Mohon hadir sesuai tanggal jadwal kontrol dengan membawa Surat Kontrol, KTP, dan Kartu BPJS.\nTerima kasih dan semoga lekas sehat selalu. 🙏`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Buka WhatsApp (pada desktop langsung membuka web.whatsapp.com, pada mobile menggunakan api.whatsapp.com)
+            const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            const whatsappUrl = isMobile 
+                ? `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`
+                : `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
+                
+            window.open(whatsappUrl, '_blank');
         }
     </script>
 </head>
@@ -141,7 +223,22 @@ if (isset($_POST['filter'])) {
         $where_conditions[] = "bridging_surat_kontrol_bpjs.nm_dokter_bpjs = '" . mysqli_real_escape_string($koneksi, $nm_dokter_bpjs) . "'";
     }
     $where = "WHERE " . implode(" AND ", $where_conditions);
-    $query = "SELECT bridging_sep.nomr, bridging_sep.nama_pasien, bridging_surat_kontrol_bpjs.tgl_rencana, bridging_surat_kontrol_bpjs.nm_dokter_bpjs, bridging_surat_kontrol_bpjs.nm_poli_bpjs FROM bridging_surat_kontrol_bpjs INNER JOIN bridging_sep ON bridging_surat_kontrol_bpjs.no_sep = bridging_sep.no_sep $where ORDER BY bridging_surat_kontrol_bpjs.tgl_rencana DESC";
+    $query = "SELECT 
+                bridging_surat_kontrol_bpjs.no_surat,
+                bridging_surat_kontrol_bpjs.no_sep,
+                bridging_sep.nomr, 
+                bridging_sep.nama_pasien, 
+                bridging_surat_kontrol_bpjs.tgl_rencana, 
+                bridging_surat_kontrol_bpjs.nm_dokter_bpjs, 
+                bridging_surat_kontrol_bpjs.nm_poli_bpjs,
+                bridging_sep.notelep,
+                pasien.no_tlp
+            FROM bridging_surat_kontrol_bpjs 
+            INNER JOIN bridging_sep ON bridging_surat_kontrol_bpjs.no_sep = bridging_sep.no_sep 
+            LEFT JOIN pasien ON bridging_sep.nomr = pasien.no_rkm_medis
+            $where 
+            ORDER BY bridging_surat_kontrol_bpjs.tgl_rencana DESC";
+
     $result = mysqli_query($koneksi, $query);
     if ($result) {
         $total_rows = mysqli_num_rows($result);
@@ -149,10 +246,34 @@ if (isset($_POST['filter'])) {
         echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> referensi</div>';
         echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
         echo '</div>';
-        echo "<div class='table-responsive'><table>\n<tr>\n<th>No</th>\n<th>No RM</th>\n<th>Nama Pasien</th>\n<th>Tanggal Rencana</th>\n<th>Dokter BPJS</th>\n<th>Poli BPJS</th>\n</tr>";
+        echo "<div class='table-responsive'><table>\n<tr>\n<th>No</th>\n<th>NO SURAT KONTROL</th>\n<th>NO RM</th>\n<th>NAMA PASIEN</th>\n<th>NO HP</th>\n<th>TANGGAL RENCANA</th>\n<th>DOKTER BPJS</th>\n<th>POLI BPJS</th>\n<th>WhatsApp</th>\n</tr>";
         $no = 1;
         while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr>\n<td>{$no}</td>\n<td>{$row['nomr']}</td>\n<td>{$row['nama_pasien']}</td>\n<td>{$row['tgl_rencana']}</td>\n<td>{$row['nm_dokter_bpjs']}</td>\n<td>{$row['nm_poli_bpjs']}</td>\n</tr>";
+            // Prioritaskan nomor telepon dari bridging_sep jika valid (ada angka selain nol), jika tidak gunakan no_tlp dari tabel pasien
+            $nohp = (!empty($row['notelep']) && preg_match('/[1-9]/', $row['notelep'])) ? $row['notelep'] : (!empty($row['no_tlp']) ? $row['no_tlp'] : '');
+            $is_valid_hp = !empty($nohp) && preg_match('/[1-9]/', $nohp);
+
+            $pasien_js = htmlspecialchars(addslashes($row['nama_pasien']), ENT_QUOTES, 'UTF-8');
+            $poli_js   = htmlspecialchars(addslashes($row['nm_poli_bpjs']), ENT_QUOTES, 'UTF-8');
+            $dokter_js = htmlspecialchars(addslashes($row['nm_dokter_bpjs']), ENT_QUOTES, 'UTF-8');
+            $surat_js  = htmlspecialchars(addslashes($row['no_surat']), ENT_QUOTES, 'UTF-8');
+            $nohp_js   = htmlspecialchars(addslashes($nohp), ENT_QUOTES, 'UTF-8');
+
+            echo "<tr>\n";
+            echo "<td>{$no}</td>\n";
+            echo "<td>{$row['no_surat']}</td>\n";
+            echo "<td>{$row['nomr']}</td>\n";
+            echo "<td>" . htmlspecialchars($row['nama_pasien']) . "</td>\n";
+            echo "<td>" . htmlspecialchars($nohp ?: '-') . "</td>\n";
+            echo "<td>{$row['tgl_rencana']}</td>\n";
+            echo "<td>" . htmlspecialchars($row['nm_dokter_bpjs']) . "</td>\n";
+            echo "<td>" . htmlspecialchars($row['nm_poli_bpjs']) . "</td>\n";
+            echo "<td>\n";
+            echo "<button class='whatsapp-btn' onclick=\"openWhatsApp('{$nohp_js}', '{$pasien_js}', '{$row['tgl_rencana']}', '{$poli_js}', '{$dokter_js}', '{$surat_js}')\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "") . ">\n";
+            echo "📱 WhatsApp\n";
+            echo "</button>\n";
+            echo "</td>\n";
+            echo "</tr>\n";
             $no++;
         }
         echo "</table></div>";
