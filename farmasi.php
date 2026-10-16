@@ -288,6 +288,10 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
                     <i class="fas fa-book-medical fa-2x" style="margin-bottom:10px;color:#a21caf;"></i>
                     <span style="color:#222;font-weight:bold;">Formularium</span>
                 </a>
+                <a href="laporan_lasa_dan_high_alert.php" class="menu-item">
+                    <i class="fas fa-pills fa-2x" style="margin-bottom:10px;color:#d97706;"></i>
+                    <span style="color:#222;font-weight:bold;">LASA & High Alert</span>
+                </a>
                 <a href="kalkulatorfaktur.php" class="menu-item">
                     <i class="fas fa-square-root-alt fa-2x" style="margin-bottom:10px;color:#fbbf24;"></i>
                     <span style="color:#222;font-weight:bold;">Kalkulator Faktur</span>
