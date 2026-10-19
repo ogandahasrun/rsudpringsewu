@@ -405,6 +405,13 @@ $rata_per_hari = $jumlah_hari_total > 0 ? round($grand_total_obat / $jumlah_hari
             transform: translateY(-1px);
         }
 
+        .btn-nav.active-link {
+            background: #ffffff;
+            color: #0369a1;
+            border-color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
         /* Filter Section */
         .filter-card {
             background: var(--card-bg);
@@ -1007,6 +1014,14 @@ $rata_per_hari = $jumlah_hari_total > 0 ? round($grand_total_obat / $jumlah_hari
             </div>
         </div>
         <div class="header-actions">
+            <a href="laporan_lasa_dan_high_alert.php" class="btn-nav active-link">
+                <i class="fas fa-calendar-day"></i>
+                Laporan Harian
+            </a>
+            <a href="laporan_lasa_dan_high_alert_bulanan.php" class="btn-nav">
+                <i class="fas fa-calendar-alt"></i>
+                Laporan Bulanan
+            </a>
             <a href="farmasi.php" class="btn-nav">
                 <i class="fas fa-arrow-left"></i>
                 Menu Farmasi
