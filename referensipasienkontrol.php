@@ -94,8 +94,30 @@
             document.getElementById('nm_dokter_bpjs').value = '';
         }
 
+        // Format Hari, Tanggal Indonesia (misal: Kamis, 10 September 2026)
+        function formatHariTanggalIndo(tglStr) {
+            if (!tglStr) return '-';
+            const parts = tglStr.split('-');
+            if (parts.length !== 3) return tglStr;
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const day = parseInt(parts[2], 10);
+            
+            const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const bulan = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            
+            const dt = new Date(year, month - 1, day);
+            const namaHari = hari[dt.getDay()];
+            const namaBulan = bulan[month - 1];
+            
+            return `${namaHari}, ${day} ${namaBulan} ${year}`;
+        }
+
         // Buka WhatsApp Web / API untuk pengingat jadwal kontrol pasien
-        function openWhatsApp(nohp, namaPasien, tglRencana, nmPoli, nmDokter, noSurat) {
+        function openWhatsApp(nohp, namaPasien, tglRencana, nmPoli, nmDokter, noSurat, noAntrean, estimasiJam) {
             if (!nohp || nohp.trim() === '') {
                 alert('❌ Nomor HP tidak tersedia');
                 return;
@@ -119,22 +141,41 @@
                 cleanNumber = '62' + cleanNumber;
             }
 
-            // Format tanggal kontrol jika berformat YYYY-MM-DD menjadi DD-MM-YYYY
-            let tglFormatted = tglRencana;
-            if (tglRencana && tglRencana.includes('-')) {
-                const parts = tglRencana.split('-');
-                if (parts.length === 3) {
-                    tglFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            // Format Hari, Tanggal (misal: Kamis, 10 September 2026)
+            const hariTanggal = formatHariTanggalIndo(tglRencana);
+
+            // Format Klinik Tujuan (misal: "Orthopedi" menjadi "Klinik Orthopedi")
+            let klinikTujuan = nmPoli ? nmPoli.trim() : '-';
+            if (klinikTujuan !== '-' && !/^klinik\s+/i.test(klinikTujuan)) {
+                if (/^poli\s+/i.test(klinikTujuan)) {
+                    klinikTujuan = klinikTujuan.replace(/^poli\s+/i, 'Klinik ');
+                } else {
+                    klinikTujuan = 'Klinik ' + klinikTujuan;
                 }
             }
-            
+
+            // Format Nomor Antrean
+            let antreanDisplay = (noAntrean !== undefined && noAntrean !== null && noAntrean !== '') ? String(noAntrean).trim() : '-';
+            if (/^0+[0-9]+$/.test(antreanDisplay)) {
+                antreanDisplay = antreanDisplay.replace(/^0+/, '');
+            }
+
+            // Format Estimasi Jam
+            let jamDisplay = (estimasiJam !== undefined && estimasiJam !== null && estimasiJam !== '') ? String(estimasiJam).trim() : '08.00 - 12.00 WIB';
+
             // Pesan Pengingat Kontrol RSUD Pringsewu
-            let message = `Halo *${namaPasien}*,\n\nKami dari *RSUD Pringsewu* ingin mengingatkan bahwa Anda memiliki jadwal kontrol kembali ke Rumah Sakit pada:\n\n` +
-                          `📅 *Hari/Tanggal:* ${tglFormatted}\n` +
-                          `🏥 *Poli Tujuan:* ${nmPoli}\n` +
-                          `👨‍⚕️ *Dokter:* ${nmDokter}\n` +
-                          `📝 *No. Surat Kontrol:* ${noSurat}\n\n` +
-                          `Mohon hadir sesuai tanggal jadwal kontrol dengan membawa Surat Kontrol, KTP, dan Kartu BPJS.\nTerima kasih dan semoga lekas sehat selalu. 🙏`;
+            let message = `Yth. Bapak/Ibu ${namaPasien},\n\n` +
+                          `Mengingatkan jadwal kontrol/berobat Anda di RSUD Pringsewu:\n\n` +
+                          `Hari, Tanggal: ${hariTanggal}\n` +
+                          `Klinik Tujuan : ${klinikTujuan}\n` +
+                          `Dokter : ${nmDokter}\n` +
+                          `Nomor Antrean: ${antreanDisplay}\n\n` +
+                          `Estimasi Jam : ${jamDisplay}\n\n` +
+                          `Penting untuk Diperhatikan:\n\n` +
+                          `Mohon melakukan Check-in / Fingerprint di lokasi RSUD Pringsewu 15 menit sebelum estimasi pelayanan.\n\n` +
+                          `Sesuai ketentuan BPJS Kesehatan, pasien wajib datang tepat pada tanggal yang tertera di Surat Kontrol (tidak bisa maju/mundur).\n\n` +
+                          `Jika membutuhkan bantuan atau konfirmasi kendala jadwal, silakan balas pesan ini.\n\n` +
+                          `Terima kasih.`;
             
             const encodedMessage = encodeURIComponent(message);
             
@@ -159,6 +200,7 @@
             </div>
 <?php
 include 'koneksi.php';
+date_default_timezone_set('Asia/Jakarta');
 // Ambil data untuk dropdown filter
 function getOptions($koneksi, $field, $table, $where = "") {
     $options = [];
@@ -232,11 +274,22 @@ if (isset($_POST['filter'])) {
                 bridging_surat_kontrol_bpjs.nm_dokter_bpjs, 
                 bridging_surat_kontrol_bpjs.nm_poli_bpjs,
                 bridging_sep.notelep,
-                pasien.no_tlp
+                pasien.no_tlp,
+                mjkn.nomorantrean,
+                mjkn.angkaantrean,
+                mjkn.jampraktek,
+                mjkn.estimasidilayani,
+                br.no_reg,
+                br.waktu_kunjungan
             FROM bridging_surat_kontrol_bpjs 
             INNER JOIN bridging_sep ON bridging_surat_kontrol_bpjs.no_sep = bridging_sep.no_sep 
             LEFT JOIN pasien ON bridging_sep.nomr = pasien.no_rkm_medis
+            LEFT JOIN referensi_mobilejkn_bpjs mjkn 
+                ON (mjkn.norm = bridging_sep.nomr AND (mjkn.nomorreferensi = bridging_surat_kontrol_bpjs.no_surat OR mjkn.tanggalperiksa = bridging_surat_kontrol_bpjs.tgl_rencana) AND mjkn.status != 'Batal')
+            LEFT JOIN booking_registrasi br
+                ON (br.no_rkm_medis = bridging_sep.nomr AND br.tanggal_periksa = bridging_surat_kontrol_bpjs.tgl_rencana AND br.status != 'Batal')
             $where 
+            GROUP BY bridging_surat_kontrol_bpjs.no_surat
             ORDER BY bridging_surat_kontrol_bpjs.tgl_rencana DESC";
 
     $result = mysqli_query($koneksi, $query);
@@ -246,18 +299,54 @@ if (isset($_POST['filter'])) {
         echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> referensi</div>';
         echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
         echo '</div>';
-        echo "<div class='table-responsive'><table>\n<tr>\n<th>No</th>\n<th>NO SURAT KONTROL</th>\n<th>NO RM</th>\n<th>NAMA PASIEN</th>\n<th>NO HP</th>\n<th>TANGGAL RENCANA</th>\n<th>DOKTER BPJS</th>\n<th>POLI BPJS</th>\n<th>WhatsApp</th>\n</tr>";
+        echo "<div class='table-responsive'><table>\n<tr>\n<th>No</th>\n<th>NO SURAT KONTROL</th>\n<th>NO RM</th>\n<th>NAMA PASIEN</th>\n<th>NO HP</th>\n<th>TANGGAL RENCANA</th>\n<th>DOKTER BPJS</th>\n<th>POLI BPJS</th>\n<th>NO ANTREAN</th>\n<th>WhatsApp</th>\n</tr>";
         $no = 1;
         while ($row = mysqli_fetch_assoc($result)) {
             // Prioritaskan nomor telepon dari bridging_sep jika valid (ada angka selain nol), jika tidak gunakan no_tlp dari tabel pasien
             $nohp = (!empty($row['notelep']) && preg_match('/[1-9]/', $row['notelep'])) ? $row['notelep'] : (!empty($row['no_tlp']) ? $row['no_tlp'] : '');
             $is_valid_hp = !empty($nohp) && preg_match('/[1-9]/', $nohp);
 
+            // Format nomor antrean
+            $no_antrean = '-';
+            if (!empty($row['angkaantrean'])) {
+                $no_antrean = ltrim($row['angkaantrean'], '0');
+                if ($no_antrean === '') $no_antrean = '0';
+            } elseif (!empty($row['nomorantrean'])) {
+                $no_antrean = $row['nomorantrean'];
+            } elseif (!empty($row['no_reg'])) {
+                $no_antrean = ltrim($row['no_reg'], '0');
+                if ($no_antrean === '') $no_antrean = '0';
+            }
+
+            // Format estimasi jam
+            $estimasi_jam = '-';
+            if (!empty($row['estimasidilayani']) && is_numeric($row['estimasidilayani']) && $row['estimasidilayani'] > 0) {
+                $ts = (int)($row['estimasidilayani'] / 1000);
+                $h = (int)date('H', $ts);
+                $h_end = $h + 1;
+                $estimasi_jam = sprintf("%02d.00 - %02d.00 WIB", $h, $h_end);
+            } elseif (!empty($row['jampraktek'])) {
+                $jam = str_replace(':', '.', $row['jampraktek']);
+                if (strpos($jam, '-') !== false) {
+                    $parts = explode('-', $jam);
+                    $estimasi_jam = trim($parts[0]) . " - " . trim($parts[1]) . " WIB";
+                } else {
+                    $estimasi_jam = trim($jam) . " WIB";
+                }
+            } elseif (!empty($row['waktu_kunjungan'])) {
+                $h = (int)date('H', strtotime($row['waktu_kunjungan']));
+                $estimasi_jam = sprintf("%02d.00 - %02d.00 WIB", $h, $h + 1);
+            } else {
+                $estimasi_jam = "08.00 - 12.00 WIB";
+            }
+
             $pasien_js = htmlspecialchars(addslashes($row['nama_pasien']), ENT_QUOTES, 'UTF-8');
             $poli_js   = htmlspecialchars(addslashes($row['nm_poli_bpjs']), ENT_QUOTES, 'UTF-8');
             $dokter_js = htmlspecialchars(addslashes($row['nm_dokter_bpjs']), ENT_QUOTES, 'UTF-8');
             $surat_js  = htmlspecialchars(addslashes($row['no_surat']), ENT_QUOTES, 'UTF-8');
             $nohp_js   = htmlspecialchars(addslashes($nohp), ENT_QUOTES, 'UTF-8');
+            $antrean_js = htmlspecialchars(addslashes($no_antrean), ENT_QUOTES, 'UTF-8');
+            $jam_js    = htmlspecialchars(addslashes($estimasi_jam), ENT_QUOTES, 'UTF-8');
 
             echo "<tr>\n";
             echo "<td>{$no}</td>\n";
@@ -268,8 +357,9 @@ if (isset($_POST['filter'])) {
             echo "<td>{$row['tgl_rencana']}</td>\n";
             echo "<td>" . htmlspecialchars($row['nm_dokter_bpjs']) . "</td>\n";
             echo "<td>" . htmlspecialchars($row['nm_poli_bpjs']) . "</td>\n";
+            echo "<td>" . htmlspecialchars($no_antrean) . "</td>\n";
             echo "<td>\n";
-            echo "<button class='whatsapp-btn' onclick=\"openWhatsApp('{$nohp_js}', '{$pasien_js}', '{$row['tgl_rencana']}', '{$poli_js}', '{$dokter_js}', '{$surat_js}')\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "") . ">\n";
+            echo "<button class='whatsapp-btn' onclick=\"openWhatsApp('{$nohp_js}', '{$pasien_js}', '{$row['tgl_rencana']}', '{$poli_js}', '{$dokter_js}', '{$surat_js}', '{$antrean_js}', '{$jam_js}')\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "") . ">\n";
             echo "📱 WhatsApp\n";
             echo "</button>\n";
             echo "</td>\n";

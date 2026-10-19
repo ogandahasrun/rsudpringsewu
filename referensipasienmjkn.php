@@ -285,15 +285,43 @@
             document.getElementById('nm_dokter_bpjs').value = '';
         }
 
-        // Buka WhatsApp Web dengan nomor HP
-        function openWhatsApp(nohp, namaPasien) {
-            if (!nohp) {
+        // Format Hari, Tanggal Indonesia (misal: Kamis, 10 September 2026)
+        function formatHariTanggalIndo(tglStr) {
+            if (!tglStr) return '-';
+            const parts = tglStr.split('-');
+            if (parts.length !== 3) return tglStr;
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const day = parseInt(parts[2], 10);
+            
+            const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const bulan = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            
+            const dt = new Date(year, month - 1, day);
+            const namaHari = hari[dt.getDay()];
+            const namaBulan = bulan[month - 1];
+            
+            return `${namaHari}, ${day} ${namaBulan} ${year}`;
+        }
+
+        // Buka WhatsApp Web / API untuk pengingat jadwal kontrol pasien
+        function openWhatsApp(nohp, namaPasien, tglRencana, nmPoli, nmDokter, noAntrean, estimasiJam) {
+            if (!nohp || nohp.trim() === '') {
                 alert('❌ Nomor HP tidak tersedia');
                 return;
             }
             
             // Format nomor HP untuk WhatsApp (hapus karakter non-digit)
             let cleanNumber = nohp.replace(/\D/g, '');
+            
+            // Cek jika nomor tidak valid (hanya 0 atau kurang dari 9 digit)
+            if (/^0+$/.test(cleanNumber) || cleanNumber.length < 9) {
+                alert('❌ Nomor HP tidak valid (' + nohp + ')');
+                return;
+            }
             
             // Jika nomor dimulai dengan 0, ganti dengan 62 (kode negara Indonesia)
             if (cleanNumber.startsWith('0')) {
@@ -303,13 +331,51 @@
             else if (!cleanNumber.startsWith('62')) {
                 cleanNumber = '62' + cleanNumber;
             }
+
+            // Format Hari, Tanggal (misal: Kamis, 10 September 2026)
+            const hariTanggal = formatHariTanggalIndo(tglRencana);
+
+            // Format Klinik Tujuan (misal: "Orthopedi" menjadi "Klinik Orthopedi")
+            let klinikTujuan = nmPoli ? nmPoli.trim() : '-';
+            if (klinikTujuan !== '-' && !/^klinik\s+/i.test(klinikTujuan)) {
+                if (/^poli\s+/i.test(klinikTujuan)) {
+                    klinikTujuan = klinikTujuan.replace(/^poli\s+/i, 'Klinik ');
+                } else {
+                    klinikTujuan = 'Klinik ' + klinikTujuan;
+                }
+            }
+
+            // Format Nomor Antrean
+            let antreanDisplay = (noAntrean !== undefined && noAntrean !== null && noAntrean !== '') ? String(noAntrean).trim() : '-';
+            if (/^0+[0-9]+$/.test(antreanDisplay)) {
+                antreanDisplay = antreanDisplay.replace(/^0+/, '');
+            }
+
+            // Format Estimasi Jam
+            let jamDisplay = (estimasiJam !== undefined && estimasiJam !== null && estimasiJam !== '') ? String(estimasiJam).trim() : '08.00 - 12.00 WIB';
+
+            // Pesan Pengingat Kontrol RSUD Pringsewu
+            let message = `Yth. Bapak/Ibu ${namaPasien},\n\n` +
+                          `Mengingatkan jadwal kontrol/berobat Anda di RSUD Pringsewu:\n\n` +
+                          `Hari, Tanggal: ${hariTanggal}\n` +
+                          `Klinik Tujuan : ${klinikTujuan}\n` +
+                          `Dokter : ${nmDokter}\n` +
+                          `Nomor Antrean: ${antreanDisplay}\n\n` +
+                          `Estimasi Jam : ${jamDisplay}\n\n` +
+                          `Penting untuk Diperhatikan:\n\n` +
+                          `Mohon melakukan Check-in / Fingerprint di lokasi RSUD Pringsewu 15 menit sebelum estimasi pelayanan.\n\n` +
+                          `Sesuai ketentuan BPJS Kesehatan, pasien wajib datang tepat pada tanggal yang tertera di Surat Kontrol (tidak bisa maju/mundur).\n\n` +
+                          `Jika membutuhkan bantuan atau konfirmasi kendala jadwal, silakan balas pesan ini.\n\n` +
+                          `Terima kasih.`;
             
-            // Pesan default
-            const message = `Halo ${namaPasien}, ini dari RSUD Pringsewu. Kami ingin menginformasikan terkait jadwal pemeriksaan Anda.`;
             const encodedMessage = encodeURIComponent(message);
             
-            // Buka WhatsApp Web
-            const whatsappUrl = `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
+            // Buka WhatsApp (pada desktop langsung membuka web.whatsapp.com, pada mobile menggunakan api.whatsapp.com)
+            const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            const whatsappUrl = isMobile 
+                ? `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`
+                : `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
+                
             window.open(whatsappUrl, '_blank');
         }
     </script>
@@ -327,6 +393,7 @@
 
     <?php
     include 'koneksi.php';
+    date_default_timezone_set('Asia/Jakarta');
 
     // Ambil data untuk dropdown filter
     function getOptions($koneksi, $field, $table, $where = "") {
@@ -436,7 +503,9 @@
                     poliklinik.nm_poli,
                     maping_dokter_dpjpvclaim.nm_dokter_bpjs,
                     referensi_mobilejkn_bpjs.nomorantrean,
-                    referensi_mobilejkn_bpjs.angkaantrean
+                    referensi_mobilejkn_bpjs.angkaantrean,
+                    referensi_mobilejkn_bpjs.estimasidilayani,
+                    referensi_mobilejkn_bpjs.jampraktek
                 FROM
                     referensi_mobilejkn_bpjs
                 INNER JOIN reg_periksa ON referensi_mobilejkn_bpjs.no_rawat = reg_periksa.no_rawat
@@ -476,6 +545,42 @@
                 </tr>";
             $no = 1; 
             while ($row = mysqli_fetch_assoc($result)) {
+                // Format nomor antrean
+                $no_antrean = '-';
+                if (!empty($row['angkaantrean'])) {
+                    $no_antrean = ltrim($row['angkaantrean'], '0');
+                    if ($no_antrean === '') $no_antrean = '0';
+                } elseif (!empty($row['nomorantrean'])) {
+                    $no_antrean = $row['nomorantrean'];
+                }
+
+                // Format estimasi jam
+                $estimasi_jam = '-';
+                if (!empty($row['estimasidilayani']) && is_numeric($row['estimasidilayani']) && $row['estimasidilayani'] > 0) {
+                    $ts = (int)($row['estimasidilayani'] / 1000);
+                    $h = (int)date('H', $ts);
+                    $h_end = $h + 1;
+                    $estimasi_jam = sprintf("%02d.00 - %02d.00 WIB", $h, $h_end);
+                } elseif (!empty($row['jampraktek'])) {
+                    $jam = str_replace(':', '.', $row['jampraktek']);
+                    if (strpos($jam, '-') !== false) {
+                        $parts = explode('-', $jam);
+                        $estimasi_jam = trim($parts[0]) . " - " . trim($parts[1]) . " WIB";
+                    } else {
+                        $estimasi_jam = trim($jam) . " WIB";
+                    }
+                } else {
+                    $estimasi_jam = "08.00 - 12.00 WIB";
+                }
+
+                $pasien_js  = htmlspecialchars(addslashes($row['nm_pasien']), ENT_QUOTES, 'UTF-8');
+                $poli_js    = htmlspecialchars(addslashes($row['nm_poli']), ENT_QUOTES, 'UTF-8');
+                $dokter_js  = htmlspecialchars(addslashes($row['nm_dokter_bpjs']), ENT_QUOTES, 'UTF-8');
+                $nohp_js    = htmlspecialchars(addslashes($row['nohp']), ENT_QUOTES, 'UTF-8');
+                $antrean_js = htmlspecialchars(addslashes($no_antrean), ENT_QUOTES, 'UTF-8');
+                $jam_js     = htmlspecialchars(addslashes($estimasi_jam), ENT_QUOTES, 'UTF-8');
+                $is_valid_hp = !empty($row['nohp']) && preg_match('/[1-9]/', $row['nohp']);
+
                 echo "<tr>
                         <td>{$no}</td>
                         <td>{$row['tanggalperiksa']}</td>
@@ -491,7 +596,7 @@
                         <td>{$row['nomorantrean']}</td>
                         <td>{$row['angkaantrean']}</td>
                         <td>
-                            <button class='whatsapp-btn' onclick=\"openWhatsApp('{$row['nohp']}', '{$row['nm_pasien']}')\" " . (empty($row['nohp']) ? "disabled title='Nomor HP tidak tersedia'" : "") . ">
+                            <button class='whatsapp-btn' onclick=\"openWhatsApp('{$nohp_js}', '{$pasien_js}', '{$row['tanggalperiksa']}', '{$poli_js}', '{$dokter_js}', '{$antrean_js}', '{$jam_js}')\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "") . ">
                                 📱 WhatsApp
                             </button>
                         </td>
