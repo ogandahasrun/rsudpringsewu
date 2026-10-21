@@ -51,6 +51,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_foto'])) {
     }
 }
 
+// Fungsi kompresi gambar dan konversi ke JPG (dengan auto-orientasi EXIF HP)
+function compressAndSaveImage($tmp_file, $target_file, $max_size = 204800) {
+    $image_info = @getimagesize($tmp_file);
+    if (!$image_info) {
+        return false;
+    }
+
+    $src_img = false;
+    switch ($image_info['mime']) {
+        case 'image/jpeg':
+            $src_img = @imagecreatefromjpeg($tmp_file);
+            // Handle orientasi EXIF kamera smartphone (agar foto tidak terbalik/miring)
+            if ($src_img && function_exists('exif_read_data')) {
+                $exif = @exif_read_data($tmp_file);
+                if (!empty($exif['Orientation'])) {
+                    switch ($exif['Orientation']) {
+                        case 3:
+                            $src_img = imagerotate($src_img, 180, 0);
+                            break;
+                        case 6:
+                            $src_img = imagerotate($src_img, -90, 0);
+                            break;
+                        case 8:
+                            $src_img = imagerotate($src_img, 90, 0);
+                            break;
+                    }
+                }
+            }
+            break;
+        case 'image/png':
+            $src_img = @imagecreatefrompng($tmp_file);
+            break;
+        case 'image/gif':
+            $src_img = @imagecreatefromgif($tmp_file);
+            break;
+        case 'image/webp':
+            if (function_exists('imagecreatefromwebp')) {
+                $src_img = @imagecreatefromwebp($tmp_file);
+            }
+            break;
+    }
+
+    if (!$src_img) {
+        return false;
+    }
+
+    // Resize proporsional jika lebar > 1280px
+    $width = imagesx($src_img);
+    $height = imagesy($src_img);
+    $max_width = 1280;
+    if ($width > $max_width) {
+        $new_width = $max_width;
+        $new_height = intval($height * $new_width / $width);
+        $dst_img = imagecreatetruecolor($new_width, $new_height);
+        imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+    } else {
+        $dst_img = $src_img;
+    }
+
+    // Kompresi dan simpan (loop kualitas sampai <200KB)
+    $quality = 85;
+    do {
+        ob_start();
+        imagejpeg($dst_img, null, $quality);
+        $img_data = ob_get_clean();
+        $img_size = strlen($img_data);
+        $quality -= 5;
+    } while ($img_size > $max_size && $quality > 30);
+
+    $saved = file_put_contents($target_file, $img_data);
+
+    if (isset($src_img) && $src_img !== $dst_img) {
+        imagedestroy($src_img);
+    }
+    if (isset($dst_img)) {
+        imagedestroy($dst_img);
+    }
+
+    return $saved !== false;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     $no_faktur = $_POST['no_faktur'];
     $upload_dir = 'uploads/faktur/';
@@ -58,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
         mkdir($upload_dir, 0777, true);
     }
 
-    // Cek sudah ada berapa foto
+    // Cek foto yang sudah ada
     $q = mysqli_query($koneksi, "SELECT * FROM pemesanan_dokumentasi WHERE no_faktur='$no_faktur' LIMIT 1");
     if ($row = mysqli_fetch_assoc($q)) {
         for ($i = 0; $i < 10; $i++) {
@@ -66,98 +147,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
         }
     }
 
-    // Cari slot kosong
-    $slot = -1;
-    for ($i=0; $i<10; $i++) {
+    // Kumpulkan slot kosong yang tersedia (index 0 - 9)
+    $empty_slots = [];
+    for ($i = 0; $i < 10; $i++) {
         if (empty($foto_paths[$i])) {
-            $slot = $i;
-            break;
+            $empty_slots[] = $i;
         }
     }
 
-    if ($slot === -1) {
-        $pesan = "Sudah ada 10 foto untuk faktur ini!";
+    // Normalisasi file upload (baik single maupun multiple)
+    $files_to_process = [];
+    if (isset($_FILES['foto']['name']) && is_array($_FILES['foto']['name'])) {
+        for ($i = 0; $i < count($_FILES['foto']['name']); $i++) {
+            if (isset($_FILES['foto']['error'][$i]) && $_FILES['foto']['error'][$i] === UPLOAD_ERR_OK && !empty($_FILES['foto']['tmp_name'][$i])) {
+                $files_to_process[] = [
+                    'name' => $_FILES['foto']['name'][$i],
+                    'tmp_name' => $_FILES['foto']['tmp_name'][$i],
+                    'size' => $_FILES['foto']['size'][$i]
+                ];
+            }
+        }
+    } elseif (isset($_FILES['foto']['error']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK && !empty($_FILES['foto']['tmp_name'])) {
+        $files_to_process[] = [
+            'name' => $_FILES['foto']['name'],
+            'tmp_name' => $_FILES['foto']['tmp_name'],
+            'size' => $_FILES['foto']['size']
+        ];
+    }
+
+    if (empty($files_to_process)) {
+        $pesan = "Tidak ada file foto yang dipilih atau ukuran file melebihi batas upload server!";
+    } elseif (empty($empty_slots)) {
+        $pesan = "Slot penuh! Maksimal 10 foto untuk faktur ini sudah tercapai.";
     } else {
         $safe_no_faktur = preg_replace('/[^A-Za-z0-9]/', '', $no_faktur);
-        $file_name = $safe_no_faktur . '_' . ($slot+1) . '.jpg';
-        $target_file = $upload_dir . $file_name;
-        $tmp_file = $_FILES['foto']['tmp_name'];
-        $max_size = 200 * 1024; // 200 KB
+        $sukses_count = 0;
+        $gagal_count = 0;
+        $updates = [];
 
-        // Kompresi dan konversi ke JPG
-        $image_info = getimagesize($tmp_file);
-        if ($image_info) {
-            $src_img = false;
-            switch ($image_info['mime']) {
-                case 'image/jpeg':
-                    $src_img = imagecreatefromjpeg($tmp_file);
-                    break;
-                case 'image/png':
-                    $src_img = imagecreatefrompng($tmp_file);
-                    break;
-                case 'image/gif':
-                    $src_img = imagecreatefromgif($tmp_file);
-                    break;
-                case 'image/webp':
-                    if (function_exists('imagecreatefromwebp')) {
-                        $src_img = imagecreatefromwebp($tmp_file);
-                    }
-                    break;
+        foreach ($files_to_process as $file_item) {
+            if (empty($empty_slots)) {
+                break; // Slot habis
             }
-            if ($src_img) {
-                // Resize jika lebar > 1280px (opsional)
-                $width = imagesx($src_img);
-                $height = imagesy($src_img);
-                $max_width = 1280;
-                if ($width > $max_width) {
-                    $new_width = $max_width;
-                    $new_height = intval($height * $new_width / $width);
-                    $dst_img = imagecreatetruecolor($new_width, $new_height);
-                    imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
-                } else {
-                    $dst_img = $src_img;
-                }
 
-                // Kompresi dan simpan (loop kualitas sampai <200KB)
-                $quality = 80;
-                do {
-                    ob_start();
-                    imagejpeg($dst_img, null, $quality);
-                    $img_data = ob_get_clean();
-                    $img_size = strlen($img_data);
-                    $quality -= 5;
-                } while ($img_size > $max_size && $quality > 30);
+            $slot = array_shift($empty_slots);
+            $file_name = $safe_no_faktur . '_' . ($slot + 1) . '.jpg';
+            $target_file = $upload_dir . $file_name;
 
-                // Simpan file hasil kompresi
-                file_put_contents($target_file, $img_data);
-
-                // Hapus resource
-                if (isset($src_img) && $src_img !== $dst_img) imagedestroy($src_img);
-                if (isset($dst_img)) imagedestroy($dst_img);
-
-                // Simpan nama file ke database
-                $field = 'foto'.($slot+1);
-                if ($q && mysqli_num_rows($q) > 0) {
-                    mysqli_query($koneksi, "UPDATE pemesanan_dokumentasi SET $field='$file_name' WHERE no_faktur='$no_faktur'");
-                } else {
-                    // Buat array untuk INSERT dengan semua field foto
-                    $foto_fields = array();
-                    $foto_values = array();
-                    for ($i = 0; $i < 10; $i++) {
-                        $foto_fields[] = 'foto' . ($i + 1);
-                        $foto_values[] = ($i == $slot) ? "'$file_name'" : "''";
-                    }
-                    $fields_str = implode(', ', $foto_fields);
-                    $values_str = implode(', ', $foto_values);
-                    mysqli_query($koneksi, "INSERT INTO pemesanan_dokumentasi (no_faktur, $fields_str) VALUES ('$no_faktur', $values_str)");
-                }
-                $pesan = "Foto berhasil diupload dan dikompresi!";
+            if (compressAndSaveImage($file_item['tmp_name'], $target_file, 200 * 1024)) {
+                $field = 'foto' . ($slot + 1);
+                $updates[$field] = $file_name;
                 $foto_paths[$slot] = $file_name;
+                $sukses_count++;
             } else {
-                $pesan = "Format gambar tidak didukung!";
+                $gagal_count++;
+                // Kembalikan slot karena gagal diproses
+                array_unshift($empty_slots, $slot);
+            }
+        }
+
+        if ($sukses_count > 0) {
+            // Update atau Insert ke database
+            $check = mysqli_query($koneksi, "SELECT no_faktur FROM pemesanan_dokumentasi WHERE no_faktur='$no_faktur' LIMIT 1");
+            if ($check && mysqli_num_rows($check) > 0) {
+                $set_clauses = [];
+                foreach ($updates as $col => $val) {
+                    $set_clauses[] = "$col='$val'";
+                }
+                mysqli_query($koneksi, "UPDATE pemesanan_dokumentasi SET " . implode(', ', $set_clauses) . " WHERE no_faktur='$no_faktur'");
+            } else {
+                $foto_fields = ['no_faktur'];
+                $foto_values = ["'$no_faktur'"];
+                for ($i = 0; $i < 10; $i++) {
+                    $col = 'foto' . ($i + 1);
+                    $foto_fields[] = $col;
+                    $foto_values[] = isset($updates[$col]) ? "'" . $updates[$col] . "'" : "''";
+                }
+                $fields_str = implode(', ', $foto_fields);
+                $values_str = implode(', ', $foto_values);
+                mysqli_query($koneksi, "INSERT INTO pemesanan_dokumentasi ($fields_str) VALUES ($values_str)");
+            }
+
+            $pesan = "✅ Berhasil mengupload dan mengompresi $sukses_count foto sekaligus!";
+            if ($gagal_count > 0) {
+                $pesan .= " (Namun terdapat $gagal_count foto gagal diproses).";
             }
         } else {
-            $pesan = "File bukan gambar!";
+            $pesan = "❌ Gagal memproses foto! Pastikan format file berupa gambar (JPG, PNG, WEBP, GIF).";
         }
     }
 }
@@ -602,13 +678,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             
             <!-- Form upload -->
             <?php if ($foto_tersedia < 10): ?>
-                <form method="post" enctype="multipart/form-data">
+                <?php $sisa_slot = 10 - $foto_tersedia; ?>
+                <form method="post" enctype="multipart/form-data" id="formUploadFoto" onsubmit="return handleFormSubmit()">
                     <input type="hidden" name="no_faktur" value="<?php echo htmlspecialchars($no_faktur); ?>">
                     
-                    <label>📤 Upload Foto Faktur ke-<?php echo $foto_tersedia+1; ?>:</label>
-                    <input type="file" name="foto" accept="image/*" required>
-                    <button type="submit">
-                        ⬆️ Upload Foto (<?php echo $foto_tersedia; ?>/10)
+                    <label>📤 Upload Foto Faktur (Bisa pilih 1 hingga <?php echo $sisa_slot; ?> foto sekaligus):</label>
+                    <input type="file" name="foto[]" id="inputFoto" accept="image/*" multiple required onchange="previewFiles(this, <?php echo $sisa_slot; ?>)">
+                    
+                    <!-- Area info file terpilih -->
+                    <div id="fileSelectionBox" style="display: none; margin-bottom: 20px; padding: 14px 18px; background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px;">
+                        <div style="font-weight: bold; color: #2e7d32; font-size: 14px;" id="fileSelectionHeader">
+                            📸 0 Foto Dipilih
+                        </div>
+                        <div id="fileSelectionList" style="margin-top: 8px; font-size: 12px; color: #444; max-height: 100px; overflow-y: auto; line-height: 1.6;"></div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitUpload">
+                        ⬆️ Upload Foto Sekaligus (Maks. <?php echo $sisa_slot; ?> Foto)
                     </button>
                 </form>
             <?php else: ?>
@@ -683,12 +769,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             }
         });
 
+        // Fungsi preview file yang dipilih sebelum diupload
+        function previewFiles(input, sisaSlot) {
+            const box = document.getElementById('fileSelectionBox');
+            const header = document.getElementById('fileSelectionHeader');
+            const list = document.getElementById('fileSelectionList');
+            const btn = document.getElementById('btnSubmitUpload');
+
+            if (!input.files || input.files.length === 0) {
+                box.style.display = 'none';
+                btn.innerHTML = '⬆️ Upload Foto Sekaligus (Maks. ' + sisaSlot + ' Foto)';
+                return;
+            }
+
+            if (input.files.length > sisaSlot) {
+                alert('⚠️ Anda memilih ' + input.files.length + ' foto.\n\nSlot yang tersedia hanya ' + sisaSlot + ' foto lagi!\nSilakan pilih maksimal ' + sisaSlot + ' foto.');
+                input.value = '';
+                box.style.display = 'none';
+                btn.innerHTML = '⬆️ Upload Foto Sekaligus (Maks. ' + sisaSlot + ' Foto)';
+                return;
+            }
+
+            header.innerHTML = '📸 ' + input.files.length + ' foto dipilih (siap diupload):';
+            let items = [];
+            for (let i = 0; i < input.files.length; i++) {
+                const f = input.files[i];
+                const sizeKb = Math.round(f.size / 1024);
+                items.push((i + 1) + '. ' + f.name + ' (' + sizeKb + ' KB)');
+            }
+            list.innerHTML = items.join('<br>');
+            box.style.display = 'block';
+            btn.innerHTML = '⬆️ Upload ' + input.files.length + ' Foto Sekaligus';
+        }
+
+        // Tampilkan indikator saat upload sedang berjalan
+        function handleFormSubmit() {
+            const btn = document.getElementById('btnSubmitUpload');
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
+                btn.innerHTML = '⏳ Sedang mengompresi & mengupload foto... Mohon tunggu.';
+            }
+            return true;
+        }
+
         // Auto refresh progress setelah upload
         <?php if (strpos($pesan, 'berhasil') !== false): ?>
         setTimeout(function() {
             const progressBar = document.querySelector('.foto-progress-fill');
             const newWidth = '<?php echo $progress_percent; ?>%';
-            progressBar.style.width = newWidth;
+            if (progressBar) progressBar.style.width = newWidth;
         }, 100);
         <?php endif; ?>
     </script>
