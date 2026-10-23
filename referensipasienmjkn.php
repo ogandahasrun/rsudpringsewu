@@ -1,9 +1,23 @@
+<?php
+include 'koneksi.php';
+date_default_timezone_set('Asia/Jakarta');
+
+// Ambil nama instansi dari database setting
+$nama_instansi = "RSUD Pringsewu";
+$query_instansi = "SELECT nama_instansi FROM setting LIMIT 1";
+$result_instansi = mysqli_query($koneksi, $query_instansi);
+if ($result_instansi && $row_instansi = mysqli_fetch_assoc($result_instansi)) {
+    if (!empty($row_instansi['nama_instansi'])) {
+        $nama_instansi = $row_instansi['nama_instansi'];
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referensi Pasien Mobile JKN - RSUD Pringsewu</title>
+    <title>Referensi Pasien Mobile JKN - <?php echo htmlspecialchars($nama_instansi); ?></title>
     <style>
         * {
             box-sizing: border-box;
@@ -190,28 +204,406 @@
         }
         
         /* WhatsApp Button Styling */
+        .wa-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 155px;
+        }
         .whatsapp-btn {
             background: #25D366;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
             font-weight: bold;
+            white-space: nowrap;
         }
         .whatsapp-btn:hover {
             background: #1DA851;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            box-shadow: 0 3px 8px rgba(37, 211, 102, 0.3);
         }
-        .whatsapp-btn:disabled {
+        .whatsapp-btn-warning {
+            background: #ea580c;
+        }
+        .whatsapp-btn-warning:hover {
+            background: #c2410c;
+            box-shadow: 0 3px 8px rgba(234, 88, 12, 0.3);
+        }
+        .whatsapp-btn:disabled,
+        .whatsapp-btn-warning:disabled {
             background: #ccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Bulk Action Bar */
+        .bulk-action-bar {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            animation: fadeInDown 0.25s ease;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bulk-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .bulk-badge {
+            background: #0284c7;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .bulk-hint {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .bulk-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-wa-bulk {
+            background: linear-gradient(45deg, #16a34a, #22c55e);
+            color: white;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-wa-bulk:hover {
+            background: linear-gradient(45deg, #15803d, #16a34a);
+            transform: translateY(-1px);
+        }
+        .btn-wa-bulk-warning {
+            background: linear-gradient(45deg, #ea580c, #f97316);
+            color: white;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-wa-bulk-warning:hover {
+            background: linear-gradient(45deg, #c2410c, #ea580c);
+            transform: translateY(-1px);
+        }
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 12px;
+        }
+        tr.row-processed td {
+            background: #e8f5e9 !important;
+        }
+        .queue-status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 4px;
+            display: inline-block;
+            text-align: center;
+        }
+        .queue-status-badge.sent {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+        .queue-status-badge.skipped {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Queue Modal Styling */
+        .queue-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .queue-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+        }
+        .queue-modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: modalZoomIn 0.25s ease-out;
+        }
+        @keyframes modalZoomIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .queue-modal-header {
+            padding: 18px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .queue-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .queue-modal-title h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: #1e293b;
+        }
+        .queue-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .queue-close-btn:hover { color: #0f172a; }
+        .queue-modal-body {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .queue-progress-section {
+            background: #f1f5f9;
+            padding: 14px 18px;
+            border-radius: 10px;
+        }
+        .queue-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .queue-progress-bar-bg {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .queue-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.3s ease;
+        }
+        .queue-patient-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .queue-patient-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .queue-badge-urutan {
+            background: #0284c7;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .queue-patient-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+        .queue-patient-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+        .queue-msg-preview-wrap label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        .queue-msg-preview {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            line-height: 1.45;
+            color: #1e293b;
+            max-height: 110px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin: 0;
+        }
+        .queue-controls-box {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .queue-timer-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .queue-timer-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #334155;
+            font-weight: 500;
+        }
+        .timer-delay-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .timer-delay-wrap select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 12px;
+        }
+        .countdown-badge {
+            background: #ea580c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .queue-action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-wa-next {
+            flex: 2;
+            min-width: 200px;
+            background: linear-gradient(45deg, #16a34a, #22c55e);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-wa-next:hover {
+            background: linear-gradient(45deg, #15803d, #16a34a);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover { background: #dc2626; }
+        .queue-tip {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+        .queue-completed-view {
+            text-align: center;
+            padding: 25px 10px;
+        }
+        .queue-completed-view .completed-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .queue-completed-view h3 {
+            margin: 0 0 8px;
+            color: #15803d;
+            font-size: 1.3rem;
+        }
+        .queue-completed-view p {
+            margin: 0 0 16px;
+            color: #64748b;
+            font-size: 14px;
         }
         
         /* Mobile Styles */
@@ -307,76 +699,376 @@
             return `${namaHari}, ${day} ${namaBulan} ${year}`;
         }
 
-        // Buka WhatsApp Web / API untuk pengingat jadwal kontrol pasien
-        function openWhatsApp(nohp, namaPasien, tglRencana, nmPoli, nmDokter, noAntrean, estimasiJam) {
+        const NAMA_INSTANSI = <?php echo json_encode($nama_instansi); ?>;
+
+        function sanitizeWhatsAppNumber(nohp) {
             if (!nohp || nohp.trim() === '') {
                 alert('❌ Nomor HP tidak tersedia');
-                return;
+                return null;
             }
-            
-            // Format nomor HP untuk WhatsApp (hapus karakter non-digit)
             let cleanNumber = nohp.replace(/\D/g, '');
-            
-            // Cek jika nomor tidak valid (hanya 0 atau kurang dari 9 digit)
             if (/^0+$/.test(cleanNumber) || cleanNumber.length < 9) {
                 alert('❌ Nomor HP tidak valid (' + nohp + ')');
-                return;
+                return null;
             }
-            
-            // Jika nomor dimulai dengan 0, ganti dengan 62 (kode negara Indonesia)
             if (cleanNumber.startsWith('0')) {
                 cleanNumber = '62' + cleanNumber.substring(1);
-            }
-            // Jika tidak dimulai dengan 62, tambahkan 62 di depan
-            else if (!cleanNumber.startsWith('62')) {
+            } else if (!cleanNumber.startsWith('62')) {
                 cleanNumber = '62' + cleanNumber;
             }
+            return cleanNumber;
+        }
 
-            // Format Hari, Tanggal (misal: Kamis, 10 September 2026)
-            const hariTanggal = formatHariTanggalIndo(tglRencana);
-
-            // Format Klinik Tujuan (misal: "Orthopedi" menjadi "Klinik Orthopedi")
-            let klinikTujuan = nmPoli ? nmPoli.trim() : '-';
-            if (klinikTujuan !== '-' && !/^klinik\s+/i.test(klinikTujuan)) {
+        function formatKlinikTujuan(nmPoli) {
+            let klinikTujuan = nmPoli ? nmPoli.trim() : '';
+            if (klinikTujuan !== '' && !/^klinik\s+/i.test(klinikTujuan)) {
                 if (/^poli\s+/i.test(klinikTujuan)) {
                     klinikTujuan = klinikTujuan.replace(/^poli\s+/i, 'Klinik ');
                 } else {
                     klinikTujuan = 'Klinik ' + klinikTujuan;
                 }
             }
+            return klinikTujuan;
+        }
 
-            // Format Nomor Antrean
+        function launchWhatsAppUrl(cleanNumber, message) {
+            const encodedMessage = encodeURIComponent(message);
+            const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            const whatsappUrl = isMobile 
+                ? `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`
+                : `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // 1. Buka WhatsApp untuk pengingat jadwal kontrol pasien
+        function openWhatsApp(nohp, namaPasien, tglRencana, nmPoli, nmDokter, noAntrean, estimasiJam, rowIndex) {
+            const cleanNumber = sanitizeWhatsAppNumber(nohp);
+            if (!cleanNumber) return;
+
+            const hariTanggal = formatHariTanggalIndo(tglRencana);
+            const klinikTujuan = formatKlinikTujuan(nmPoli) || '-';
+
             let antreanDisplay = (noAntrean !== undefined && noAntrean !== null && noAntrean !== '') ? String(noAntrean).trim() : '-';
             if (/^0+[0-9]+$/.test(antreanDisplay)) {
                 antreanDisplay = antreanDisplay.replace(/^0+/, '');
             }
 
-            // Format Estimasi Jam
             let jamDisplay = (estimasiJam !== undefined && estimasiJam !== null && estimasiJam !== '') ? String(estimasiJam).trim() : '08.00 - 12.00 WIB';
 
-            // Pesan Pengingat Kontrol RSUD Pringsewu
             let message = `Yth. Bapak/Ibu ${namaPasien},\n\n` +
-                          `Mengingatkan jadwal kontrol/berobat Anda di RSUD Pringsewu:\n\n` +
+                          `Mengingatkan jadwal kontrol/berobat Anda di ${NAMA_INSTANSI}:\n\n` +
                           `Hari, Tanggal: ${hariTanggal}\n` +
                           `Klinik Tujuan : ${klinikTujuan}\n` +
                           `Dokter : ${nmDokter}\n` +
                           `Nomor Antrean: ${antreanDisplay}\n\n` +
                           `Estimasi Jam : ${jamDisplay}\n\n` +
                           `Penting untuk Diperhatikan:\n\n` +
-                          `Mohon melakukan Check-in / Fingerprint di lokasi RSUD Pringsewu 15 menit sebelum estimasi pelayanan.\n\n` +
+                          `Mohon melakukan Check-in / Fingerprint di lokasi ${NAMA_INSTANSI} 15 menit sebelum estimasi pelayanan.\n\n` +
                           `Sesuai ketentuan BPJS Kesehatan, pasien wajib datang tepat pada tanggal yang tertera di Surat Kontrol (tidak bisa maju/mundur).\n\n` +
                           `Jika membutuhkan bantuan atau konfirmasi kendala jadwal, silakan balas pesan ini.\n\n` +
                           `Terima kasih.`;
-            
-            const encodedMessage = encodeURIComponent(message);
-            
-            // Buka WhatsApp (pada desktop langsung membuka web.whatsapp.com, pada mobile menggunakan api.whatsapp.com)
-            const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-            const whatsappUrl = isMobile 
-                ? `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`
-                : `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
+
+            launchWhatsAppUrl(cleanNumber, message);
+            if (rowIndex) markRowProcessed(rowIndex, '✅ Terbuka', 'sent');
+        }
+
+        // 2. Buka WhatsApp untuk pemberitahuan dokter berhalangan hadir
+        function openWhatsAppDokterBerhalangan(nohp, namaPasien, tglRencana, nmPoli, nmDokter, rowIndex) {
+            const cleanNumber = sanitizeWhatsAppNumber(nohp);
+            if (!cleanNumber) return;
+
+            const hariTanggal = formatHariTanggalIndo(tglRencana);
+            const klinikTujuan = formatKlinikTujuan(nmPoli);
+            const bagianPoli = klinikTujuan ? ` ${klinikTujuan}` : '';
+
+            let message = `Halo ${namaPasien} \n` +
+                          `Kami dari ${NAMA_INSTANSI} akan menginformasikan terkait jadwal pemeriksaan Anda. \n\n` +
+                          `Dokter ${nmDokter}${bagianPoli} berhalangan hadir pada ${hariTanggal}.\n` +
+                          `Untuk reschedule jadwal atau pengambilan ulang jadwal kontrol, harap konfirmasi ke Nomor Pendaftaran ${NAMA_INSTANSI} di https://wa.me/6281394022020\n\n` +
+                          `Apabila sudah mendapatkan jadwal kontrol baru, Silahkan ambil antrian ulang di aplikasi MJKN. \n\n` +
+                          `Mohon maaf atas ketidaknyamananya. Terimakasih`;
+
+            launchWhatsAppUrl(cleanNumber, message);
+            if (rowIndex) markRowProcessed(rowIndex, '✅ Terbuka', 'sent');
+        }
+
+        // ===== BULK QUEUE STATE & FUNCTIONS =====
+        let queueData = [];
+        let queueIndex = 0;
+        let queueType = 'pengingat';
+        let queueTimerInterval = null;
+        let queueCountdown = 0;
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.patient-checkbox:checked');
+            const totalValid = document.querySelectorAll('.patient-checkbox:not(:disabled)').length;
+            const count = checkboxes.length;
+
+            const bulkBar = document.getElementById('bulkActionBar');
+            const countBadge = document.getElementById('selectedCountBadge');
+            const numSpans = document.querySelectorAll('.selected-num');
+            const checkAll = document.getElementById('checkAll');
+
+            if (count > 0) {
+                if (bulkBar) bulkBar.style.display = 'flex';
+                if (countBadge) countBadge.textContent = count + ' Pasien Terpilih';
+                numSpans.forEach(el => el.textContent = count);
+            } else {
+                if (bulkBar) bulkBar.style.display = 'none';
+                numSpans.forEach(el => el.textContent = '0');
+            }
+
+            if (checkAll) {
+                if (count === 0) {
+                    checkAll.checked = false;
+                    checkAll.indeterminate = false;
+                } else if (count === totalValid && totalValid > 0) {
+                    checkAll.checked = true;
+                    checkAll.indeterminate = false;
+                } else {
+                    checkAll.checked = false;
+                    checkAll.indeterminate = true;
+                }
+            }
+        }
+
+        function toggleSelectAll(masterCheckbox) {
+            const checkboxes = document.querySelectorAll('.patient-checkbox:not(:disabled)');
+            checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+            updateSelectedCount();
+        }
+
+        function clearAllSelections() {
+            const checkboxes = document.querySelectorAll('.patient-checkbox');
+            checkboxes.forEach(cb => cb.checked = false);
+            const checkAll = document.getElementById('checkAll');
+            if (checkAll) {
+                checkAll.checked = false;
+                checkAll.indeterminate = false;
+            }
+            updateSelectedCount();
+        }
+
+        function buildQueueMessage(type, item) {
+            const hariTanggal = formatHariTanggalIndo(item.tgl);
+            const klinikTujuan = formatKlinikTujuan(item.poli);
+            const bagianPoli = klinikTujuan ? ` ${klinikTujuan}` : '';
+
+            if (type === 'berhalangan') {
+                return `Halo ${item.pasien} \n` +
+                       `Kami dari ${NAMA_INSTANSI} akan menginformasikan terkait jadwal pemeriksaan Anda. \n\n` +
+                       `Dokter ${item.dokter}${bagianPoli} berhalangan hadir pada ${hariTanggal}.\n` +
+                       `Untuk reschedule jadwal atau pengambilan ulang jadwal kontrol, harap konfirmasi ke Nomor Pendaftaran ${NAMA_INSTANSI} di https://wa.me/6281394022020\n\n` +
+                       `Apabila sudah mendapatkan jadwal kontrol baru, Silahkan ambil antrian ulang di aplikasi MJKN. \n\n` +
+                       `Mohon maaf atas ketidaknyamananya. Terimakasih`;
+            } else {
+                let antreanDisplay = (item.antrean !== undefined && item.antrean !== null && item.antrean !== '') ? String(item.antrean).trim() : '-';
+                if (/^0+[0-9]+$/.test(antreanDisplay)) {
+                    antreanDisplay = antreanDisplay.replace(/^0+/, '');
+                }
+                let jamDisplay = (item.jam !== undefined && item.jam !== null && item.jam !== '') ? String(item.jam).trim() : '08.00 - 12.00 WIB';
+
+                return `Yth. Bapak/Ibu ${item.pasien},\n\n` +
+                       `Mengingatkan jadwal kontrol/berobat Anda di ${NAMA_INSTANSI}:\n\n` +
+                       `Hari, Tanggal: ${hariTanggal}\n` +
+                       `Klinik Tujuan : ${klinikTujuan || '-'}\n` +
+                       `Dokter : ${item.dokter}\n` +
+                       `Nomor Antrean: ${antreanDisplay}\n\n` +
+                       `Estimasi Jam : ${jamDisplay}\n\n` +
+                       `Penting untuk Diperhatikan:\n\n` +
+                       `Mohon melakukan Check-in / Fingerprint di lokasi ${NAMA_INSTANSI} 15 menit sebelum estimasi pelayanan.\n\n` +
+                       `Sesuai ketentuan BPJS Kesehatan, pasien wajib datang tepat pada tanggal yang tertera di Surat Kontrol (tidak bisa maju/mundur).\n\n` +
+                       `Jika membutuhkan bantuan atau konfirmasi kendala jadwal, silakan balas pesan ini.\n\n` +
+                       `Terima kasih.`;
+            }
+        }
+
+        function startBulkQueue(type) {
+            const checkedBoxes = Array.from(document.querySelectorAll('.patient-checkbox:checked'));
+            if (checkedBoxes.length === 0) {
+                alert('⚠️ Silakan pilih/centang minimal 1 pasien terlebih dahulu.');
+                return;
+            }
+
+            queueData = checkedBoxes.map(cb => ({
+                index: cb.getAttribute('data-index'),
+                nohp: cb.getAttribute('data-nohp'),
+                pasien: cb.getAttribute('data-pasien'),
+                tgl: cb.getAttribute('data-tgl'),
+                poli: cb.getAttribute('data-poli'),
+                dokter: cb.getAttribute('data-dokter'),
+                antrean: cb.getAttribute('data-antrean'),
+                jam: cb.getAttribute('data-jam')
+            }));
+
+            queueIndex = 0;
+            queueType = type;
+            stopAutoTimerCountdown();
+
+            const modal = document.getElementById('waQueueModal');
+            const modalTitle = document.getElementById('queueModalTitle');
+            const modalIcon = document.getElementById('queueModalIcon');
+
+            if (type === 'berhalangan') {
+                modalTitle.textContent = 'Antrean Kirim Info Dokter Berhalangan';
+                modalIcon.textContent = '⚠️';
+            } else {
+                modalTitle.textContent = 'Antrean Kirim Pengingat Kehadiran';
+                modalIcon.textContent = '📢';
+            }
+
+            document.getElementById('queueActiveCard').style.display = 'block';
+            document.getElementById('queueControlsBox').style.display = 'flex';
+            document.getElementById('queueCompletedView').style.display = 'none';
+
+            if (modal) modal.style.display = 'flex';
+            renderQueueCurrent();
+        }
+
+        function renderQueueCurrent() {
+            stopAutoTimerCountdown();
+
+            if (queueIndex >= queueData.length) {
+                document.getElementById('queueActiveCard').style.display = 'none';
+                document.getElementById('queueControlsBox').style.display = 'none';
+                document.getElementById('queueCompletedView').style.display = 'block';
+                document.getElementById('queueCompletedSummary').textContent = 
+                    `Selesai memproses ${queueData.length} pasien terpilih.`;
+                document.getElementById('queueProgressText').textContent = 
+                    `${queueData.length} dari ${queueData.length} (100%)`;
+                document.getElementById('queueProgressBar').style.width = '100%';
+                return;
+            }
+
+            const current = queueData[queueIndex];
+            const pct = Math.round(((queueIndex) / queueData.length) * 100);
+
+            document.getElementById('queueProgressText').textContent = 
+                `${queueIndex + 1} dari ${queueData.length} (${pct}%)`;
+            document.getElementById('queueProgressBar').style.width = pct + '%';
+
+            document.getElementById('queueUrutanBadge').textContent = `Pasien #${queueIndex + 1} dari ${queueData.length}`;
+            document.getElementById('queuePatientName').textContent = current.pasien;
+            document.getElementById('queuePatientHp').textContent = current.nohp || '-';
+            document.getElementById('queuePatientPoli').textContent = current.poli || '-';
+            document.getElementById('queuePatientDokter').textContent = current.dokter || '-';
+            document.getElementById('queuePatientTgl').textContent = formatHariTanggalIndo(current.tgl);
+
+            const msg = buildQueueMessage(queueType, current);
+            document.getElementById('queueMsgPreview').textContent = msg;
+
+            const btnNext = document.getElementById('btnQueueNext');
+            btnNext.textContent = `▶ Buka WA Pasien Ini & Lanjut (${queueIndex + 1}/${queueData.length})`;
+        }
+
+        function markRowProcessed(index, label, type) {
+            const row = document.getElementById('row-' + index);
+            if (row) row.classList.add('row-processed');
+
+            const badge = document.getElementById('status-badge-' + index);
+            if (badge) {
+                badge.style.display = 'inline-block';
+                badge.className = 'queue-status-badge ' + (type || 'sent');
+                badge.textContent = label || '✅ Terbuka';
+            }
+        }
+
+        function processQueueCurrentAndAdvance() {
+            stopAutoTimerCountdown();
+
+            if (queueIndex >= queueData.length) return;
+
+            const current = queueData[queueIndex];
+            const cleanNumber = sanitizeWhatsAppNumber(current.nohp);
+
+            if (cleanNumber) {
+                const message = buildQueueMessage(queueType, current);
+                const encodedMessage = encodeURIComponent(message);
+                const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+                const whatsappUrl = isMobile 
+                    ? `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`
+                    : `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
                 
-            window.open(whatsappUrl, '_blank');
+                // Buka di jendela waQueueWindow yang sama agar tidak menumpuk tab
+                window.open(whatsappUrl, 'waQueueWindow');
+                markRowProcessed(current.index, '✅ Terbuka', 'sent');
+            }
+
+            queueIndex++;
+
+            if (queueIndex < queueData.length) {
+                renderQueueCurrent();
+                checkAndStartAutoTimer();
+            } else {
+                renderQueueCurrent();
+            }
+        }
+
+        function skipQueueCurrent() {
+            stopAutoTimerCountdown();
+            if (queueIndex >= queueData.length) return;
+
+            const current = queueData[queueIndex];
+            markRowProcessed(current.index, '⏭ Dilewati', 'skipped');
+            queueIndex++;
+            renderQueueCurrent();
+            checkAndStartAutoTimer();
+        }
+
+        function checkAndStartAutoTimer() {
+            const autoCheck = document.getElementById('queueAutoTimerCheck');
+            if (autoCheck && autoCheck.checked && queueIndex < queueData.length) {
+                const delaySelect = document.getElementById('queueDelaySec');
+                const delaySec = parseInt(delaySelect ? delaySelect.value : '5', 10) || 5;
+                queueCountdown = delaySec;
+
+                const badge = document.getElementById('queueCountdownBadge');
+                if (badge) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = `⏱ Lanjut dalam ${queueCountdown}s...`;
+                }
+
+                queueTimerInterval = setInterval(() => {
+                    queueCountdown--;
+                    if (badge) badge.textContent = `⏱ Lanjut dalam ${queueCountdown}s...`;
+                    if (queueCountdown <= 0) {
+                        stopAutoTimerCountdown();
+                        processQueueCurrentAndAdvance();
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopAutoTimerCountdown() {
+            if (queueTimerInterval) {
+                clearInterval(queueTimerInterval);
+                queueTimerInterval = null;
+            }
+            const badge = document.getElementById('queueCountdownBadge');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function toggleAutoTimer() {
+            const autoCheck = document.getElementById('queueAutoTimerCheck');
+            if (autoCheck && autoCheck.checked) {
+                checkAndStartAutoTimer();
+            } else {
+                stopAutoTimerCountdown();
+            }
+        }
+
+        function changeDelaySec() {
+            const autoCheck = document.getElementById('queueAutoTimerCheck');
+            if (autoCheck && autoCheck.checked) {
+                stopAutoTimerCountdown();
+                checkAndStartAutoTimer();
+            }
+        }
+
+        function closeQueueModalConfirm() {
+            stopAutoTimerCountdown();
+            const modal = document.getElementById('waQueueModal');
+            if (modal) modal.style.display = 'none';
         }
     </script>
 </head>
@@ -525,9 +1217,32 @@
             echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> referensi</div>';
             echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
             echo '</div>';
+
+            echo '
+            <div id="bulkActionBar" class="bulk-action-bar" style="display: none;">
+                <div class="bulk-info">
+                    <span class="bulk-badge" id="selectedCountBadge">0 Pasien Terpilih</span>
+                    <span class="bulk-hint">Pilih template pesan untuk dikirim berurutan:</span>
+                </div>
+                <div class="bulk-buttons">
+                    <button type="button" class="btn-wa-bulk" onclick="startBulkQueue(\'pengingat\')">
+                        🔔 Kirim Pengingat Hadir (<span class="selected-num">0</span>)
+                    </button>
+                    <button type="button" class="btn-wa-bulk-warning" onclick="startBulkQueue(\'berhalangan\')">
+                        ⚠️ Kirim Dokter Berhalangan (<span class="selected-num">0</span>)
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="clearAllSelections()">
+                        ✕ Batal Pilih
+                    </button>
+                </div>
+            </div>
+            ';
             
             echo "<div class='table-responsive'><table>
                 <tr>
+                    <th style='width: 38px; text-align: center;'>
+                        <input type='checkbox' id='checkAll' onchange='toggleSelectAll(this)' title='Pilih Semua Pasien' style='width: 17px; height: 17px; cursor: pointer;'>
+                    </th>
                     <th>No</th>
                     <th>TANGGAL PERIKSA</th>
                     <th>NO BOOKING</th>
@@ -541,7 +1256,7 @@
                     <th>DOKTER BPJS</th>
                     <th>NO ANTREAN</th>
                     <th>ANGKA ANTREAN</th>
-                    <th>WhatsApp</th>
+                    <th>Aksi WhatsApp</th>
                 </tr>";
             $no = 1; 
             while ($row = mysqli_fetch_assoc($result)) {
@@ -581,7 +1296,21 @@
                 $jam_js     = htmlspecialchars(addslashes($estimasi_jam), ENT_QUOTES, 'UTF-8');
                 $is_valid_hp = !empty($row['nohp']) && preg_match('/[1-9]/', $row['nohp']);
 
-                echo "<tr>
+                echo "<tr id='row-{$no}'>
+                        <td style='text-align: center;'>
+                            <input type='checkbox' 
+                                   class='patient-checkbox' 
+                                   data-index='{$no}'
+                                   data-nohp='{$nohp_js}'
+                                   data-pasien='{$pasien_js}'
+                                   data-tgl='{$row['tanggalperiksa']}'
+                                   data-poli='{$poli_js}'
+                                   data-dokter='{$dokter_js}'
+                                   data-antrean='{$antrean_js}'
+                                   data-jam='{$jam_js}'
+                                   onchange='updateSelectedCount()' " . (!$is_valid_hp ? "disabled title='Nomor HP tidak valid'" : "") . "
+                                   style='width: 17px; height: 17px; cursor: pointer;'>
+                        </td>
                         <td>{$no}</td>
                         <td>{$row['tanggalperiksa']}</td>
                         <td>{$row['nobooking']}</td>
@@ -596,9 +1325,15 @@
                         <td>{$row['nomorantrean']}</td>
                         <td>{$row['angkaantrean']}</td>
                         <td>
-                            <button class='whatsapp-btn' onclick=\"openWhatsApp('{$nohp_js}', '{$pasien_js}', '{$row['tanggalperiksa']}', '{$poli_js}', '{$dokter_js}', '{$antrean_js}', '{$jam_js}')\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "") . ">
-                                📱 WhatsApp
-                            </button>
+                            <div class='wa-btn-group'>
+                                <button class='whatsapp-btn' onclick=\"openWhatsApp('{$nohp_js}', '{$pasien_js}', '{$row['tanggalperiksa']}', '{$poli_js}', '{$dokter_js}', '{$antrean_js}', '{$jam_js}', {$no})\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "title='Kirim Pesan Pengingat Kehadiran'") . ">
+                                    🔔 Ingatkan Hadir
+                                </button>
+                                <button class='whatsapp-btn whatsapp-btn-warning' onclick=\"openWhatsAppDokterBerhalangan('{$nohp_js}', '{$pasien_js}', '{$row['tanggalperiksa']}', '{$poli_js}', '{$dokter_js}', {$no})\" " . (!$is_valid_hp ? "disabled title='Nomor HP tidak tersedia atau tidak valid'" : "title='Kirim Info Dokter Berhalangan Hadir'") . ">
+                                    ⚠️ Dokter Berhalangan
+                                </button>
+                                <span id='status-badge-{$no}' class='queue-status-badge' style='display:none;'></span>
+                            </div>
                         </td>
                     </tr>";
                 $no++;    
@@ -619,5 +1354,95 @@
     
         </div> <!-- Tutup content -->
     </div> <!-- Tutup container -->
+
+    <!-- Modal Queue Runner WhatsApp -->
+    <div id="waQueueModal" class="queue-modal" style="display: none;">
+        <div class="queue-modal-overlay" onclick="closeQueueModalConfirm()"></div>
+        <div class="queue-modal-content">
+            <div class="queue-modal-header">
+                <div class="queue-modal-title">
+                    <span id="queueModalIcon" style="font-size: 1.4rem;">📢</span>
+                    <h3 id="queueModalTitle">Antrean Pengiriman WhatsApp</h3>
+                </div>
+                <button type="button" class="queue-close-btn" onclick="closeQueueModalConfirm()" title="Tutup Antrean">&times;</button>
+            </div>
+
+            <div class="queue-modal-body">
+                <!-- Progress Section -->
+                <div class="queue-progress-section">
+                    <div class="queue-progress-label">
+                        <span>Progress Pengiriman:</span>
+                        <strong id="queueProgressText">0 dari 0 (0%)</strong>
+                    </div>
+                    <div class="queue-progress-bar-bg">
+                        <div id="queueProgressBar" class="queue-progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Active Patient Card -->
+                <div id="queueActiveCard" class="queue-patient-card">
+                    <div class="queue-patient-header">
+                        <span class="queue-badge-urutan" id="queueUrutanBadge">Pasien #1</span>
+                        <h4 id="queuePatientName">Nama Pasien</h4>
+                    </div>
+                    <div class="queue-patient-details">
+                        <div><strong>📱 No. HP:</strong> <span id="queuePatientHp">-</span></div>
+                        <div><strong>🏥 Poliklinik:</strong> <span id="queuePatientPoli">-</span></div>
+                        <div><strong>👨‍⚕️ Dokter:</strong> <span id="queuePatientDokter">-</span></div>
+                        <div><strong>📅 Jadwal:</strong> <span id="queuePatientTgl">-</span></div>
+                    </div>
+
+                    <div class="queue-msg-preview-wrap">
+                        <label>Pratinjau Pesan yang Dibuka:</label>
+                        <pre id="queueMsgPreview" class="queue-msg-preview"></pre>
+                    </div>
+                </div>
+
+                <!-- Completed View -->
+                <div id="queueCompletedView" class="queue-completed-view" style="display: none;">
+                    <div class="completed-icon">🎉</div>
+                    <h3>Semua Antrean Selesai Diproses!</h3>
+                    <p id="queueCompletedSummary">Sebanyak X pasien telah dibuka di WhatsApp Web.</p>
+                    <button type="button" class="btn btn-primary" onclick="closeQueueModalConfirm()">Tutup Jendela</button>
+                </div>
+
+                <!-- Controls -->
+                <div class="queue-controls-box" id="queueControlsBox">
+                    <div class="queue-timer-toggle">
+                        <label>
+                            <input type="checkbox" id="queueAutoTimerCheck" onchange="toggleAutoTimer()">
+                            <span>Otomatis buka pasien berikutnya setelah jeda</span>
+                        </label>
+                        <div class="timer-delay-wrap">
+                            <select id="queueDelaySec" onchange="changeDelaySec()">
+                                <option value="4">4 detik</option>
+                                <option value="5" selected>5 detik</option>
+                                <option value="7">7 detik</option>
+                                <option value="10">10 detik</option>
+                            </select>
+                            <span id="queueCountdownBadge" class="countdown-badge" style="display: none;">⏱ 5s</span>
+                        </div>
+                    </div>
+
+                    <div class="queue-action-buttons">
+                        <button type="button" class="btn-wa-next" id="btnQueueNext" onclick="processQueueCurrentAndAdvance()">
+                            ▶ Buka WhatsApp Pasien Ini
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnQueueSkip" onclick="skipQueueCurrent()">
+                            ⏭ Lewati
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="closeQueueModalConfirm()">
+                            ⏹ Tutup
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tip -->
+                <div class="queue-tip">
+                    💡 <strong>Tips Efisien:</strong> WhatsApp dibuka pada <em>satu tab browser yang sama</em> secara bergantian. Setelah chat WhatsApp terbuka, Anda cukup menekan tombol <strong>Enter/Kirim</strong> di tab WhatsApp tersebut, lalu kembali ke sini untuk melanjutkan (atau aktifkan checklist jeda otomatis di atas).
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
