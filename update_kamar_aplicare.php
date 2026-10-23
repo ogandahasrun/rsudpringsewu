@@ -88,6 +88,7 @@ function fetchAplicareMappings($koneksi) {
                 COUNT(*) AS kapasitas,
                 SUM(CASE WHEN LOWER(status) = 'kosong' THEN 1 ELSE 0 END) AS tersedia
             FROM kamar
+            WHERE statusdata = '1'
             GROUP BY kd_bangsal
         ) AS kamar_ringkasan ON kamar_ringkasan.kd_bangsal = aplicare_ketersediaan_kamar.kd_bangsal
         ORDER BY nm_bangsal ASC, aplicare_ketersediaan_kamar.kd_bangsal ASC
@@ -800,7 +801,7 @@ $mappingError = $mappingFetch['error'];
             <!-- Info Card -->
             <div class="card">
                 <h2>Ringkasan Konfigurasi</h2>
-                <p class="subtle">Kapasitas dihitung dari jumlah baris pada tabel kamar per kd_bangsal. Tempat tidur tersedia dihitung dari kamar dengan status <code>kosong</code>. Auto sync berjalan setiap <strong>10 menit</strong>.</p>
+                <p class="subtle">Kapasitas dihitung dari kamar aktif (<code>statusdata = '1'</code>) per kd_bangsal. Tempat tidur tersedia dihitung dari kamar aktif dengan status <code>kosong</code>. Auto sync berjalan setiap <strong>10 menit</strong>.</p>
 
                 <div class="meta-grid">
                     <div class="meta-box">
