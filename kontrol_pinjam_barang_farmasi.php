@@ -299,6 +299,22 @@ foreach ($raw_pinjam as $item) {
     $data_dokumen[$no_hibah]['items'][] = $row_processed;
 }
 
+// Lengkapi data dokumen dengan status & persentase terhitung
+foreach ($data_dokumen as $k => $doc) {
+    $doc_pinjam  = $doc['total_pinjam'];
+    $doc_kembali = $doc['total_kembali'];
+    $doc_persen  = $doc_pinjam > 0 ? min(100, round(($doc_kembali / $doc_pinjam) * 100)) : 0;
+    if ($doc_kembali >= $doc_pinjam && $doc_pinjam > 0) {
+        $d_text = 'Lunas / Lengkap';
+    } elseif ($doc_kembali > 0) {
+        $d_text = 'Sebagian Kembali';
+    } else {
+        $d_text = 'Belum Kembali';
+    }
+    $data_dokumen[$k]['persentase']  = $doc_persen;
+    $data_dokumen[$k]['status_text'] = $d_text;
+}
+
 $total_transaksi = count($data_dokumen);
 $total_persen_kembali = $total_qty_pinjam > 0 ? round(($total_qty_kembali / $total_qty_pinjam) * 100, 1) : 0;
 
@@ -1215,7 +1231,8 @@ if ($action === 'export_excel') {
 
             .page-header, .filter-card, .table-toolbar, .dataTables_filter, 
             .dataTables_length, .dataTables_paginate, .dataTables_info,
-            .btn, .btn-header, .tab-buttons, .status-pills-bar, .modal-overlay {
+            .btn, .btn-header, .tab-buttons, .status-pills-bar, .modal-overlay,
+            .btn-copy-mini, .btn-copy-toolbar, .copy-toast {
                 display: none !important;
             }
 
@@ -1283,6 +1300,86 @@ if ($action === 'export_excel') {
         .print-kop {
             display: none;
         }
+
+        /* COPY BUTTONS & TOAST NOTIFICATION */
+        .btn-copy-mini {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.74rem;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .btn-copy-mini:hover {
+            background: #e2e8f0;
+            color: var(--primary);
+        }
+
+        .btn-copy-toolbar {
+            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            padding: 6px 12px;
+            border-radius: 7px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy-toolbar:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            z-index: 99999;
+            font-size: 0.84rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .copy-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .copy-toast.success {
+            background: #065f46;
+            border: 1px solid #059669;
+        }
+
+        .copy-toast.error {
+            background: #991b1b;
+            border: 1px solid #dc2626;
+        }
     </style>
 </head>
 <body>
@@ -1316,6 +1413,9 @@ if ($action === 'export_excel') {
                 <a href="farmasi.php" class="btn-header" title="Kembali ke Menu Farmasi">
                     <i class="fa-solid fa-arrow-left"></i> Menu Farmasi
                 </a>
+                <button type="button" class="btn-header" onclick="copyTableToClipboard()" title="Salin seluruh data tabel aktif ke clipboard (bisa langsung paste ke Excel)">
+                    <i class="fa-solid fa-clipboard"></i> Copy ke Clipboard
+                </button>
                 <a href="?action=export_excel&tgl_awal=<?php echo urlencode($tgl_awal); ?>&tgl_akhir=<?php echo urlencode($tgl_akhir); ?>&status_filter=<?php echo urlencode($status_filter); ?>&pemberi_filter=<?php echo urlencode($pemberi_filter); ?>" 
                    class="btn-header" title="Download data dalam format Excel">
                     <i class="fa-solid fa-file-excel"></i> Export Excel
@@ -1510,6 +1610,9 @@ if ($action === 'export_excel') {
                     </button>
                 </div>
                 <div class="table-toolbar">
+                    <button type="button" class="btn-copy-toolbar" onclick="copyTableToClipboard()" title="Salin seluruh data tabel yang aktif ke clipboard (Excel-ready)">
+                        <i class="fa-solid fa-copy"></i> Copy Tabel
+                    </button>
                     <span class="sub-text">
                         <i class="fa-solid fa-info-circle"></i> Cocokkan otomatis No. Hibah = No. Keluar
                     </span>
@@ -1547,6 +1650,9 @@ if ($action === 'export_excel') {
                                         <td class="text-center"><?php echo $nomor++; ?></td>
                                         <td class="text-center">
                                             <span class="no-transaksi"><?php echo htmlspecialchars($row['no_hibah']); ?></span>
+                                            <button type="button" class="btn-copy-mini" onclick="copySingleText('<?php echo htmlspecialchars($row['no_hibah']); ?>', this, 'No. Pinjam')" title="Salin No. Pinjam">
+                                                <i class="fa-regular fa-copy"></i>
+                                            </button>
                                             <span class="sub-text"><?php echo htmlspecialchars($row['nama_petugas_pinjam']); ?></span>
                                         </td>
                                         <td class="text-center">
@@ -1560,7 +1666,10 @@ if ($action === 'export_excel') {
                                             <span><?php echo htmlspecialchars($row['nm_bangsal']); ?></span>
                                         </td>
                                         <td>
-                                            <span class="brng-kode"><?php echo htmlspecialchars($row['kode_brng']); ?></span><br>
+                                            <span class="brng-kode"><?php echo htmlspecialchars($row['kode_brng']); ?></span>
+                                            <button type="button" class="btn-copy-mini" onclick="copySingleText('<?php echo htmlspecialchars($row['kode_brng']); ?>', this, 'Kode Obat')" title="Salin Kode Obat">
+                                                <i class="fa-regular fa-copy"></i>
+                                            </button><br>
                                             <span class="brng-nama"><?php echo htmlspecialchars($row['nama_brng']); ?></span>
                                         </td>
                                         <td class="text-center">
@@ -1679,6 +1788,9 @@ if ($action === 'export_excel') {
                                         <td class="text-center"><?php echo $no_doc++; ?></td>
                                         <td class="text-center">
                                             <span class="no-transaksi"><?php echo htmlspecialchars($doc['no_hibah']); ?></span>
+                                            <button type="button" class="btn-copy-mini" onclick="copySingleText('<?php echo htmlspecialchars($doc['no_hibah']); ?>', this, 'No. Pinjam')" title="Salin No. Pinjam">
+                                                <i class="fa-regular fa-copy"></i>
+                                            </button>
                                         </td>
                                         <td class="text-center">
                                             <strong><?php echo date('d/m/Y', strtotime($doc['tgl_hibah'])); ?></strong>
@@ -1752,6 +1864,9 @@ if ($action === 'export_excel') {
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fa-solid fa-file-invoice"></i> Rincian Dokumen Peminjaman: <span id="modalNoHibah"></span>
+                    <button type="button" class="btn-copy-mini" id="btnCopyModalNo" style="color:rgba(255,255,255,0.85); margin-left:6px;" onclick="copyModalNo()" title="Salin No. Dokumen">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
                 </div>
                 <button type="button" class="modal-close" onclick="closeDocDetail()">&times;</button>
             </div>
@@ -1796,7 +1911,10 @@ if ($action === 'export_excel') {
                     </table>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="gap: 8px;">
+                <button type="button" class="btn btn-primary" onclick="copyModalDocDetail()" title="Salin rincian dokumen ini ke clipboard">
+                    <i class="fa-solid fa-copy"></i> Copy Rincian
+                </button>
                 <button type="button" class="btn btn-secondary" onclick="closeDocDetail()">Tutup</button>
             </div>
         </div>
@@ -1976,6 +2094,351 @@ if ($action === 'export_excel') {
 
         function formatNumber(num) {
             return Number(num).toLocaleString('id-ID');
+        }
+
+        // ==========================================
+        // FITUR COPY KE CLIPBOARD (EXCEL & TEXT)
+        // ==========================================
+        const rawDataDetail = <?php echo json_encode($data_detail, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+        const rawDataDokumen = <?php echo json_encode(array_values($data_dokumen), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+        let currentModalDoc = null;
+
+        // Update showDocDetail untuk menyimpan doc aktif
+        const originalShowDocDetail = showDocDetail;
+        showDocDetail = function(doc) {
+            currentModalDoc = doc;
+            originalShowDocDetail(doc);
+        };
+
+        // Fungsi Salin Seluruh Tabel yang Sedang Aktif
+        function copyTableToClipboard() {
+            const isDetail = $('#pane-detail').hasClass('active');
+
+            if (isDetail) {
+                if (!rawDataDetail || rawDataDetail.length === 0) {
+                    showToast('Tidak ada data peminjaman untuk disalin', 'error');
+                    return;
+                }
+
+                const dt = $('#tableDetail').DataTable();
+                const filteredIndexes = dt.rows({ search: 'applied' }).indexes().toArray();
+
+                if (filteredIndexes.length === 0) {
+                    showToast('Tidak ada data yang sesuai filter pencarian', 'error');
+                    return;
+                }
+
+                let tsv = "KONTROL PEMINJAMAN & PENGEMBALIAN BARANG FARMASI - RSUD PRINGSEWU\n";
+                tsv += "Periode: <?php echo htmlspecialchars($tgl_awal); ?> s/d <?php echo htmlspecialchars($tgl_akhir); ?>\n";
+                tsv += "Filter Status: <?php echo ucfirst(htmlspecialchars($status_filter)); ?>\n\n";
+
+                const headers = [
+                    "No",
+                    "No. Pinjam (Hibah)",
+                    "Tgl Pinjam",
+                    "Asal Peminjaman",
+                    "Depo / Bangsal",
+                    "Petugas Pinjam",
+                    "Kode Obat",
+                    "Nama Obat / BHP",
+                    "Satuan",
+                    "Jml Pinjam",
+                    "Jml Kembali",
+                    "Sisa",
+                    "% Pelunasan",
+                    "Status",
+                    "Tgl Kembali",
+                    "Keterangan Pengembalian",
+                    "Petugas Pengembalian"
+                ];
+
+                tsv += headers.join("\t") + "\n";
+
+                let html = `<h3>KONTROL PEMINJAMAN & PENGEMBALIAN BARANG FARMASI - RSUD PRINGSEWU</h3>`;
+                html += `<p>Periode: <?php echo htmlspecialchars($tgl_awal); ?> s/d <?php echo htmlspecialchars($tgl_akhir); ?> | Total Data: ${filteredIndexes.length}</p>`;
+                html += `<table border="1" cellpadding="5" cellspacing="0"><thead><tr style="background:#0f766e; color:#ffffff;">`;
+                headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
+                html += `</tr></thead><tbody>`;
+
+                let rowNum = 1;
+                filteredIndexes.forEach(idx => {
+                    const r = rawDataDetail[idx];
+                    if (!r) return;
+                    const rowValues = [
+                        rowNum++,
+                        r.no_hibah,
+                        r.tgl_hibah,
+                        r.nama_pemberi,
+                        r.nm_bangsal,
+                        r.nama_petugas_pinjam,
+                        r.kode_brng,
+                        r.nama_brng,
+                        r.kode_sat,
+                        r.jml_pinjam,
+                        r.jml_kembali,
+                        r.sisa,
+                        r.persentase + '%',
+                        r.status_text,
+                        r.tgl_kembali || '-',
+                        r.ket_kembali || '-',
+                        r.nama_petugas_kembali || '-'
+                    ];
+                    tsv += rowValues.map(v => String(v).replace(/\t/g, ' ').replace(/\r?\n/g, ' ')).join("\t") + "\n";
+
+                    html += `<tr>`;
+                    rowValues.forEach((v, i) => {
+                        const align = (i >= 9 && i <= 11) ? 'right' : ([0, 1, 2, 6, 8, 12, 13, 14].includes(i) ? 'center' : 'left');
+                        html += `<td align="${align}">${escapeHtml(v)}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+                html += `</tbody></table>`;
+
+                writeClipboardBoth(tsv, html, `✅ ${filteredIndexes.length} baris detail barang berhasil disalin! (Siap paste ke Excel)`);
+            } else {
+                if (!rawDataDokumen || rawDataDokumen.length === 0) {
+                    showToast('Tidak ada data dokumen peminjaman untuk disalin', 'error');
+                    return;
+                }
+
+                const dt = $('#tableDokumen').DataTable();
+                const filteredIndexes = dt.rows({ search: 'applied' }).indexes().toArray();
+
+                if (filteredIndexes.length === 0) {
+                    showToast('Tidak ada dokumen yang sesuai filter pencarian', 'error');
+                    return;
+                }
+
+                let tsv = "REKAP DOKUMEN PEMINJAMAN BARANG FARMASI - RSUD PRINGSEWU\n";
+                tsv += "Periode: <?php echo htmlspecialchars($tgl_awal); ?> s/d <?php echo htmlspecialchars($tgl_akhir); ?>\n\n";
+
+                const headers = [
+                    "No",
+                    "No. Pinjam (Hibah)",
+                    "Tgl Pinjam",
+                    "Asal Peminjaman",
+                    "Depo / Bangsal",
+                    "Petugas Pencatat",
+                    "Jml Macam Obat",
+                    "Total Pinjam",
+                    "Total Kembali",
+                    "Total Sisa",
+                    "% Pelunasan",
+                    "Status Dokumen",
+                    "Tgl Kembali Terakhir"
+                ];
+
+                tsv += headers.join("\t") + "\n";
+
+                let html = `<h3>REKAP DOKUMEN PEMINJAMAN BARANG FARMASI - RSUD PRINGSEWU</h3>`;
+                html += `<p>Periode: <?php echo htmlspecialchars($tgl_awal); ?> s/d <?php echo htmlspecialchars($tgl_akhir); ?> | Total Dokumen: ${filteredIndexes.length}</p>`;
+                html += `<table border="1" cellpadding="5" cellspacing="0"><thead><tr style="background:#0f766e; color:#ffffff;">`;
+                headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
+                html += `</tr></thead><tbody>`;
+
+                let rowNum = 1;
+                filteredIndexes.forEach(idx => {
+                    const d = rawDataDokumen[idx];
+                    if (!d) return;
+                    const rowValues = [
+                        rowNum++,
+                        d.no_hibah,
+                        d.tgl_hibah,
+                        d.nama_pemberi,
+                        d.nm_bangsal,
+                        d.nama_petugas_pinjam,
+                        d.total_item + ' Macam',
+                        d.total_pinjam,
+                        d.total_kembali,
+                        d.total_sisa,
+                        d.persentase + '%',
+                        d.status_text,
+                        d.tgl_kembali_terakhir || '-'
+                    ];
+                    tsv += rowValues.map(v => String(v).replace(/\t/g, ' ').replace(/\r?\n/g, ' ')).join("\t") + "\n";
+
+                    html += `<tr>`;
+                    rowValues.forEach((v, i) => {
+                        const align = (i >= 7 && i <= 9) ? 'right' : ([0, 1, 2, 6, 10, 11, 12].includes(i) ? 'center' : 'left');
+                        html += `<td align="${align}">${escapeHtml(v)}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+                html += `</tbody></table>`;
+
+                writeClipboardBoth(tsv, html, `✅ ${filteredIndexes.length} rekap dokumen berhasil disalin! (Siap paste ke Excel)`);
+            }
+        }
+
+        // Salin Teks Tunggal (No. Pinjam / Kode Obat)
+        function copySingleText(text, btn, label) {
+            if (!text) return;
+            const desc = label ? (label + ' "' + text + '"') : ('"' + text + '"');
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast('✅ ' + desc + ' berhasil disalin!', 'success');
+                    animateCopyButton(btn);
+                }).catch(function() {
+                    fallbackCopyText(text, '✅ ' + desc + ' berhasil disalin!');
+                    animateCopyButton(btn);
+                });
+            } else {
+                fallbackCopyText(text, '✅ ' + desc + ' berhasil disalin!');
+                animateCopyButton(btn);
+            }
+        }
+
+        // Salin No Dokumen pada Modal
+        function copyModalNo() {
+            if (currentModalDoc && currentModalDoc.no_hibah) {
+                copySingleText(currentModalDoc.no_hibah, document.getElementById('btnCopyModalNo'), 'No. Dokumen');
+            }
+        }
+
+        // Salin Seluruh Rincian Modal Dokumen ke Clipboard
+        function copyModalDocDetail() {
+            if (!currentModalDoc) return;
+            const doc = currentModalDoc;
+            let text = "RINCIAN PEMINJAMAN BARANG FARMASI - RSUD PRINGSEWU\n";
+            text += "No. Pinjam (Hibah) : " + doc.no_hibah + "\n";
+            text += "Tanggal Pinjam     : " + doc.tgl_hibah + "\n";
+            text += "Asal Peminjaman    : " + doc.nama_pemberi + " (" + doc.kode_pemberi + ")\n";
+            text += "Depo / Bangsal     : " + doc.nm_bangsal + "\n";
+            text += "Petugas Peminjam   : " + doc.nama_petugas_pinjam + "\n";
+            text += "------------------------------------------------------------\n";
+            text += "Kode\tNama Obat / BHP\tSatuan\tPinjam\tKembali\tSisa\tStatus\tTgl & Ket. Kembali\n";
+
+            let html = `<h3>RINCIAN DOKUMEN PEMINJAMAN BARANG FARMASI</h3>`;
+            html += `<p><b>No. Pinjam:</b> ${escapeHtml(doc.no_hibah)}<br>`;
+            html += `<b>Tanggal:</b> ${escapeHtml(doc.tgl_hibah)} | <b>Asal:</b> ${escapeHtml(doc.nama_pemberi)} | <b>Depo:</b> ${escapeHtml(doc.nm_bangsal)}<br>`;
+            html += `<b>Petugas:</b> ${escapeHtml(doc.nama_petugas_pinjam)}</p>`;
+            html += `<table border="1" cellpadding="5" cellspacing="0"><thead><tr style="background:#0f766e; color:#ffffff;">`;
+            html += `<th>Kode</th><th>Nama Obat / BHP</th><th>Satuan</th><th>Pinjam</th><th>Kembali</th><th>Sisa</th><th>Status</th><th>Tgl & Ket. Kembali</th></tr></thead><tbody>`;
+
+            if (doc.items && doc.items.length > 0) {
+                doc.items.forEach(function(item) {
+                    let ket = item.tgl_kembali ? item.tgl_kembali : '-';
+                    if (item.ket_kembali) ket += ' (' + item.ket_kembali + ')';
+
+                    text += [
+                        item.kode_brng,
+                        item.nama_brng,
+                        item.kode_sat,
+                        item.jml_pinjam,
+                        item.jml_kembali,
+                        item.sisa,
+                        item.status_text,
+                        ket
+                    ].join('\t') + '\n';
+
+                    html += `<tr>`;
+                    html += `<td>${escapeHtml(item.kode_brng)}</td>`;
+                    html += `<td>${escapeHtml(item.nama_brng)}</td>`;
+                    html += `<td align="center">${escapeHtml(item.kode_sat)}</td>`;
+                    html += `<td align="right">${formatNumber(item.jml_pinjam)}</td>`;
+                    html += `<td align="right">${formatNumber(item.jml_kembali)}</td>`;
+                    html += `<td align="right">${formatNumber(item.sisa)}</td>`;
+                    html += `<td align="center">${escapeHtml(item.status_text)}</td>`;
+                    html += `<td>${escapeHtml(ket)}</td>`;
+                    html += `</tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+
+            writeClipboardBoth(text, html, '✅ Rincian dokumen ' + doc.no_hibah + ' berhasil disalin!');
+        }
+
+        // Tulis Ke Clipboard Mendukung Plain Text (TSV) & Rich HTML (Excel-friendly)
+        function writeClipboardBoth(tsvText, htmlText, successMsg) {
+            if (navigator.clipboard && window.isSecureContext) {
+                if (typeof ClipboardItem !== 'undefined') {
+                    try {
+                        const blobText = new Blob([tsvText], { type: 'text/plain' });
+                        const blobHtml = new Blob([htmlText], { type: 'text/html' });
+                        const item = new ClipboardItem({
+                            'text/plain': blobText,
+                            'text/html': blobHtml
+                        });
+                        navigator.clipboard.write([item]).then(function() {
+                            showToast(successMsg, 'success');
+                        }).catch(function(err) {
+                            navigator.clipboard.writeText(tsvText).then(function() {
+                                showToast(successMsg, 'success');
+                            }).catch(function() {
+                                fallbackCopyText(tsvText, successMsg);
+                            });
+                        });
+                        return;
+                    } catch (e) {
+                        // Browser might restrict ClipboardItem constructor
+                    }
+                }
+                navigator.clipboard.writeText(tsvText).then(function() {
+                    showToast(successMsg, 'success');
+                }).catch(function() {
+                    fallbackCopyText(tsvText, successMsg);
+                });
+                return;
+            }
+            fallbackCopyText(tsvText, successMsg);
+        }
+
+        // Fallback untuk Browser Lama atau Non-HTTPS
+        function fallbackCopyText(text, successMsg) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast(successMsg, 'success');
+                } else {
+                    showToast('Gagal menyalin ke clipboard', 'error');
+                }
+            } catch (err) {
+                showToast('Browser tidak mendukung salin otomatis', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Animasi Ikon Tombol Copy saat Berhasil
+        function animateCopyButton(btn) {
+            if (!btn) return;
+            const icon = btn.querySelector('i');
+            if (icon) {
+                const oldClass = icon.className;
+                icon.className = 'fa-solid fa-check';
+                btn.style.color = '#10b981';
+                setTimeout(function() {
+                    icon.className = oldClass;
+                    btn.style.color = '';
+                }, 1200);
+            }
+        }
+
+        // Toast Notifikasi Halus
+        function showToast(message, type) {
+            let toast = document.getElementById('copyToastNotification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'copyToastNotification';
+                toast.className = 'copy-toast';
+                document.body.appendChild(toast);
+            }
+
+            toast.className = 'copy-toast ' + (type === 'error' ? 'error' : 'success') + ' show';
+            const iconHtml = type === 'error' ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+            toast.innerHTML = iconHtml + ' <span>' + message + '</span>';
+
+            clearTimeout(toast.timeoutId);
+            toast.timeoutId = setTimeout(function() {
+                toast.classList.remove('show');
+            }, 3200);
         }
     </script>
 </body>
