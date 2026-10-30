@@ -24,33 +24,26 @@ $bangsals = ['GO','DRI','AP','DI','DO','DPED'];
 foreach ($bangsals as $bangsal) {
     $stok_awal[$bangsal] = [];
     foreach ($barang_list as $kode_brng => $barang) {
-        // Ambil tanggal dan jam paling awal untuk barang dan bangsal ini dalam periode
-        $q_min = "SELECT tanggal FROM riwayat_barang_medis 
-                  WHERE kd_bangsal = '$bangsal' 
-                    AND kode_brng = '$kode_brng'
-                    AND tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
-                  ORDER BY tanggal ASC LIMIT 1";
-        $r_min = mysqli_query($koneksi, $q_min);
-        $min_row = mysqli_fetch_assoc($r_min);
+        // Ambil transaksi paling awal (berdasarkan tanggal & jam) di dalam periode
+        $q_stok = "SELECT stok_awal FROM riwayat_barang_medis 
+                   WHERE kd_bangsal = '$bangsal' 
+                     AND kode_brng = '$kode_brng'
+                     AND tanggal BETWEEN '$tanggal_awal' AND '$tanggal_akhir'
+                   ORDER BY tanggal ASC, jam ASC 
+                   LIMIT 1";
+        $r_stok = mysqli_query($koneksi, $q_stok);
+        $stok_row = mysqli_fetch_assoc($r_stok);
         
-        if ($min_row) {
-            $min_tanggal = $min_row['tanggal'];
-            // Ambil stok_awal pada tanggal dan jam paling awal dalam periode
-            $q_stok = "SELECT stok_awal FROM riwayat_barang_medis 
-                       WHERE kd_bangsal = '$bangsal' 
-                         AND kode_brng = '$kode_brng'
-                         AND tanggal = '$min_tanggal'
-                       LIMIT 1";
-            $r_stok = mysqli_query($koneksi, $q_stok);
-            $stok_row = mysqli_fetch_assoc($r_stok);
-            $stok_awal[$bangsal][$kode_brng] = $stok_row ? $stok_row['stok_awal'] : 0;
+        if ($stok_row) {
+            $stok_awal[$bangsal][$kode_brng] = $stok_row['stok_awal'];
         } else {
-            // Jika tidak ada data dalam periode, ambil stok_akhir dari transaksi terakhir sebelum periode
+            // Jika tidak ada data dalam periode, ambil stok_akhir dari transaksi penutup terakhir sebelum periode
             $q_prev = "SELECT stok_akhir FROM riwayat_barang_medis 
                        WHERE kd_bangsal = '$bangsal' 
                          AND kode_brng = '$kode_brng'
                          AND tanggal < '$tanggal_awal'
-                       ORDER BY tanggal DESC LIMIT 1";
+                       ORDER BY tanggal DESC, jam DESC 
+                       LIMIT 1";
             $r_prev = mysqli_query($koneksi, $q_prev);
             $prev_row = mysqli_fetch_assoc($r_prev);
             $stok_awal[$bangsal][$kode_brng] = $prev_row ? $prev_row['stok_akhir'] : 0;
