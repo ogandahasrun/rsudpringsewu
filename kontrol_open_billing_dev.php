@@ -1,0 +1,269 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($koneksi)) {
+    require_once __DIR__ . '/koneksi.php';
+}
+
+// Parameter filter (using GET for dev version)
+$tanggal_awal  = isset($_GET['tanggal_awal']) ? $_GET['tanggal_awal'] : date('Y-m-d');
+$tanggal_akhir = isset($_GET['tanggal_akhir']) ? $_GET['tanggal_akhir'] : date('Y-m-d');
+$kd_pj         = isset($_GET['kd_pj']) ? $_GET['kd_pj'] : '';
+$limit         = isset($_GET['limit']) ? $_GET['limit'] : '50';
+$halaman       = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
+if ($halaman < 1) $halaman = 1;
+$is_filtered   = isset($_GET['filter']);
+
+// Query daftar jenis bayar / penjab
+$query_pj = "SELECT kd_pj, png_jawab FROM penjab ORDER BY png_jawab ASC";
+$result_pj = mysqli_query($koneksi, $query_pj);
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrol Open Billing (Dev)</title>
+    <style>
+        /* Unified styling from kontrol_open_billing.php */
+        * { box-sizing: border-box; }
+        body, table, th, td, input, select, button { font-family: Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            margin: 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 100%; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+        .header { background: linear-gradient(45deg, #28a745, #20c997); color: white; padding: 25px; text-align: center; }
+        .header h1 { margin: 0; font-size: 1.8em; font-weight: bold; }
+        .content { padding: 25px; }
+        .back-button { margin-bottom: 20px; }
+        .back-button a { display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3); }
+        .back-button a:hover { background: #5a6268; transform: translateY(-2px); }
+        .filter-form { background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef; }
+        .filter-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-weight: bold; color: #495057; font-size: 14px; }
+        .filter-group input, .filter-group select { padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+        .filter-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(45deg, #007bff, #0056b3); color: white; box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4); }
+        .btn-success { background: linear-gradient(45deg, #28a745, #20c997); color: white; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3); }
+        .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); }
+        .table-responsive { max-height: 70vh; overflow-y: auto; overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; -webkit-overflow-scrolling: touch; position: relative; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; background: white; min-width: 900px; }
+        th { position: sticky; top: 0; z-index: 10; background: #343a40; background: linear-gradient(45deg, #343a40, #495057); color: white; padding: 15px 12px; text-align: left; font-weight: bold; font-size: 13px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+        td { padding: 12px; border-bottom: 1px solid #e9ecef; font-size: 13px; }
+        tr:nth-child(even) td { background: #f8f9fa; }
+        tr:hover td { background: #e3f2fd; }
+        .no-data { text-align: center; color: #666; font-style: italic; padding: 40px; background: #f8f9fa; }
+        .total-row td { background: #e9ecef !important; font-weight: bold; color: #495057; }
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header { padding: 20px 15px; }
+            .header h1 { font-size: 1.5em; }
+            .content { padding: 15px; }
+            .filter-form { padding: 20px 15px; }
+            .filter-grid { grid-template-columns: 1fr; gap: 15px; }
+            .filter-actions { justify-content: stretch; }
+            .btn { padding: 10px 15px; font-size: 13px; }
+            th, td { padding: 8px 6px; font-size: 12px; }
+            table { min-width: 720px; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.3em; }
+            .filter-title { font-size: 16px; }
+        }
+    </style>
+    <script>
+        function copyTableData() {
+            let table = document.querySelector('.table-responsive');
+            if (table) {
+                let range = document.createRange();
+                range.selectNode(table);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                try { document.execCommand('copy'); alert('✅ Tabel berhasil disalin ke clipboard!'); }
+                catch(err) { alert('❌ Gagal menyalin tabel'); }
+                window.getSelection().removeAllRanges();
+            }
+        }
+        function changePage(page) {
+            let elem = document.getElementById('halaman');
+            if (elem) { elem.value = page; document.getElementById('formFilter').submit(); }
+        }
+        function resetForm() {
+            document.getElementById('tanggal_awal').value = '<?php echo date('Y-m-d'); ?>';
+            document.getElementById('tanggal_akhir').value = '<?php echo date('Y-m-d'); ?>';
+            document.getElementById('kd_pj').value = '';
+            document.getElementById('limit').value = '50';
+            if (document.getElementById('halaman')) { document.getElementById('halaman').value = '1'; }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kontrol Open Billing (Dev)</h1>
+        </div>
+        <div class="back-button">
+            <a href="../index.php?page=kontrol_open_billing">← Kembali ke Versi Utama</a>
+        </div>
+        <div class="content">
+            <form method="GET" class="filter-form" id="formFilter">
+                <input type="hidden" name="filter" value="1">
+                <input type="hidden" id="halaman" name="halaman" value="<?php echo htmlspecialchars($halaman); ?>">
+                <div class="filter-title">🔍 Filter Open Billing</div>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="tanggal_awal">📅 Tanggal Awal</label>
+                        <input type="date" id="tanggal_awal" name="tanggal_awal" required value="<?php echo htmlspecialchars($tanggal_awal); ?>">
+                    </div>
+                    <div class="filter-group">
+                        <label for="tanggal_akhir">📅 Tanggal Akhir</label>
+                        <input type="date" id="tanggal_akhir" name="tanggal_akhir" required value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+                    </div>
+                    <div class="filter-group">
+                        <label for="kd_pj">💳 Jenis Bayar</label>
+                        <select id="kd_pj" name="kd_pj">
+                            <option value="">-- Semua Jenis Bayar --</option>
+                            <?php
+                            if ($result_pj && mysqli_num_rows($result_pj) > 0) {
+                                while ($row_pj = mysqli_fetch_assoc($result_pj)) {
+                                    $selected = ($kd_pj == $row_pj['kd_pj']) ? 'selected' : '';
+                                    echo "<option value='" . htmlspecialchars($row_pj['kd_pj']) . "' {$selected}>" . htmlspecialchars($row_pj['png_jawab']) . "</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="limit">🔢 Tampilkan Data</label>
+                        <select id="limit" name="limit" onchange="document.getElementById('halaman').value=1; this.form.submit();">
+                            <option value="50" <?php echo ($limit == '50') ? 'selected' : ''; ?>>50 Data</option>
+                            <option value="100" <?php echo ($limit == '100') ? 'selected' : ''; ?>>100 Data</option>
+                            <option value="200" <?php echo ($limit == '200') ? 'selected' : ''; ?>>200 Data</option>
+                            <option value="semua" <?php echo ($limit == 'semua') ? 'selected' : ''; ?>>Semua Data</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">📊 Tampilkan Laporan</button>
+                    <button type="button" onclick="resetForm()" class="btn btn-secondary">🔄 Reset Filter</button>
+                </div>
+            </form>
+            <?php
+            if (isset($_GET['filter'])) {
+                // Escape input for safety
+                $tanggal_awal = mysqli_real_escape_string($koneksi, $_GET['tanggal_awal']);
+                $tanggal_akhir = mysqli_real_escape_string($koneksi, $_GET['tanggal_akhir']);
+                $kd_pj = isset($_GET['kd_pj']) ? mysqli_real_escape_string($koneksi, $_GET['kd_pj']) : '';
+                $limit = isset($_GET['limit']) ? $_GET['limit'] : '50';
+                $halaman = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
+                if ($halaman < 1) $halaman = 1;
+
+                $where_pj = "";
+                if (!empty($kd_pj)) { $where_pj = " AND rp.kd_pj = '$kd_pj' "; }
+
+                // $query_base = "SELECT \n                    ob.tanggal,\n                    peg.nama,\n                    rp.no_rawat,\n                    pas.no_rkm_medis,\n                    pas.nm_pasien,\n                    pj.png_jawab,\n                    MAX(cb.tanggal) AS tanggal_close_bill\n                FROM trackersql ob\n                INNER JOIN reg_periksa rp ON rp.no_rawat = SUBSTRING_INDEX(SUBSTRING_INDEX(ob.sqle, 'no_rawat=\'','', -1), '\'', 1)\n                INNER JOIN pasien pas ON rp.no_rkm_medis = pas.no_rkm_medis\n                LEFT JOIN penjab pj ON rp.kd_pj = pj.kd_pj\n                LEFT JOIN pegawai peg ON ob.usere = peg.nik\n                LEFT JOIN trackersql cb ON cb.sqle LIKE '%update reg_periksa set status_bayar=\'Sudah Bayar\'%'\n                    AND cb.sqle LIKE CONCAT('%no_rawat=\'", rp.no_rawat, "\'%')\n                    AND cb.tanggal <= ob.tanggal\n                WHERE ob.sqle LIKE '%delete from billing%'\n                    AND ob.sqle LIKE '%no_rawat=\'%'\n                    AND ob.tanggal BETWEEN '$tanggal_awal 00:00:00' AND '$tanggal_akhir 23:59:59'\n                    $where_pj\n                GROUP BY ob.tanggal, peg.nama, rp.no_rawat, pas.no_rkm_medis, pas.nm_pasien, pj.png_jawab\n                ORDER BY ob.tanggal DESC";
+
+                $result_all = mysqli_query($koneksi, // $query_base);
+                if ($result_all) {
+                    $total_rows = mysqli_num_rows($result_all);
+                    if ($limit === 'semua') {
+                        $total_pages = 1;
+                        $offset = 0;
+                        $query = // $query_base;
+                    } else {
+                        $limit_val = (int)$limit;
+                        if ($limit_val <= 0) $limit_val = 50;
+                        $total_pages = (int)ceil($total_rows / $limit_val);
+                        if ($total_pages < 1) $total_pages = 1;
+                        if ($halaman > $total_pages) $halaman = $total_pages;
+                        $offset = ($halaman - 1) * $limit_val;
+                        $query = // $query_base . " LIMIT $offset, $limit_val";
+                    }
+                    $result = mysqli_query($koneksi, $query);
+                    echo '<div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">';
+                    echo '<div style="font-weight: bold; color: #495057;">📊 Total Data: <span style="color: #007bff;">' . $total_rows . '</span> log open billing</div>';
+                    if ($limit !== "semua" && $total_pages > 1) {
+                        echo " <span style='color: #6c757d; font-size: 13px;'>(Halaman $halaman dari $total_pages)</span>";
+                    }
+                    echo '</div>';
+                    echo '<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">';
+                    if ($limit !== "semua" && $total_pages > 1) {
+                        echo '<div style="display: flex; align-items: center; gap: 6px;">';
+                        echo '<label for="halaman_select" style="font-weight: bold; font-size: 13px; color: #495057;">📄 Pilih Halaman:</label>';
+                        echo '<select id="halaman_select" onchange="changePage(this.value)" style="padding: 8px 12px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 13px; outline: none; background: white; cursor: pointer;">';
+                        for ($i = 1; $i <= $total_pages; $i++) {
+                            $selected_page = ($i == $halaman) ? 'selected' : '';
+                            echo "<option value='$i' $selected_page>Halaman $i</option>";
+                        }
+                        echo '</select>';
+                        echo '</div>';
+                    }
+                    echo '<button onclick="copyTableData()" class="btn btn-success">📋 Copy Tabel</button>';
+                    echo '</div>';
+                    echo '<div class="table-responsive"><table>';
+                    echo '<tr><th>No</th><th>TANGGAL CLOSE BILL</th><th>TANGGAL OPEN BILL</th><th>SELISIH WAKTU</th><th>NO RAWAT</th><th>NO RKM MEDIS</th><th>NAMA PASIEN</th><th>JENIS BAYAR</th><th>NAMA PEGAWAI</th></tr>';
+                    $no = $offset + 1;
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $tanggal = htmlspecialchars($row['tanggal']);
+                        $no_rawat = htmlspecialchars($row['no_rawat']);
+                        $no_rkm_medis = htmlspecialchars($row['no_rkm_medis']);
+                        $nm_pasien = htmlspecialchars($row['nm_pasien']);
+                        $png_jawab = htmlspecialchars($row['png_jawab'] ?? '-');
+                        $nama = htmlspecialchars($row['nama']);
+                        if ($row['tanggal_close_bill']) {
+                            $tanggal_close_bill = htmlspecialchars($row['tanggal_close_bill']);
+                            $dt_close = new DateTime($row['tanggal_close_bill']);
+                            $dt_open = new DateTime($row['tanggal']);
+                            $diff = $dt_close->diff($dt_open);
+                            $parts = [];
+                            if ($diff->d > 0) $parts[] = $diff->d . ' hari';
+                            if ($diff->h > 0) $parts[] = $diff->h . ' jam';
+                            if ($diff->i > 0) $parts[] = $diff->i . ' menit';
+                            if (empty($parts)) $parts[] = '< 1 menit';
+                            $selisih_text = implode(' ', $parts);
+                            $total_menit = $diff->d * 1440 + $diff->h * 60 + $diff->i;
+                            if ($total_menit <= 1440) { $color = '#28a745'; $bg = '#d4edda'; }
+                            elseif ($total_menit <= 2880) { $color = '#856404'; $bg = '#fff3cd'; }
+                            else { $color = '#721c24'; $bg = '#f8d7da'; }
+                            $selisih_html = "<span style='display:inline-block;padding:3px 8px;border-radius:12px;background:$bg;color:$color;font-weight:bold;font-size:12px;'>⏱ $selisih_text</span>";
+                        } else {
+                            $tanggal_close_bill = "<span style='color:#aaa;font-style:italic;'>-</span>";
+                            $selisih_html = "<span style='color:#aaa;font-style:italic;'>-</span>";
+                        }
+                        echo "<tr><td>$no</td><td>$tanggal_close_bill</td><td>$tanggal</td><td style='text-align:center;'>$selisih_html</td><td>$no_rawat</td><td>$no_rkm_medis</td><td>$nm_pasien</td><td>$png_jawab</td><td>$nama</td></tr>";
+                        $no++;
+                    }
+                    echo '</table></div>';
+                    if ($limit !== "semua" && $total_pages > 1) {
+                        echo '<div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8f9fa; padding: 12px 20px; border-radius: 8px; border: 1px solid #e9ecef;">';
+                        echo '<div style="font-size: 13px; color: #495057; font-weight: 500;">Menampilkan halaman <strong>' . $halaman . '</strong> dari <strong>' . $total_pages . '</strong> (Total ' . $total_rows . ' data)</div>';
+                        echo '<div style="display: flex; align-items: center; gap: 6px;">';
+                        echo '<label for="halaman_select_bottom" style="font-weight: bold; font-size: 13px; color: #495057;">📄 Pilih Halaman:</label>';
+                        echo '<select id="halaman_select_bottom" onchange="changePage(this.value)" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #e9ecef; font-size: 13px; outline: none; background: white; cursor: pointer;">';
+                        for ($i = 1; $i <= $total_pages; $i++) {
+                            $selected_page = ($i == $halaman) ? 'selected' : '';
+                            echo "<option value='$i' $selected_page>Halaman $i</option>";
+                        }
+                        echo '</select></div></div>';
+                    }
+                } else {
+                    echo '<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; border: 1px solid #f5c6cb;">❌ Terjadi kesalahan dalam query: ' . mysqli_error($koneksi) . '</div>';
+                }
+            }
+            ?>
+        </div>
+    </div>
+</body>
+</html>
