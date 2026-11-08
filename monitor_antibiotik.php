@@ -333,9 +333,14 @@ if ($resDokter) {
             <button type="submit" class="btn btn-primary">Tampilkan</button>
         </form>
 
-        <?php if ($result && mysqli_num_rows($result) > 0): ?>
-        <button type="button" id="copy-table-btn" class="btn btn-success">Copy Tabel ke Clipboard</button>
-        <?php endif; ?>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <a href="laporan_ppra_penggunaan_antibiotik.php?start=<?php echo urlencode($start); ?>&end=<?php echo urlencode($end); ?>" class="btn btn-primary">
+                Rekapitulasi &amp; Grafik Laporan PPRA
+            </a>
+            <?php if ($result && mysqli_num_rows($result) > 0): ?>
+            <button type="button" id="copy-table-btn" class="btn btn-success">Copy Tabel ke Clipboard</button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php if ($result && mysqli_num_rows($result) > 0): ?>
