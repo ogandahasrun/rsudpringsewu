@@ -90,6 +90,47 @@ if (isset($_GET['action']) && $_GET['action'] === 'cetak' && !empty($_GET['no_re
         $resPasien = mysqli_stmt_get_result($stmtPasien);
         $pasienData = mysqli_fetch_assoc($resPasien);
     }
+
+    // Fallback data peresepan jika tidak ada item resep
+    if ($no_rawat_resep === '') {
+        $sqlResepFallback = "SELECT resep_obat.no_rawat, resep_obat.tgl_peresepan, resep_obat.jam_peresepan, dokter.nm_dokter
+                             FROM resep_obat
+                             LEFT JOIN dokter ON resep_obat.kd_dokter = dokter.kd_dokter
+                             WHERE resep_obat.no_resep = ? LIMIT 1";
+        $stmtFb = mysqli_prepare($koneksi, $sqlResepFallback);
+        mysqli_stmt_bind_param($stmtFb, 's', $no_resep_cetak);
+        mysqli_stmt_execute($stmtFb);
+        $resFb = mysqli_stmt_get_result($stmtFb);
+        if ($rowFb = mysqli_fetch_assoc($resFb)) {
+            $no_rawat_resep  = $rowFb['no_rawat'];
+            $tgl_peresepan   = $rowFb['tgl_peresepan'];
+            $jam_peresepan   = $rowFb['jam_peresepan'];
+            $nm_dokter_resep = $rowFb['nm_dokter'] ?? '';
+        }
+    }
+
+    // 4. Generate QR Code Tanda Tangan Dokter (Hanya di memori / base64, tanpa simpan file)
+    $nama_instansi_qr = $header['nama_instansi'] ?? '';
+    $kabupaten_qr     = $header['kabupaten'] ?? '';
+    $dokter_qr        = $nm_dokter_resep ?? '';
+    $tgl_resep_qr     = $tgl_peresepan ?? '';
+
+    $qr_text = "Dikeluarkan di " . $nama_instansi_qr . ", Kabupaten/Kota " . $kabupaten_qr . "\n"
+             . "Ditandatangani secara elektronik oleh " . $dokter_qr . "\n"
+             . "pada tanggal " . $tgl_resep_qr;
+
+    $qr_src = '';
+    if (file_exists('phpqrcode/qrlib.php')) {
+        require_once 'phpqrcode/qrlib.php';
+        ob_start();
+        // Menggunakan stream php://output agar tidak memicu Header("Content-type: image/png") dari phpqrcode
+        QRcode::png($qr_text, 'php://output', QR_ECLEVEL_M, 3, 2);
+        $qr_image_data = ob_get_clean();
+        header('Content-Type: text/html; charset=utf-8');
+        if (!empty($qr_image_data)) {
+            $qr_src = "data:image/png;base64," . base64_encode($qr_image_data);
+        }
+    }
     ?>
     <!DOCTYPE html>
     <html lang="id">
@@ -289,6 +330,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'cetak' && !empty($_GET['no_re
             .sig-space {
                 height: 55px;
             }
+            .sig-qr {
+                margin: 5px auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .sig-qr img {
+                width: 75px;
+                height: 75px;
+                display: block;
+            }
             @media print {
                 body {
                     background: #fff;
@@ -332,7 +384,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'cetak' && !empty($_GET['no_re
                     </div>
                 </div>
 
-                <div class="judul-resep">SALINAN / LEMBAR RESEP DOKTER</div>
+                <div class="judul-resep">LEMBAR RESEP DOKTER</div>
 
                 <!-- Data Pasien & Resep -->
                 <table class="info-table">
@@ -440,7 +492,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'cetak' && !empty($_GET['no_re
                 <div class="sig-box">
                     <div><?php echo htmlspecialchars($header['kabupaten'] ?? 'Pringsewu'); ?>, <?php echo htmlspecialchars($tgl_peresepan ?: date('Y-m-d')); ?></div>
                     <div>Dokter Penulis Resep,</div>
-                    <div class="sig-space"></div>
+                    <?php if (!empty($qr_src)): ?>
+                        <div class="sig-qr">
+                            <img src="<?php echo $qr_src; ?>" alt="QR Code Tanda Tangan Dokter">
+                        </div>
+                    <?php else: ?>
+                        <div class="sig-space"></div>
+                    <?php endif; ?>
                     <div><strong>( <?php echo htmlspecialchars($nm_dokter_resep ?: '....................................'); ?> )</strong></div>
                 </div>
             </div>
