@@ -362,6 +362,7 @@ if ($show_data) {
         .td-name { font-weight: 500; }
         .td-unit { text-align: center; }
         .td-qty  { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .td-ket  { text-align: center; white-space: nowrap; }
 
         .qty-zero       { color: #94a3b8; font-style: italic; font-weight: 400; }
         .qty-pengajuan  { color: var(--secondary); }
@@ -375,8 +376,8 @@ if ($show_data) {
         tbody tr.row-only-datang:hover         { background: #dcfce7 !important; }
 
         .badge {
-            display: inline-block; padding: 2px 8px; border-radius: 99px;
-            font-size: 0.68rem; font-weight: 600; margin-left: 5px; vertical-align: middle;
+            display: inline-block; padding: 3px 10px; border-radius: 99px;
+            font-size: 0.72rem; font-weight: 600; vertical-align: middle;
         }
         .badge-warning { background: #fef3c7; color: #b45309; }
         .badge-info    { background: #dbeafe; color: #1d4ed8; }
@@ -524,12 +525,14 @@ if ($show_data) {
 
     <?php
     $total_item        = count($rows_gabungan);
+    $item_diajukan     = 0;
     $item_sesuai       = 0;
     $item_lebih        = 0;
     $item_kurang       = 0;
     $item_tdk_datang   = 0;
     $item_tdk_diajukan = 0;
     foreach ($rows_gabungan as $r) {
+        if ($r['jml_pengajuan'] > 0) $item_diajukan++;
         if ($r['jml_pengajuan'] == 0 && $r['jml_datang'] > 0)     $item_tdk_diajukan++;
         elseif ($r['jml_datang'] == 0 && $r['jml_pengajuan'] > 0) $item_tdk_datang++;
         elseif ($r['selisih_lebih'] > 0)                           $item_lebih++;
@@ -543,6 +546,10 @@ if ($show_data) {
         <div class="stat-card teal">
             <span class="stat-label">Total Item</span>
             <span class="stat-value"><?= $total_item ?></span>
+        </div>
+        <div class="stat-card blue">
+            <span class="stat-label">Item Diajukan</span>
+            <span class="stat-value"><?= $item_diajukan ?></span>
         </div>
         <div class="stat-card green">
             <span class="stat-label">Sesuai</span>
@@ -578,7 +585,7 @@ if ($show_data) {
                     Periode <?= ($jenis_tanggal === 'tgl_faktur') ? 'Tgl. Faktur' : 'Tgl. Datang' ?>:
                     <?= date('d/m/Y', strtotime($tgl_awal)) ?> &ndash;
                     <?= date('d/m/Y', strtotime($tgl_akhir)) ?>
-                    &bull; <?= $total_item ?> item
+                    &bull; <?= $total_item ?> item (<?= $item_diajukan ?> diajukan)
                 </div>
             </div>
             <div class="btn-group">
@@ -604,6 +611,7 @@ if ($show_data) {
                         <th style="width:120px; text-align:right;">Jml Datang</th>
                         <th style="width:120px; text-align:right;">Selisih Lebih</th>
                         <th style="width:120px; text-align:right;">Selisih Kurang</th>
+                        <th style="width:130px; text-align:center;">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -623,14 +631,7 @@ if ($show_data) {
                 ?>
                 <tr class="<?= $row_class ?>">
                     <td class="td-num"><?= $no++ ?></td>
-                    <td class="td-code">
-                        <?= htmlspecialchars($r['kode_brng']) ?>
-                        <?php if ($r['jml_pengajuan'] == 0 && $r['jml_datang'] > 0): ?>
-                            <span class="badge badge-info">Tdk Diajukan</span>
-                        <?php elseif ($r['jml_datang'] == 0 && $r['jml_pengajuan'] > 0): ?>
-                            <span class="badge badge-warning">Tdk Datang</span>
-                        <?php endif; ?>
-                    </td>
+                    <td class="td-code"><?= htmlspecialchars($r['kode_brng']) ?></td>
                     <td class="td-name"><?= htmlspecialchars($r['nama_brng']) ?></td>
                     <td class="td-unit"><?= htmlspecialchars($r['kode_sat']) ?></td>
                     <td class="td-qty <?= $qty_d_class ?>">
@@ -644,6 +645,15 @@ if ($show_data) {
                     </td>
                     <td class="td-qty <?= $sel_k_class ?>">
                         <?= ($r['selisih_kurang'] == 0) ? '&mdash;' : number_format($r['selisih_kurang'], 0, ',', '.') ?>
+                    </td>
+                    <td class="td-ket">
+                        <?php if ($r['jml_pengajuan'] == 0 && $r['jml_datang'] > 0): ?>
+                            <span class="badge badge-info">Tdk Diajukan</span>
+                        <?php elseif ($r['jml_datang'] == 0 && $r['jml_pengajuan'] > 0): ?>
+                            <span class="badge badge-warning">Tdk Datang</span>
+                        <?php else: ?>
+                            <span class="qty-zero">&mdash;</span>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
