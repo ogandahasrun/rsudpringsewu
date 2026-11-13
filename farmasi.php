@@ -731,6 +731,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <span class="menu-title">Kontrol Pinjam Barang</span>
         </a>
 
+        <!-- 32. Kontrol Pemberian Obat Berulang (< 7 Hari) -->
+        <a href="kontrol_obat_berulang.php" class="menu-item" data-category="pelayanan" data-keywords="kontrol obat berulang resep ganda duplikasi pencegahan rawat jalan ralan 7 hari">
+            <div class="menu-icon-wrapper" style="background: rgba(2, 132, 199, 0.12);">
+                <i class="fas fa-pills" style="color: #0284c7;"></i>
+            </div>
+            <span class="menu-title">Kontrol Obat Berulang (&lt; 7 Hari)</span>
+        </a>
+
         <!-- Empty State Container -->
         <div class="empty-state" id="emptyState">
             <i class="fas fa-search"></i>
