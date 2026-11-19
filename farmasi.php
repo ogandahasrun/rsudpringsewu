@@ -739,6 +739,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <span class="menu-title">Kontrol Obat Berulang (&lt; 7 Hari)</span>
         </a>
 
+        <!-- 33. Monitoring Dead Stock & Barang Non-Aktif -->
+        <a href="monitoring_dead_stock.php" class="menu-item" data-category="mutasi" data-keywords="monitoring dead stock slow moving barang non aktif stok mati obat bhp farmasi audit ed">
+            <div class="menu-icon-wrapper" style="background: rgba(13, 148, 136, 0.12);">
+                <i class="fas fa-box-archive" style="color: #0d9488;"></i>
+            </div>
+            <span class="menu-title">Monitoring Dead Stock &amp; Non-Aktif</span>
+        </a>
+
         <!-- Empty State Container -->
         <div class="empty-state" id="emptyState">
             <i class="fas fa-search"></i>
