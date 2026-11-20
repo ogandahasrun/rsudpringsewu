@@ -747,6 +747,14 @@ if ($row_instansi = mysqli_fetch_assoc($result_instansi)) {
             <span class="menu-title">Monitoring Dead Stock &amp; Non-Aktif</span>
         </a>
 
+        <!-- 34. Capaian Mutu Farmasi (Fornas, Generik, High Alert & LASA) -->
+        <a href="capaian_mutu_farmasi.php" class="menu-item" data-category="laporan" data-keywords="capaian mutu farmasi kepatuhan formularium nasional fornas generik obat diwaspadai high alert lasa tahunan bulanan inm starkes">
+            <div class="menu-icon-wrapper" style="background: rgba(16, 185, 129, 0.14);">
+                <i class="fas fa-award" style="color: #10b981;"></i>
+            </div>
+            <span class="menu-title">Capaian Mutu Farmasi</span>
+        </a>
+
         <!-- Empty State Container -->
         <div class="empty-state" id="emptyState">
             <i class="fas fa-search"></i>
